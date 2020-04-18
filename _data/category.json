@@ -1,0 +1,52 @@
+{
+  "categories": [
+    {
+      "brandName": "Pappy",
+      "categoryName": "Floor Cleaner",
+      "categoryCode": "PAPPYFLOORCLEANER",
+      "categoryType": "Liquid",
+      "fragrances": ["Rose", "Jasmine"],
+      "volumesInLitres": [0.95, 1]
+    },
+    {
+      "brandName": "Uniqus",
+      "categoryName": "Phenyl Cleaner",
+      "categoryCode": "UNIQUSPHENYLCLEANER",
+      "categoryType": "Liquid",
+      "fragrances": ["Yellow", "Rose", "Orange"],
+      "volumesInLitres": [1, 0.5]
+    },
+    {
+      "brandName": "Pappy",
+      "categoryName": "Hand Wash",
+      "categoryCode": "PAPPYHANDWASH",
+      "categoryType": "Liquid",
+      "fragrances": ["Rose", "Lime"],
+      "volumesInLitres": [0.225, 0.5]
+    },
+    {
+      "brandName": "Uniqus",
+      "categoryName": "Hand Wash",
+      "categoryCode": "UNIQUSHANDWASH",
+      "categoryType": "Liquid",
+      "fragrances": ["Rose", "Lime"],
+      "volumesInLitres": [0.25, 0.5]
+    },
+    {
+      "brandName": "Pappy",
+      "categoryName": "Dish wash soap",
+      "categoryType": "Soap",
+      "categoryCode": "PAPPYDISHWASHSOAP",
+      "fragrances": ["Rose", "Lime"],
+      "weightInKgs": [0.225]
+    },
+    {
+      "brandName": "Uniqus",
+      "categoryName": "Washing Powder",
+      "categoryType": "Powder",
+      "categoryCode": "UNIQUSWASHINGPOWDER",
+      "fragrances": ["White"],
+      "weightInKgs": [0.5, 2]
+    }
+  ]
+}
