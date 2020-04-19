@@ -12,12 +12,21 @@ const ProductSchema = new Schema({
     type: String,
     required: true,
   },
-  perCaseQuantity: {
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "Category",
+  },
+  fragrance: {
     type: String,
     required: true,
   },
-  categoryId: {
+  size: {
     type: mongoose.Schema.Types.ObjectId,
+    required: true,
+  },
+  perCaseQuantity: {
+    type: String,
     required: true,
   },
 });

@@ -1,6 +1,27 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+const FragranceSchema = new Schema(
+  {
+    fragranceId: {
+      type: String,
+    },
+    fragranceName: {
+      type: String,
+    },
+  },
+  { _id: false }
+);
+
+const SizeSchema = new Schema(
+  {
+    sizeValue: {
+      type: String,
+    },
+  },
+  { _id: false }
+);
+
 // create category Schema & model
 const CategorySchema = new Schema({
   _id: mongoose.Schema.Types.ObjectId,
@@ -22,16 +43,12 @@ const CategorySchema = new Schema({
     required: true,
   },
   fragrances: {
-    type: [String],
+    type: [FragranceSchema],
     required: true,
   },
-  volumesInLitres: {
-    type: [String],
-    default: [],
-  },
-  weightInKgs: {
-    type: [String],
-    default: [],
+  sizes: {
+    type: [SizeSchema],
+    required: true,
   },
 });
 

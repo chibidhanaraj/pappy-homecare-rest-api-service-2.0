@@ -9,7 +9,7 @@ const { getAllCategoriesCodeNames } = require("../../utils/CategoryUtils");
 exports.getAllCategories = asyncHandler(async (req, res, next) => {
   const categories = await CategoryModel.find()
     .select(
-      "brandName categoryName categoryCode categoryType fragrances volumesInLitres weightInKgs _id"
+      "brandName categoryName categoryCode categoryType fragrances sizes _id"
     )
     .exec();
   const categoriesCodeNames = await getAllCategoriesCodeNames(categories);
@@ -28,7 +28,7 @@ exports.getCategory = asyncHandler(async (req, res, next) => {
   console.log(id);
   const category = await CategoryModel.findById(id)
     .select(
-      "brandName categoryName categoryCode categoryType fragrances volumesInLitres weightInKgs _id"
+      "brandName categoryName categoryCode categoryType fragrances sizes _id"
     )
     .exec();
   if (!category) {
@@ -52,8 +52,7 @@ exports.createCategory = asyncHandler(async (req, res, next) => {
     categoryCode: req.body.categoryCode,
     categoryType: req.body.categoryType,
     fragrances: req.body.fragrances,
-    volumesInLitres: req.body.volumesInLitres,
-    weightInKgs: req.body.weightInKgs,
+    sizes: req.body.sizes,
   });
 
   // Check for created category
@@ -80,8 +79,7 @@ exports.createCategory = asyncHandler(async (req, res, next) => {
       categoryCode: savedDocument.categoryCode,
       categoryType: req.body.categoryType,
       fragrances: savedDocument.fragrances,
-      volumesInLitres: savedDocument.volumesInLitres,
-      weightInKgs: req.body.weightInKgs,
+      sizes: savedDocument.sizes,
     },
   });
 });
@@ -102,12 +100,12 @@ exports.updateCategory = asyncHandler(async (req, res, next) => {
     new: true,
     runValidators: true,
   }).select(
-    "brandName categoryName categoryCode categoryType fragrances volumesInLitres weightInKgs _id"
+    "brandName categoryName categoryCode categoryType fragrances sizes _id"
   );
   res.status(200).json({ success: true, category: updatedCategory });
 });
 
-// @desc      Update category
+// @desc      Delete category
 // @route     DELETE /api/category/
 exports.deleteCategory = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
