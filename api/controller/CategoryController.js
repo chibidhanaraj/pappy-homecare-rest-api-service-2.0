@@ -55,15 +55,14 @@ exports.createCategory = asyncHandler(async (req, res, next) => {
     sizes: req.body.sizes,
   });
 
-  // Check for created category
   const createdCategory = await CategoryModel.findOne({
-    categoryCode: req.body.categoryCode,
+    categoryCode: category.categoryCode,
   });
 
   if (createdCategory) {
     return next(
       new ErrorResponse(
-        `The category ${req.body.categoryCode} has already been created`,
+        `The category ${category.categoryName} has already been created`,
         400
       )
     );

@@ -1,0 +1,61 @@
+{
+  "customers": [
+    {
+      "customerName": "Mr.Customer 1",
+      "distributionType": ["DISTRIBUTOR"],
+      "contact": [
+        {
+          "contactName": "John",
+          "contactNumber": "+919876543210",
+          "emailAddress": "john@google.com",
+          "primaryContact": true
+        },
+        {
+          "contactName": "Rose",
+          "contactNumber": "+919876543210",
+          "primaryContact": false
+        }
+      ],
+      "gstNumber": "456123987145",
+      "address": [
+        {
+          "doorNumber": "22B",
+          "streetAddress": "Baker's Street",
+          "landmark": "Near ABC bakery",
+          "place": "Small City",
+          "district": "Karur",
+          "pincode": 639002
+        }
+      ],
+      "customerBeatAreas": ["5ea03d79d8d3634ba4b3487a"]
+    },
+    {
+      "customerName": "Mr.Customer 2",
+      "distributionType": ["DISTRIBUTOR", "SUPER_STOCKIST"],
+      "contact": [
+        {
+          "contactName": "Jim",
+          "contactNumber": "+917895641230",
+          "emailAddress": "jim@google.com",
+          "primaryContact": true
+        },
+        {
+          "contactName": "Rose",
+          "contactNumber": "+919469871235",
+          "primaryContact": false
+        }
+      ],
+      "gstNumber": "GSTTIN09345690",
+      "address": [
+        {
+          "doorNumber": "16B",
+          "streetAddress": "9th Cross Street",
+          "landmark": "Near Hope Tower",
+          "place": "Muthur",
+          "district": "Erode",
+          "pincode": 625632
+        }
+      ]
+    }
+  ]
+}

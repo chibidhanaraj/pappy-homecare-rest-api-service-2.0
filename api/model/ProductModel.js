@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-// create category Schema & model
+// create Product Schema & model
 const ProductSchema = new Schema({
   _id: mongoose.Schema.Types.ObjectId,
   productName: {
