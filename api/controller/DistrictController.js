@@ -110,15 +110,29 @@ exports.deleteDistrict = asyncHandler(async (req, res, next) => {
     );
   }
 
-  Promise.all([
-    DistrictModel.findByIdAndRemove(id).exec(),
+  const deleteDistrict = () => {
+    return DistrictModel.findByIdAndRemove(id).exec();
+  };
 
-    ZoneModel.findOneAndUpdate(
+  const removeDistrictIdFromZone = () => {
+    return ZoneModel.findOneAndUpdate(
       { _id: district.zoneId },
-      { $pull: { districts: id } }
-    ),
+      { $pull: { districts: id } },
+      (error) => {
+        if (error) {
+          return next(
+            new ErrorResponse(
+              `Could not delete the zoneId for district id - ${district._id}`,
+              404
+            )
+          );
+        }
+      }
+    );
+  };
 
-    DivisionModel.deleteMany({ districtId: district._id }, (error) => {
+  const removeDistrictIdFromDivisions = () => {
+    return DivisionModel.deleteMany({ districtId: district._id }, (error) => {
       if (error) {
         return next(
           new ErrorResponse(
@@ -127,9 +141,11 @@ exports.deleteDistrict = asyncHandler(async (req, res, next) => {
           )
         );
       }
-    }),
+    });
+  };
 
-    BeatAreaModel.deleteMany({ districtId: district._id }, (error) => {
+  const removeDistrictIdFromBeatAreas = () => {
+    return BeatAreaModel.deleteMany({ districtId: district._id }, (error) => {
       if (error) {
         return next(
           new ErrorResponse(
@@ -138,7 +154,14 @@ exports.deleteDistrict = asyncHandler(async (req, res, next) => {
           )
         );
       }
-    }),
+    });
+  };
+
+  Promise.all([
+    await deleteDistrict(),
+    await removeDistrictIdFromZone(),
+    await removeDistrictIdFromDivisions(),
+    await removeDistrictIdFromBeatAreas(),
   ]);
 
   res.status(200).json({

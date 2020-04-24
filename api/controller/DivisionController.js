@@ -103,13 +103,29 @@ exports.deleteDivision = asyncHandler(async (req, res, next) => {
     );
   }
 
-  Promise.all([
-    DivisionModel.findByIdAndRemove(id).exec(),
-    DistrictModel.findOneAndUpdate(
+  const deleteDivision = () => {
+    return DivisionModel.findByIdAndRemove(id).exec();
+  };
+
+  const removeDivisionIdFromDistrict = () => {
+    return DistrictModel.findOneAndUpdate(
       { _id: division.districtId },
-      { $pull: { divisions: id } }
-    ),
-    BeatAreaModel.deleteMany({ divisionId: division._id }, (error) => {
+      { $pull: { divisions: id } },
+      (error) => {
+        if (error) {
+          return next(
+            new ErrorResponse(
+              `Could not delete the districtId for division id - ${division._id}`,
+              404
+            )
+          );
+        }
+      }
+    );
+  };
+
+  const removeDivisionIdFromBeatAreas = () => {
+    return BeatAreaModel.deleteMany({ divisionId: division._id }, (error) => {
       if (error) {
         return next(
           new ErrorResponse(
@@ -118,7 +134,13 @@ exports.deleteDivision = asyncHandler(async (req, res, next) => {
           )
         );
       }
-    }),
+    });
+  };
+
+  Promise.all([
+    await deleteDivision(),
+    await removeDivisionIdFromDistrict(),
+    await removeDivisionIdFromBeatAreas(),
   ]);
 
   res.status(200).json({

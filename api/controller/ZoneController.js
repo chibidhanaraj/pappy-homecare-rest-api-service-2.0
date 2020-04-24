@@ -95,59 +95,6 @@ exports.createZone = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.deleteZone = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
-  const zone = await ZoneModel.findById(id).exec();
-
-  if (!zone) {
-    return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
-    );
-  }
-
-  Promise.all([
-    ZoneModel.findByIdAndRemove(id).exec(),
-
-    DistrictModel.deleteMany({ zoneId: zone._id }, (error) => {
-      if (error) {
-        return next(
-          new ErrorResponse(
-            `Could not delete the district for zone id - ${zone._id}`,
-            404
-          )
-        );
-      }
-    }),
-
-    DivisionModel.deleteMany({ zoneId: zone._id }, (error) => {
-      if (error) {
-        return next(
-          new ErrorResponse(
-            `Could not delete the division for zone id - ${zone._id}`,
-            404
-          )
-        );
-      }
-    }),
-
-    BeatAreaModel.deleteMany({ zoneId: zone._id }, (error) => {
-      if (error) {
-        return next(
-          new ErrorResponse(
-            `Could not delete the Beat Areas for district id - ${district._id}`,
-            404
-          )
-        );
-      }
-    }),
-  ]);
-
-  res.status(200).json({
-    success: true,
-    product: {},
-  });
-});
-
 // @desc      Update Zone
 // @route     PUT /api/zone/
 exports.updateZone = asyncHandler(async (req, res, next) => {
@@ -173,4 +120,71 @@ exports.updateZone = asyncHandler(async (req, res, next) => {
     runValidators: true,
   });
   res.status(200).json({ success: true, zone: updatedZone });
+});
+
+exports.deleteZone = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+  const zone = await ZoneModel.findById(id).exec();
+
+  if (!zone) {
+    return next(
+      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+    );
+  }
+
+  const deleteZone = () => {
+    return ZoneModel.findByIdAndRemove(id).exec();
+  };
+
+  const removeZoneIdFromDistricts = () => {
+    return DistrictModel.deleteMany({ zoneId: zone._id }, (error) => {
+      if (error) {
+        return next(
+          new ErrorResponse(
+            `Could not delete the district for zone id - ${zone._id}`,
+            404
+          )
+        );
+      }
+    });
+  };
+
+  const removeZoneIdFromDivisions = () => {
+    return DivisionModel.deleteMany({ zoneId: zone._id }, (error) => {
+      if (error) {
+        return next(
+          new ErrorResponse(
+            `Could not delete the division for zone id - ${zone._id}`,
+            404
+          )
+        );
+      }
+    });
+  };
+
+  const removeZoneIdFromBeatAreas = () => {
+    return BeatAreaModel.deleteMany({ zoneId: zone._id }, (error) => {
+      if (error) {
+        return next(
+          new ErrorResponse(
+            `Could not delete the Beat Areas for district id - ${district._id}`,
+            404
+          )
+        );
+      }
+    });
+  };
+
+  Promise.all([
+    await deleteZone(),
+    await removeZoneIdFromDistricts(),
+    await removeZoneIdFromDivisions(),
+    await removeZoneIdFromDivisions(),
+    await removeZoneIdFromBeatAreas(),
+  ]);
+
+  res.status(200).json({
+    success: true,
+    product: {},
+  });
 });

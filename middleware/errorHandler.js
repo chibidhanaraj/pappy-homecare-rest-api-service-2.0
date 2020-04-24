@@ -5,7 +5,7 @@ const errorHandler = (err, req, res, next) => {
 
   error.message = err.message;
 
-  console.log(err);
+  console.log(err, "Hi");
 
   // Mongoose Cast error
   if (err.name === "CastError") {

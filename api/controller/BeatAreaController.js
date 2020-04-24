@@ -126,33 +126,53 @@ exports.deleteBeatArea = asyncHandler(async (req, res, next) => {
     );
   }
 
-  const deleteBeatArea = async () => {
-    return await BeatAreaModel.findByIdAndRemove(id).exec();
+  const deleteBeatArea = () => {
+    return BeatAreaModel.findByIdAndRemove(id).exec();
   };
 
-  const removeBeatAreaIdFromDivisionModel = async () => {
-    return await DivisionModel.findOneAndUpdate(
+  const removeBeatAreaIdFromDivisionModel = () => {
+    return DivisionModel.findOneAndUpdate(
       { _id: beatArea.divisionId },
-      { $pull: { beatAreas: id } }
+      { $pull: { beatAreas: id } },
+      (error) => {
+        if (error) {
+          return next(
+            new ErrorResponse(
+              `Could not remove the beatArea Id in division id - ${beatArea.divisionId}`,
+              404
+            )
+          );
+        }
+      }
     );
   };
 
-  const removeAssignedBeatAreasFromCustomerModel = async () => {
-    return await CustomerModel.updateMany(
+  const removeAssignedBeatAreasFromCustomerModel = () => {
+    return CustomerModel.updateMany(
       { customerBeatAreas: id },
       { $pull: { customerBeatAreas: id } },
-      { multi: true }
+      { multi: true },
+      (error) => {
+        if (error) {
+          return next(
+            new ErrorResponse(
+              `Could not remove the beatArea Id in customers ${id}`,
+              404
+            )
+          );
+        }
+      }
     );
   };
 
   Promise.all([
-    deleteBeatArea(),
-    removeBeatAreaIdFromDivisionModel(),
-    removeAssignedBeatAreasFromCustomerModel(),
+    await deleteBeatArea(),
+    await removeBeatAreaIdFromDivisionModel(),
+    await removeAssignedBeatAreasFromCustomerModel(),
   ]);
 
   res.status(200).json({
     success: true,
-    product: {},
+    beatArea: {},
   });
 });

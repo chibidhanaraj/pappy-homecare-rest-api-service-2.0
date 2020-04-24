@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {
   getAllCustomers,
+  getCustomer,
   createCustomer,
   updateCustomer,
   deleteCustomer,
@@ -9,5 +10,9 @@ const {
 
 router.route("/").get(getAllCustomers).post(createCustomer);
 
-router.route("/:id").put(updateCustomer).delete(deleteCustomer);
+router
+  .route("/:id")
+  .get(getCustomer)
+  .put(updateCustomer)
+  .delete(deleteCustomer);
 module.exports = router;

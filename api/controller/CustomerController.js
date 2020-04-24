@@ -3,7 +3,7 @@ const CustomerModel = require("../model/CustomerModel");
 const BeatAreaModel = require("../model/BeatAreaModel");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
-const { toSentenceCase, toConstantCase } = require("../../utils/CommonUtils");
+const { toSentenceCase } = require("../../utils/CommonUtils");
 
 // @desc      Get all Customer types
 // @route     GET /api/customer/
@@ -13,6 +13,24 @@ exports.getAllCustomers = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     customers,
+  });
+});
+
+// @desc      Get Customer
+// @route     GET /api/customer/:customerId
+exports.getCustomer = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+  const customer = await CustomerModel.findById(id).select("-__v").exec();
+
+  if (!customer) {
+    return next(
+      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+    );
+  }
+
+  res.status(200).json({
+    success: true,
+    customer,
   });
 });
 
@@ -65,26 +83,95 @@ exports.createCustomer = asyncHandler(async (req, res, next) => {
 // @route     PUT /api/customer/
 exports.updateCustomer = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
+  const customerName = toSentenceCase(req.body.customerName);
+  const distributionType = req.body.distributionType;
+  const contact = req.body.contact;
+  const address = req.body.address;
+  const gstNumber = req.body.gstNumber;
   const customerBeatAreas = req.body.customerBeatAreas;
 
-  const addCustomerBeatAreas = async () => {
-    return await CustomerModel.findOneAndUpdate(
+  const customer = await CustomerModel.findById(id).exec();
+  if (!customer) {
+    return next(
+      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+    );
+  }
+
+  const dataToUpdate = {
+    customerName,
+    distributionType,
+    contact,
+    address,
+    gstNumber,
+  };
+
+  const updateCustomerModel = () => {
+    return CustomerModel.findByIdAndUpdate(
+      id,
+      dataToUpdate,
+      {
+        new: true,
+        runValidators: true,
+      },
+      (error) => {
+        if (error) {
+          return next(
+            new ErrorResponse(
+              `Could not update the customer id - ${customer._id}`,
+              404
+            )
+          );
+        }
+      }
+    );
+  };
+
+  const addCustomerBeatAreas = () => {
+    return CustomerModel.findOneAndUpdate(
       { _id: id },
       { $addToSet: { customerBeatAreas: { $each: customerBeatAreas } } },
-      { new: true }
+      { new: true },
+      (error) => {
+        if (error) {
+          return next(
+            new ErrorResponse(
+              `Could not add the Beat Area Ids to the customer id - ${customer._id}`,
+              404
+            )
+          );
+        }
+      }
     );
   };
 
-  const updateIdsToBeatAreaModel = async () => {
-    return await BeatAreaModel.updateMany(
+  const updateCustomerIdToBeatAreas = () => {
+    return BeatAreaModel.updateMany(
       { _id: { $in: customerBeatAreas } },
       { $addToSet: { assignedCustomers: id } },
-      { multi: true }
+      { multi: true },
+      (error) => {
+        if (error) {
+          return next(
+            new ErrorResponse(
+              `Could not add the customer id - ${customer._id} to Beat Areas`,
+              404
+            )
+          );
+        }
+      }
     );
   };
 
-  Promise.all([addCustomerBeatAreas(), updateIdsToBeatAreaModel()]);
-  res.status(200).json({ success: true });
+  if (req.body.customerBeatAreas) {
+    Promise.all([
+      await addCustomerBeatAreas(),
+      await updateCustomerIdToBeatAreas(),
+    ]);
+    res.status(200).json({ success: true });
+  } else {
+    const updatedCustomerDetails = await updateCustomerModel();
+    res.status(200).json({ success: true, customer: updatedCustomerDetails });
+  }
 });
 
 // @desc      Delete Customer
@@ -99,19 +186,29 @@ exports.deleteCustomer = asyncHandler(async (req, res, next) => {
     );
   }
 
-  const deleteCustomer = async () => {
-    return await CustomerModel.findByIdAndRemove(id).exec();
+  const deleteCustomer = () => {
+    return CustomerModel.findByIdAndRemove(id).exec();
   };
 
-  const removeCustomerIdFromBeatAreas = async () => {
-    return await BeatAreaModel.updateMany(
+  const removeCustomerIdFromBeatAreas = () => {
+    return BeatAreaModel.updateMany(
       { assignedCustomers: id },
       { $pull: { assignedCustomers: id } },
-      { multi: true }
+      { multi: true },
+      (error) => {
+        if (error) {
+          return next(
+            new ErrorResponse(
+              `Could not remove the customer id - ${customer._id} from Beat Areas`,
+              404
+            )
+          );
+        }
+      }
     );
   };
 
-  Promise.all([deleteCustomer(), removeCustomerIdFromBeatAreas()]);
+  Promise.all([await deleteCustomer(), await removeCustomerIdFromBeatAreas()]);
 
   res.status(200).json({
     success: true,
