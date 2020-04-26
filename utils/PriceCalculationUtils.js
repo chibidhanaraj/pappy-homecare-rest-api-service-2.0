@@ -8,18 +8,18 @@ const calculateLandedPrice = (price, marginPercentage) => {
   );
 };
 
-const calculateLandedPrices = (mrp, ...margins) => {
+const calculateLandedPrices = (retailPrice, ...margins) => {
   let prices = {};
   let priceCount = margins.length || 0;
 
   (margins || []).reduce((acc, margin) => {
     return (prices[`price${priceCount--}`] = calculateLandedPrice(acc, margin));
-  }, mrp); // {"price3": 100.00, "price2": 100.00, "price1": 100.00}
+  }, retailPrice); // {"price3": 100.00, "price2": 100.00, "price1": 100.00}
   return prices;
 };
 
 const typeAPrices = (
-  mrp,
+  retailPrice,
   retailerMargin,
   distributorMargin,
   superStockistMargin,
@@ -32,7 +32,7 @@ const typeAPrices = (
   // Price 4 - Retailer
 
   const { price1, price2, price3, price4 } = calculateLandedPrices(
-    mrp,
+    retailPrice,
     retailerMargin,
     distributorMargin,
     superStockistMargin,
@@ -48,14 +48,14 @@ const typeAPrices = (
   };
 };
 
-const typeBPrices = (mrp, retailerMargin, distributorMargin, gst) => {
+const typeBPrices = (retailPrice, retailerMargin, distributorMargin, gst) => {
   // Factory -> Distributor -> Retailer
   // Price 1 - Base Price from factory
   // Price 2 - Distributor
   // Price 3 - Retailer
 
   const { price1, price2, price3 } = calculateLandedPrices(
-    mrp,
+    retailPrice,
     retailerMargin,
     distributorMargin,
     gst
@@ -69,14 +69,14 @@ const typeBPrices = (mrp, retailerMargin, distributorMargin, gst) => {
   };
 };
 
-const typeCPrices = (mrp, retailerMargin, wholeSellerMargin, gst) => {
+const typeCPrices = (retailPrice, retailerMargin, wholeSellerMargin, gst) => {
   // Factory -> WholeSeller -> Retailer
   // Price 1 - Base Price from factory
   // Price 2 - WholeSeller
   // Price 3 - Retailer
 
   const { price1, price2, price3 } = calculateLandedPrices(
-    mrp,
+    retailPrice,
     retailerMargin,
     wholeSellerMargin,
     gst
@@ -90,11 +90,15 @@ const typeCPrices = (mrp, retailerMargin, wholeSellerMargin, gst) => {
   };
 };
 
-const typeDPrices = (mrp, retailerMargin, gst) => {
+const typeDPrices = (retailPrice, retailerMargin, gst) => {
   // Factory -> Retailer
   // Price 1 - Base Price from factory
   // Price 2 - Retailer
-  const { price1, price2 } = calculateLandedPrices(mrp, retailerMargin, gst);
+  const { price1, price2 } = calculateLandedPrices(
+    retailPrice,
+    retailerMargin,
+    gst
+  );
 
   return {
     distributionType: "D",
@@ -104,6 +108,7 @@ const typeDPrices = (mrp, retailerMargin, gst) => {
 };
 
 const distributionTypesPrices = (customerTypes, mrp, gst, specialPrice) => {
+  const retailPrice = specialPrice || mrp;
   const {
     superStockistMargin,
     distributorMargin,
@@ -113,7 +118,7 @@ const distributionTypesPrices = (customerTypes, mrp, gst, specialPrice) => {
 
   // MRP, Retailer, Distributor, SS, GST - Arguments Order
   const distributionTypeA = typeAPrices(
-    mrp,
+    retailPrice,
     retailerMargin,
     distributorMargin,
     superStockistMargin,
@@ -121,19 +126,19 @@ const distributionTypesPrices = (customerTypes, mrp, gst, specialPrice) => {
   );
 
   const distributionTypeB = typeBPrices(
-    mrp,
+    retailPrice,
     retailerMargin,
     distributorMargin,
     gst
   );
 
   const distributionTypeC = typeCPrices(
-    mrp,
+    retailPrice,
     retailerMargin,
     wholeSellerMargin,
     gst
   );
-  const distributionTypeD = typeDPrices(mrp, retailerMargin, gst);
+  const distributionTypeD = typeDPrices(retailPrice, retailerMargin, gst);
 
   return [
     distributionTypeA,
