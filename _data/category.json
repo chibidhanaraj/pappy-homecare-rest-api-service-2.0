@@ -6,9 +6,8 @@
       "categoryCode": "PAPPYFLOORCLEANER",
       "categoryType": "Liquid",
       "fragrances": [
-        { "fragranceId": "100", "fragranceName": "Rose" },
+        { "fragranceName": "Rose" },
         {
-          "fragranceId": "101",
           "fragranceName": "Jasmine"
         }
       ],

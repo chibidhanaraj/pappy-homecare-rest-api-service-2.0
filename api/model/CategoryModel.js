@@ -1,26 +1,17 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const FragranceSchema = new Schema(
-  {
-    fragranceId: {
-      type: String,
-    },
-    fragranceName: {
-      type: String,
-    },
+const FragranceSchema = new Schema({
+  fragranceName: {
+    type: String,
   },
-  { _id: false }
-);
+});
 
-const SizeSchema = new Schema(
-  {
-    sizeValue: {
-      type: String,
-    },
+const SizeSchema = new Schema({
+  sizeValue: {
+    type: String,
   },
-  { _id: false }
-);
+});
 
 // create category Schema & model
 const CategorySchema = new Schema({
