@@ -11,6 +11,7 @@ const ProductSchema = new Schema({
   productCode: {
     type: String,
     required: true,
+    unique: true,
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
@@ -18,16 +19,28 @@ const ProductSchema = new Schema({
     ref: "Category",
   },
   fragrance: {
-    type: String,
-    required: true,
+    type: {
+      fragranceName: String,
+    },
   },
   size: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
+    type: {
+      sizeValue: String,
+    },
   },
   perCaseQuantity: {
     type: String,
     required: true,
+  },
+  mrp: {
+    type: Number,
+    required: true,
+  },
+  specialPrice: {
+    type: Number,
+  },
+  gst: {
+    type: Number,
   },
 });
 

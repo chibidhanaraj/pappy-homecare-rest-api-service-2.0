@@ -1,11 +1,14 @@
-const buildProductPayload = (product) => {
-  let shapedProductPayload = {};
-  const { fragranceName } = getFragrenceNameFromCategoryCollection(
-    product.category.fragrances,
-    product.fragrance
+const { distributionTypesPrices } = require("./PriceCalculationUtils");
+
+const buildProductPayload = (product, customerTypes) => {
+  const billingPrices = distributionTypesPrices(
+    customerTypes,
+    product.mrp,
+    product.gst,
+    product.specialPrice
   );
 
-  return (shapedProductPayload = {
+  return {
     productId: product._id,
     productName: product.productName,
     productCode: product.productCode,
@@ -13,20 +16,17 @@ const buildProductPayload = (product) => {
     categoryName: product.category.categoryName,
     productType: product.category.categoryType,
     brandName: product.category.brandName,
-    fragranceName,
-  });
+    mrp: product.mrp,
+    gst: product.gst,
+    specialPrice: product.specialPrice,
+    billingPrices,
+  };
 };
 
-const buildAllProductsPayload = (products) => {
+const buildAllProductsPayload = (products, customerTypes) => {
   return products.reduce((allProducts, product) => {
-    return [...allProducts, buildProductPayload(product)];
+    return [...allProducts, buildProductPayload(product, customerTypes)];
   }, []);
-};
-
-const getFragrenceNameFromCategoryCollection = (fragrences, fragrenceId) => {
-  return fragrences.find((fragrence) => {
-    return fragrence.fragranceId === fragrenceId;
-  });
 };
 
 module.exports = {

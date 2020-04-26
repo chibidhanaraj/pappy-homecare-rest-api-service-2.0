@@ -1,11 +1,14 @@
 const mongoose = require("mongoose");
 const ProductModel = require("../model/ProductModel");
+const CustomerTypeModel = require("../model/CustomerTypeModel");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
 const {
   buildAllProductsPayload,
   buildProductPayload,
 } = require("../../utils/ProductUtils");
+
+const { toUpperCase } = require("../../utils/CommonUtils");
 
 // @desc      Get all product
 // @route     GET /api/product
@@ -15,7 +18,8 @@ exports.getAllProducts = asyncHandler(async (req, res, next) => {
     .populate("category")
     .exec();
 
-  const products = buildAllProductsPayload(fetchedProducts);
+  const customerTypes = await CustomerTypeModel.find().exec();
+  const products = buildAllProductsPayload(fetchedProducts, customerTypes);
   res.status(200).json({
     success: true,
     products,
@@ -37,35 +41,43 @@ exports.getProduct = asyncHandler(async (req, res, next) => {
     );
   }
 
-  const product = buildProductPayload(fetchedProduct);
+  const customerTypes = await CustomerTypeModel.find().exec();
+  const product = buildProductPayload(fetchedProduct, customerTypes);
+
   res.status(200).json({
     success: true,
-    product,
+    ...product,
   });
 });
 
 // @desc      Post product
 // @route     POST /api/product/
 exports.createProduct = asyncHandler(async (req, res, next) => {
+  const productName = req.body.productName;
+  const productCode = toUpperCase(productName);
+
   const product = new ProductModel({
     _id: new mongoose.Types.ObjectId(),
-    productName: req.body.productName,
-    productCode: req.body.productCode,
+    productName,
+    productCode,
     category: req.body.categoryId,
     fragrance: req.body.fragrance,
     size: req.body.size,
     perCaseQuantity: req.body.perCaseQuantity,
+    mrp: req.body.mrp,
+    gst: req.body.gst,
+    specialPrice: req.body.specialPrice,
   });
 
   // Check for created product
   const createdProduct = await ProductModel.findOne({
-    productCode: req.body.productCode,
+    productCode: productCode,
   });
 
   if (createdProduct) {
     return next(
       new ErrorResponse(
-        `The category ${req.body.productCode} has already been created`,
+        `The category ${productCode} has already been created`,
         400
       )
     );

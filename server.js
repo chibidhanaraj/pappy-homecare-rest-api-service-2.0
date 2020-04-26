@@ -38,7 +38,7 @@ app.use("/api/district", districtRoutes);
 app.use("/api/division", divisionRoutes);
 app.use("/api/beatarea", beatAreaRoutes);
 app.use("/api/customer", customerRoutes);
-app.use("/api/customer/customerType", customerTypeRoutes);
+app.use("/api/customertype", customerTypeRoutes);
 
 app.use(errorHandler);
 

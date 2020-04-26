@@ -10,7 +10,9 @@ const customerTypeSchema = new Schema({
   },
   customerTypeCode: {
     type: String,
-    unique: true,
+  },
+  marginPercentage: {
+    type: Number,
   },
 });
 

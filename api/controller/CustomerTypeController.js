@@ -8,7 +8,7 @@ const { toSentenceCase, toConstantCase } = require("../../utils/CommonUtils");
 // @route     GET /api/customer/customertype/
 exports.getAllCustomerTypes = asyncHandler(async (req, res, next) => {
   const customerTypes = await CustomerTypeModel.find()
-    .select("_id customerTypeName customerTypeCode")
+    .select("_id customerTypeName customerTypeCode marginPercentage")
     .exec();
 
   res.status(200).json({
@@ -22,7 +22,7 @@ exports.getAllCustomerTypes = asyncHandler(async (req, res, next) => {
 exports.getCustomerType = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
   const customerType = await CustomerTypeModel.findById(id).select(
-    "_id customerTypeName customerTypeCode"
+    "_id customerTypeName customerTypeCode marginPercentage"
   );
 
   if (!customerType) {
@@ -42,8 +42,9 @@ exports.getCustomerType = asyncHandler(async (req, res, next) => {
 exports.createCustomerType = asyncHandler(async (req, res, next) => {
   const customerTypeName = toSentenceCase(req.body.customerTypeName);
   const customerTypeCode = toConstantCase(customerTypeName);
+  const marginPercentage = req.body.marginPercentage;
 
-  // Check for created zone
+  // Check for created customerType
   const createdCustomerType = await CustomerTypeModel.findOne({
     customerTypeCode,
   });
@@ -58,6 +59,7 @@ exports.createCustomerType = asyncHandler(async (req, res, next) => {
     _id: new mongoose.Types.ObjectId(),
     customerTypeName,
     customerTypeCode,
+    marginPercentage,
   });
 
   const savedDocument = await customerType.save();
@@ -67,15 +69,17 @@ exports.createCustomerType = asyncHandler(async (req, res, next) => {
       _id: savedDocument._id,
       customerTypeName: savedDocument.customerTypeName,
       customerTypeCode: savedDocument.customerTypeCode,
+      marginPercentage: savedDocument.marginPercentage,
     },
   });
 });
 
 // @desc      Update Customer Type
-// @route     PUT /api/customer/customertype/:id
+// @route     PUT /api/customertype/:id
 exports.updateCustomerType = asyncHandler(async (req, res, next) => {
   const customerTypeName = toSentenceCase(req.body.customerTypeName);
   const customerTypeCode = toConstantCase(customerTypeName);
+  const marginPercentage = Number(req.body.marginPercentage);
 
   const id = req.params.id;
   const customerType = await CustomerTypeModel.findById(id).exec();
@@ -89,6 +93,7 @@ exports.updateCustomerType = asyncHandler(async (req, res, next) => {
   const dataToUpdate = {
     customerTypeName,
     customerTypeCode,
+    marginPercentage,
   };
 
   const updatedCustomerType = await CustomerTypeModel.findByIdAndUpdate(

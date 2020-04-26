@@ -2,18 +2,28 @@
   "products": [
     {
       "productName": "Floor Cleaner 200ml Rose",
-      "productCode": "PAPPYFLOORCLEANER200MLROSE",
-      "categoryId": "5e9c8f96e884ac1868142c56",
-      "fragrance": "100",
-      "size": "5e9c112be7405f203c3dfd5b",
+      "categoryId": "",
+      "fragrance": {
+        "_id": "",
+        "fragranceName": "Rose"
+      },
+      "size": {
+        "_id": "",
+        "sizeValue": "0.2"
+      },
       "perCaseQuantity": "24"
     },
     {
       "productName": "Floor Cleaner 200ml Jasmine",
-      "productCode": "PAPPYFLOORCLEANER200MLJASMINE",
-      "categoryId": "5e9c8f96e884ac1868142c56",
-      "fragrance": "101",
-      "size": "5e9c112be7405f203c3dfd5b",
+      "categoryId": "",
+      "fragrance": {
+        "_id": "",
+        "fragranceName": "Rose"
+      },
+      "size": {
+        "_id": "",
+        "sizeValue": "0.2"
+      },
       "perCaseQuantity": "24"
     }
   ]
