@@ -18,7 +18,7 @@ const updateCategoryFragranceProperty = (
     { $set: { "fragrances.$.fragranceName": fragranceName } },
     (error, doc) => {
       if (error || !doc) {
-        console.log("Not entry found");
+        console.log("No entry found");
       }
     }
   );

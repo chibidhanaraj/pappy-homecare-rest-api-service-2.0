@@ -16,6 +16,7 @@ const divisionRoutes = require("./api/routes/DivisionRoutes");
 const beatAreaRoutes = require("./api/routes/BeatAreaRoutes");
 const customerRoutes = require("./api/routes/CustomerRoutes");
 const customerTypeRoutes = require("./api/routes/CustomerTypeRoutes");
+const distributorRoutes = require("./api/routes/DistributorRoutes");
 
 //Load Environment Variables
 dotenv.config({ path: "./config/config.env" });
@@ -39,6 +40,7 @@ app.use("/api/division", divisionRoutes);
 app.use("/api/beatarea", beatAreaRoutes);
 app.use("/api/customer", customerRoutes);
 app.use("/api/customertype", customerTypeRoutes);
+app.use("/api/distributor", distributorRoutes);
 
 app.use(errorHandler);
 

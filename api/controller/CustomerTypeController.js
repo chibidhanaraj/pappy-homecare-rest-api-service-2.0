@@ -77,12 +77,11 @@ exports.createCustomerType = asyncHandler(async (req, res, next) => {
 // @desc      Update Customer Type
 // @route     PUT /api/customertype/:id
 exports.updateCustomerType = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+  const customerType = await CustomerTypeModel.findById(id).exec();
   const customerTypeName = toSentenceCase(req.body.customerTypeName);
   const customerTypeCode = toConstantCase(customerTypeName);
   const marginPercentage = Number(req.body.marginPercentage);
-
-  const id = req.params.id;
-  const customerType = await CustomerTypeModel.findById(id).exec();
 
   if (!customerType) {
     return next(

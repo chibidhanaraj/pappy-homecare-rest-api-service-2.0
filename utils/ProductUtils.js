@@ -13,12 +13,12 @@ const buildProductPayload = (product, customerTypes) => {
     productName: product.productName,
     productCode: product.productCode,
     perCaseQuantity: product.perCaseQuantity,
-    categoryName: product.category.categoryName,
-    productType: product.category.categoryType,
-    brandName: product.category.brandName,
+    category: product.category,
+    fragrance: product.fragrance,
+    size: product.size,
     mrp: product.mrp,
     gst: product.gst,
-    specialPrice: product.specialPrice,
+    specialPrice: product.specialPrice || "",
     billingPrices,
   };
 };

@@ -29,7 +29,7 @@ const ProductSchema = new Schema({
     },
   },
   perCaseQuantity: {
-    type: String,
+    type: Number,
     required: true,
   },
   mrp: {
@@ -41,6 +41,7 @@ const ProductSchema = new Schema({
   },
   gst: {
     type: Number,
+    required: true,
   },
 });
 

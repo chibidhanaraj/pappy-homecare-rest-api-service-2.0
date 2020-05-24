@@ -61,10 +61,10 @@ exports.createCategory = asyncHandler(async (req, res, next) => {
 
   const category = new CategoryModel({
     _id: new mongoose.Types.ObjectId(),
-    brandName: toSentenceCase(req.body.brandName),
+    brandName: req.body.brandName,
     categoryName,
     categoryCode,
-    categoryType: toSentenceCase(req.body.categoryType),
+    categoryType: req.body.categoryType,
     fragrances: req.body.fragrances,
     sizes: req.body.sizes,
   });
@@ -101,10 +101,10 @@ exports.createCategory = asyncHandler(async (req, res, next) => {
 // @route     PUT /api/category/
 exports.updateCategory = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
-  const brandName = toSentenceCase(req.body.brandName);
+  const brandName = req.body.brandName;
   const categoryName = toSentenceCase(req.body.categoryName);
   const categoryCode = toUpperCase(categoryName);
-  const categoryType = toSentenceCase(req.body.categoryType);
+  const categoryType = req.body.categoryType;
 
   const category = await CategoryModel.findById(id).exec();
 
@@ -119,6 +119,8 @@ exports.updateCategory = asyncHandler(async (req, res, next) => {
     categoryName,
     categoryCode,
     categoryType,
+    fragrances: req.body.fragrances,
+    sizes: req.body.sizes,
   };
 
   const updatedCategory = await CategoryModel.findByIdAndUpdate(

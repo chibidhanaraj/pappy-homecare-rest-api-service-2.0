@@ -46,7 +46,7 @@ exports.getProduct = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    ...product,
+    product,
   });
 });
 
@@ -84,17 +84,13 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
   }
 
   const savedDocument = await product.save();
+  console.log(savedDocument);
+  const customerTypes = await CustomerTypeModel.find().exec();
+  const productPayload = buildProductPayload(savedDocument, customerTypes);
+
   res.status(201).json({
     success: true,
-    product: {
-      _id: savedDocument._id,
-      productName: savedDocument.productName,
-      productCode: savedDocument.productCode,
-      perCaseQuantity: savedDocument.perCaseQuantity,
-      fragrance: savedDocument.fragrance,
-      size: savedDocument.size,
-      category: savedDocument.categoryId,
-    },
+    product: productPayload,
   });
 });
 
@@ -113,8 +109,12 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
   const updatedProduct = await ProductModel.findByIdAndUpdate(id, req.body, {
     new: true,
     runValidators: true,
-  }).select("productName productCode perCaseQuantity _id category");
-  res.status(200).json({ success: true, product: updatedProduct });
+  }).populate("category");
+
+  const customerTypes = await CustomerTypeModel.find().exec();
+  const productPayload = buildProductPayload(updatedProduct, customerTypes);
+
+  res.status(200).json({ success: true, product: productPayload });
 });
 
 // @desc      Update product

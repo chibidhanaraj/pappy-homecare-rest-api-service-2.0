@@ -13,7 +13,6 @@ const ContactSchema = new Schema({
   },
   primaryContact: {
     type: Boolean,
-    required: true,
   },
 });
 
