@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const dotenv = require("dotenv");
+const cookieParser = require("cookie-parser");
 const { dbConnection } = require("./config/dbConnection");
 const colors = require("colors");
 const morgan = require("morgan");
@@ -17,6 +18,8 @@ const beatAreaRoutes = require("./api/routes/BeatAreaRoutes");
 const customerRoutes = require("./api/routes/CustomerRoutes");
 const customerTypeRoutes = require("./api/routes/CustomerTypeRoutes");
 const distributorRoutes = require("./api/routes/DistributorRoutes");
+const userRoutes = require("./api/routes/UserRoutes");
+const authRoutes = require("./api/routes/AuthRoutes");
 
 //Load Environment Variables
 dotenv.config({ path: "./config/config.env" });
@@ -28,6 +31,7 @@ dbConnection();
 //Middlewares
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(morgan("dev"));
@@ -41,6 +45,8 @@ app.use("/api/beatarea", beatAreaRoutes);
 app.use("/api/customer", customerRoutes);
 app.use("/api/customertype", customerTypeRoutes);
 app.use("/api/distributor", distributorRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/auth", authRoutes);
 
 app.use(errorHandler);
 

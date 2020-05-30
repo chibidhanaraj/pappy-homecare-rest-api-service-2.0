@@ -10,21 +10,7 @@ const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");
 // @desc      Get all zones
 // @route     GET /api/zone
 exports.getAllZones = asyncHandler(async (req, res, next) => {
-  const zones = await ZoneModel.find()
-    .select("_id zoneName zoneCode districts")
-    .populate({
-      path: "districts",
-      select: "_id districtName districtCode zoneId",
-      populate: {
-        path: "divisions",
-        select: "_id divisionName divisionCode districtId beatAreas",
-        populate: {
-          path: "beatAreas",
-          select: "_id beatAreaName beatAreaCode",
-        },
-      },
-    })
-    .exec();
+  const zones = await ZoneModel.find().exec();
 
   res.status(200).json({
     success: true,
@@ -36,17 +22,11 @@ exports.getAllZones = asyncHandler(async (req, res, next) => {
 // @route     GET /api/zone/:id
 exports.getZone = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
-  const zone = await ZoneModel.findById(id)
-    .select("_id zoneName zoneCode districts")
-    .populate({
-      path: "districts",
-      select: "_id districtName districtCode zoneId",
-      populate: {
-        path: "divisions",
-      },
-    });
+  const zone = await ZoneModel.findById(id).select(
+    "_id zoneName zoneCode districts"
+  );
 
-  if (!fetchedZone) {
+  if (!zone) {
     return next(
       new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
     );
@@ -87,22 +67,16 @@ exports.createZone = asyncHandler(async (req, res, next) => {
   const savedDocument = await zone.save();
   res.status(201).json({
     success: true,
-    zone: {
-      _id: savedDocument._id,
-      zoneName: savedDocument.zoneName,
-      zoneCode: savedDocument.zoneCode,
-    },
+    zone: savedDocument,
   });
 });
 
 // @desc      Update Zone
-// @route     PUT /api/zone/
+// @route     PATCH /api/zone/:id
 exports.updateZone = asyncHandler(async (req, res, next) => {
-  const zoneName = toSentenceCase(req.body.zoneName);
-  const zoneCode = toUpperCase(zoneName);
+  const zoneId = req.params.id;
 
-  const id = req.params.id;
-  const zone = await ZoneModel.findById(id).exec();
+  const zone = await ZoneModel.findById(zoneId).exec();
 
   if (!zone) {
     return next(
@@ -110,15 +84,30 @@ exports.updateZone = asyncHandler(async (req, res, next) => {
     );
   }
 
+  const receivedUpdateProperties = Object.keys(req.body);
+  const allowedUpdateProperties = ["zoneName"];
+
+  const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
+    allowedUpdateProperties.includes(key)
+  );
+
+  if (!isValidUpdateOperation) {
+    return next(new ErrorResponse(`Invalid Updates for ${zoneId}`));
+  }
+
+  const zoneName = toSentenceCase(req.body.zoneName);
+  const zoneCode = toUpperCase(zoneName);
+
   const dataToUpdate = {
     zoneName,
     zoneCode,
   };
 
-  const updatedZone = await ZoneModel.findByIdAndUpdate(id, dataToUpdate, {
+  const updatedZone = await ZoneModel.findByIdAndUpdate(zoneId, dataToUpdate, {
     new: true,
     runValidators: true,
   });
+
   res.status(200).json({ success: true, zone: updatedZone });
 });
 
@@ -132,59 +121,10 @@ exports.deleteZone = asyncHandler(async (req, res, next) => {
     );
   }
 
-  const deleteZone = () => {
-    return ZoneModel.findByIdAndRemove(id).exec();
-  };
-
-  const removeZoneIdFromDistricts = () => {
-    return DistrictModel.deleteMany({ zoneId: zone._id }, (error) => {
-      if (error) {
-        return next(
-          new ErrorResponse(
-            `Could not delete the district for zone id - ${zone._id}`,
-            404
-          )
-        );
-      }
-    });
-  };
-
-  const removeZoneIdFromDivisions = () => {
-    return DivisionModel.deleteMany({ zoneId: zone._id }, (error) => {
-      if (error) {
-        return next(
-          new ErrorResponse(
-            `Could not delete the division for zone id - ${zone._id}`,
-            404
-          )
-        );
-      }
-    });
-  };
-
-  const removeZoneIdFromBeatAreas = () => {
-    return BeatAreaModel.deleteMany({ zoneId: zone._id }, (error) => {
-      if (error) {
-        return next(
-          new ErrorResponse(
-            `Could not delete the Beat Areas for district id - ${district._id}`,
-            404
-          )
-        );
-      }
-    });
-  };
-
-  Promise.all([
-    await deleteZone(),
-    await removeZoneIdFromDistricts(),
-    await removeZoneIdFromDivisions(),
-    await removeZoneIdFromDivisions(),
-    await removeZoneIdFromBeatAreas(),
-  ]);
+  await zone.remove();
 
   res.status(200).json({
     success: true,
-    product: {},
+    zone: {},
   });
 });

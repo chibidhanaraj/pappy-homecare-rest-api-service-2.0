@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const ZoneModel = require("../model/ZoneModel");
+const DistrictModel = require("../model/DistrictModel");
 const DivisionModel = require("../model/DivisionModel");
 const BeatAreaModel = require("../model/BeatAreaModel");
 const CustomerModel = require("../model/CustomerModel");
@@ -23,7 +25,7 @@ exports.getBeatArea = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
   const beatArea = await BeatAreaModel.findById(id).select("-__v").exec();
 
-  if (!fetchedBeatArea) {
+  if (!beatArea) {
     return next(
       new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
     );
@@ -67,19 +69,28 @@ exports.createBeatArea = asyncHandler(async (req, res, next) => {
 
   const savedDocument = await beatArea.save();
 
-  //update the beatAreaId to Division
-  await DivisionModel.findOneAndUpdate(
-    { _id: beatArea.divisionId },
-    { $push: { beatAreas: savedDocument._id } },
-    { new: true, upsert: true }
-  );
+  Promise.all([
+    //update the beatAreaId to Zones Collection
+    await ZoneModel.findOneAndUpdate(
+      { _id: savedDocument.zoneId },
+      { $push: { beatAreas: savedDocument._id } },
+      { new: true, upsert: true }
+    ),
+    //update the beatAreaId to Districts Collection
+    await DistrictModel.findOneAndUpdate(
+      { _id: savedDocument.districtId },
+      { $push: { beatAreas: savedDocument._id } },
+      { new: true, upsert: true }
+    ),
+
+    //update the beatAreaId to Divisions Collections
+
+    ,
+  ]);
+
   res.status(201).json({
     success: true,
-    beatArea: {
-      _id: savedDocument._id,
-      beatAreaName: savedDocument.beatAreaName,
-      beatAreaCode: savedDocument.beatAreaCode,
-    },
+    beatArea: savedDocument,
   });
 });
 
@@ -126,50 +137,7 @@ exports.deleteBeatArea = asyncHandler(async (req, res, next) => {
     );
   }
 
-  const deleteBeatArea = () => {
-    return BeatAreaModel.findByIdAndRemove(id).exec();
-  };
-
-  const removeBeatAreaIdFromDivisionModel = () => {
-    return DivisionModel.findOneAndUpdate(
-      { _id: beatArea.divisionId },
-      { $pull: { beatAreas: id } },
-      (error) => {
-        if (error) {
-          return next(
-            new ErrorResponse(
-              `Could not remove the beatArea Id in division id - ${beatArea.divisionId}`,
-              404
-            )
-          );
-        }
-      }
-    );
-  };
-
-  const removeAssignedBeatAreasFromCustomerModel = () => {
-    return CustomerModel.updateMany(
-      { customerBeatAreas: id },
-      { $pull: { customerBeatAreas: id } },
-      { multi: true },
-      (error) => {
-        if (error) {
-          return next(
-            new ErrorResponse(
-              `Could not remove the beatArea Id in customers ${id}`,
-              404
-            )
-          );
-        }
-      }
-    );
-  };
-
-  Promise.all([
-    await deleteBeatArea(),
-    await removeBeatAreaIdFromDivisionModel(),
-    await removeAssignedBeatAreasFromCustomerModel(),
-  ]);
+  await beatArea.remove();
 
   res.status(200).json({
     success: true,

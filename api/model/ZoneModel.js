@@ -19,6 +19,31 @@ const ZoneSchema = new Schema({
       ref: "District",
     },
   ],
+  divisions: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Division",
+    },
+  ],
+  beatAreas: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BeatArea",
+    },
+  ],
+});
+// Cascade delete district when a zone is deleted
+ZoneSchema.pre("remove", async function (next) {
+  console.log(`Districts & Divisions being removed for Zone Id: ${this._id}`);
+  await this.model("District").deleteMany({ zoneId: this._id });
+  await this.model("Division").deleteMany({ zoneId: this._id });
+  await this.model("BeatArea").deleteMany({ zoneId: this._id });
+  next();
+});
+
+// Ensure virtual fields are serialised.
+ZoneSchema.set("toJSON", {
+  virtuals: true,
 });
 
 const ZoneModel = mongoose.model("Zone", ZoneSchema);

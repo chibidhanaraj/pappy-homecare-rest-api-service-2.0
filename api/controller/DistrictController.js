@@ -10,17 +10,7 @@ const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");
 // @desc      Get all districts
 // @route     GET /api/district
 exports.getAllDistricts = asyncHandler(async (req, res, next) => {
-  const districts = await DistrictModel.find()
-    .select("_id districtName districtCode divisions zoneId")
-    .populate({
-      path: "divisions",
-      select: "_id divisionName divisionCode districtId beatAreas",
-      populate: {
-        path: "beatAreas",
-        select: "_id beatAreaName beatAreaCode",
-      },
-    })
-    .exec();
+  const districts = await DistrictModel.find().exec();
 
   res.status(200).json({
     success: true,
@@ -32,18 +22,9 @@ exports.getAllDistricts = asyncHandler(async (req, res, next) => {
 // @route     GET /api/district/:id
 exports.getDistrict = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
-  const district = await DistrictModel.findById(id)
-    .populate({
-      path: "divisions",
-      select: "_id divisionName divisionCode districtId beatAreas",
-      populate: {
-        path: "beatAreas",
-        select: "_id beatAreaName beatAreaId",
-      },
-    })
-    .exec();
+  const district = await DistrictModel.findById(id).exec();
 
-  if (!fetchedDistrict) {
+  if (!district) {
     return next(
       new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
     );
@@ -61,7 +42,7 @@ exports.createDistrict = asyncHandler(async (req, res, next) => {
   const districtName = toSentenceCase(req.body.districtName);
   const districtCode = toUpperCase(districtName);
 
-  // Check for created district
+  // Check for already created district
   const createdDistrict = await DistrictModel.findOne({
     districtCode,
   });
@@ -86,17 +67,14 @@ exports.createDistrict = asyncHandler(async (req, res, next) => {
 
   //update the districtId to Zone
   await ZoneModel.findOneAndUpdate(
-    { _id: req.body.zoneId },
+    { _id: savedDocument.zoneId },
     { $push: { districts: savedDocument._id } },
     { new: true }
   );
+
   res.status(201).json({
     success: true,
-    district: {
-      _id: savedDocument._id,
-      districtName: savedDocument.districtName,
-      districtCode: savedDocument.districtCode,
-    },
+    district: savedDocument,
   });
 });
 
@@ -110,59 +88,7 @@ exports.deleteDistrict = asyncHandler(async (req, res, next) => {
     );
   }
 
-  const deleteDistrict = () => {
-    return DistrictModel.findByIdAndRemove(id).exec();
-  };
-
-  const removeDistrictIdFromZone = () => {
-    return ZoneModel.findOneAndUpdate(
-      { _id: district.zoneId },
-      { $pull: { districts: id } },
-      (error) => {
-        if (error) {
-          return next(
-            new ErrorResponse(
-              `Could not delete the zoneId for district id - ${district._id}`,
-              404
-            )
-          );
-        }
-      }
-    );
-  };
-
-  const removeDistrictIdFromDivisions = () => {
-    return DivisionModel.deleteMany({ districtId: district._id }, (error) => {
-      if (error) {
-        return next(
-          new ErrorResponse(
-            `Could not delete the divisions for district id - ${district._id}`,
-            404
-          )
-        );
-      }
-    });
-  };
-
-  const removeDistrictIdFromBeatAreas = () => {
-    return BeatAreaModel.deleteMany({ districtId: district._id }, (error) => {
-      if (error) {
-        return next(
-          new ErrorResponse(
-            `Could not delete the Beat Areas for district id - ${district._id}`,
-            404
-          )
-        );
-      }
-    });
-  };
-
-  Promise.all([
-    await deleteDistrict(),
-    await removeDistrictIdFromZone(),
-    await removeDistrictIdFromDivisions(),
-    await removeDistrictIdFromBeatAreas(),
-  ]);
+  await district.remove();
 
   res.status(200).json({
     success: true,
@@ -170,33 +96,83 @@ exports.deleteDistrict = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc      Update District
-// @route     PUT /api/district/
 exports.updateDistrict = asyncHandler(async (req, res, next) => {
-  const districtName = toSentenceCase(req.body.districtName);
-  const districtCode = toUpperCase(districtName);
+  const districtId = req.params.id;
+  const district = await DistrictModel.findById(districtId).exec();
 
-  const id = req.params.id;
-  const district = await DistrictModel.findById(id).exec();
-
+  // Check whether the district already exists
   if (!district) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(`No valid district found for provided ID ${id}`, 404)
     );
   }
 
+  // Match for Updates
+  const receivedUpdateProperties = Object.keys(req.body);
+  const allowedUpdateProperties = ["districtName", "zoneId"];
+
+  const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
+    allowedUpdateProperties.includes(key)
+  );
+
+  if (!isValidUpdateOperation) {
+    return next(new ErrorResponse(`Invalid Updates for ${districtId}`));
+  }
+
+  const reqDistrictName = toSentenceCase(req.body.districtName);
+  const reqDistrictCode = toUpperCase(reqDistrictName);
+
+  // Check for duplicates
+  if (reqDistrictCode !== district.districtCode) {
+    const createdDistrict = await DistrictModel.findOne({
+      reqDistrictCode,
+    });
+
+    if (createdDistrict) {
+      return next(
+        new ErrorResponse(
+          `District Name Already exists: ${reqDistrictCode}`,
+          400
+        )
+      );
+    }
+  }
+
   const dataToUpdate = {
-    districtName,
-    districtCode,
+    ...req.body,
+    reqDistrictName,
+    reqDistrictCode,
   };
 
   const updatedDistrict = await DistrictModel.findByIdAndUpdate(
-    id,
+    districtId,
     dataToUpdate,
     {
       new: true,
       runValidators: true,
     }
   );
+
+  //update the districtId to Zone
+  if (req.body.zoneId !== district.zoneId) {
+    Promise.all([
+      //1.Remove the DistrictId from exisiting zone
+      await ZoneModel.findOneAndUpdate(
+        { _id: district.zoneId },
+        { $pull: { districts: districtId } }
+      ),
+
+      //2. Add the DistrictId to another zone
+      await ZoneModel.findOneAndUpdate(
+        { _id: req.body.zoneId },
+        {
+          $addToSet: {
+            districts: districtId,
+          },
+        }
+      ),
+    ]);
+  }
+
   res.status(200).json({ success: true, district: updatedDistrict });
 });

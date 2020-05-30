@@ -10,6 +10,6 @@ const {
 
 router.route("/").get(getAllZones).post(createZone);
 
-router.route("/:id").get(getZone).put(updateZone).delete(deleteZone);
+router.route("/:id").get(getZone).patch(updateZone).delete(deleteZone);
 
 module.exports = router;

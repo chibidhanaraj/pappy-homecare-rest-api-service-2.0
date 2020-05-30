@@ -35,6 +35,31 @@ const beatAreaSchema = new Schema({
   ],
 });
 
+// Cascade delete district when a zone is deleted
+beatAreaSchema.pre("remove", async function (next) {
+  console.log(
+    `BeatArea Id: ${this._id} is being removed from Zone Collection & District Collection & Division Collection`
+  );
+  await this.model("Zone").findOneAndUpdate(
+    { _id: this.zoneId },
+    { $pull: { beatAreas: this._id } }
+  );
+  await this.model("District").findOneAndUpdate(
+    { _id: this.districtId },
+    { $pull: { beatAreas: this._id } }
+  );
+  await this.model("Division").findOneAndUpdate(
+    { _id: this.divisionId },
+    { $pull: { beatAreas: this._id } }
+  );
+  next();
+});
+
+// Ensure virtual fields are serialised.
+beatAreaSchema.set("toJSON", {
+  virtuals: true,
+});
+
 const DivisionModel = mongoose.model("BeatArea", beatAreaSchema);
 
 module.exports = DivisionModel;

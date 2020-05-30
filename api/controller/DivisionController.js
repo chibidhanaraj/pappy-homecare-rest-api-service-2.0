@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
-const DivisionModel = require("../model/DivisionModel");
+const ZoneModel = require("../model/ZoneModel");
 const DistrictModel = require("../model/DistrictModel");
+const DivisionModel = require("../model/DivisionModel");
 const BeatAreaModel = require("../model/BeatAreaModel");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
@@ -27,15 +28,9 @@ exports.getAllDivisions = asyncHandler(async (req, res, next) => {
 // @route     GET /api/division/:id
 exports.getDivision = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
-  const division = await DivisionModel.findById(id)
-    .select("divisionName divisionCode districtId")
-    .populate({
-      path: "beatAreas",
-      select: "_id beatAreaName beatAreaId",
-    })
-    .exec();
+  const division = await DivisionModel.findById(id).exec();
 
-  if (!fetchedDivision) {
+  if (!division) {
     return next(
       new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
     );
@@ -77,19 +72,19 @@ exports.createDivision = asyncHandler(async (req, res, next) => {
 
   const savedDocument = await division.save();
 
-  //update the divisionId to District
-  await DistrictModel.findOneAndUpdate(
-    { _id: req.body.districtId },
-    { $push: { divisions: savedDocument._id } },
-    { new: true, upsert: true }
-  );
+  Promise.all([
+    //update the divisionId to Zones Collection
+    await ZoneModel.findOneAndUpdate(
+      { _id: savedDocument.zoneId },
+      { $push: { divisions: savedDocument._id } },
+      { new: true, upsert: true }
+    ),
+    //update the divisionId to Districts Collection
+  ]);
+
   res.status(201).json({
     success: true,
-    division: {
-      _id: savedDocument._id,
-      divisionName: savedDocument.divisionName,
-      divisionCode: savedDocument.divisionCode,
-    },
+    division: savedDocument,
   });
 });
 
@@ -103,49 +98,11 @@ exports.deleteDivision = asyncHandler(async (req, res, next) => {
     );
   }
 
-  const deleteDivision = () => {
-    return DivisionModel.findByIdAndRemove(id).exec();
-  };
-
-  const removeDivisionIdFromDistrict = () => {
-    return DistrictModel.findOneAndUpdate(
-      { _id: division.districtId },
-      { $pull: { divisions: id } },
-      (error) => {
-        if (error) {
-          return next(
-            new ErrorResponse(
-              `Could not delete the districtId for division id - ${division._id}`,
-              404
-            )
-          );
-        }
-      }
-    );
-  };
-
-  const removeDivisionIdFromBeatAreas = () => {
-    return BeatAreaModel.deleteMany({ divisionId: division._id }, (error) => {
-      if (error) {
-        return next(
-          new ErrorResponse(
-            `Could not delete the Beat Areas for division id - ${division._id}`,
-            404
-          )
-        );
-      }
-    });
-  };
-
-  Promise.all([
-    await deleteDivision(),
-    await removeDivisionIdFromDistrict(),
-    await removeDivisionIdFromBeatAreas(),
-  ]);
+  await division.remove();
 
   res.status(200).json({
     success: true,
-    product: {},
+    division: {},
   });
 });
 
@@ -177,5 +134,6 @@ exports.updateDivision = asyncHandler(async (req, res, next) => {
       runValidators: true,
     }
   );
+
   res.status(200).json({ success: true, division: updatedDivision });
 });

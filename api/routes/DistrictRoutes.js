@@ -13,7 +13,7 @@ router.route("/").get(getAllDistricts).post(createDistrict);
 router
   .route("/:id")
   .get(getDistrict)
-  .put(updateDistrict)
+  .patch(updateDistrict)
   .delete(deleteDistrict);
 
 module.exports = router;
