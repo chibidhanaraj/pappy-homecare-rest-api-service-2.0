@@ -37,11 +37,16 @@ divisionSchema.pre("remove", async function (next) {
   );
   await this.model("Zone").findOneAndUpdate(
     { _id: this.zoneId },
-    { $pull: { divisions: this._id } }
+    { $pull: { divisions: this._id, beatAreas: { $in: this.beatAreas } } }
   );
   await this.model("District").findOneAndUpdate(
     { _id: this.districtId },
-    { $pull: { divisions: this._id } }
+    {
+      $pull: {
+        divisions: this._id,
+        beatAreas: { $in: this.beatAreas },
+      },
+    }
   );
   await this.model("BeatArea").deleteMany({ divisionId: this._id });
   next();

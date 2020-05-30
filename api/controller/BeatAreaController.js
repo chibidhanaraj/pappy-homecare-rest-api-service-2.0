@@ -84,8 +84,11 @@ exports.createBeatArea = asyncHandler(async (req, res, next) => {
     ),
 
     //update the beatAreaId to Divisions Collections
-
-    ,
+    await DivisionModel.findOneAndUpdate(
+      { _id: savedDocument.divisionId },
+      { $push: { beatAreas: savedDocument._id } },
+      { new: true, upsert: true }
+    ),
   ]);
 
   res.status(201).json({
