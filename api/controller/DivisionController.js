@@ -80,6 +80,11 @@ exports.createDivision = asyncHandler(async (req, res, next) => {
       { new: true, upsert: true }
     ),
     //update the divisionId to Districts Collection
+    await DistrictModel.findOneAndUpdate(
+      { _id: req.body.districtId },
+      { $push: { divisions: savedDocument._id } },
+      { new: true, upsert: true }
+    ),
   ]);
 
   res.status(201).json({
