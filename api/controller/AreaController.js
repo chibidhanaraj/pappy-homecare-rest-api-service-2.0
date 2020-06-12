@@ -99,7 +99,11 @@ exports.deleteArea = asyncHandler(async (req, res, next) => {
     );
   }
 
-  // Remove the Area Id from Distributors. Also if the only area of a district is removed, we're removing the respective district id from distributorsdd
+  /* 
+  This removal of the area id is standalone deletion as arrays are involved. 
+  Client has flexibility in adding the territories to the Distributor
+  Hence, deletion of the area requires updates in several collections
+  */
   const district = await DistrictModel.findById(districtId).exec();
   const zone = await ZoneModel.findById(zoneId).exec();
   if (distributors.length)
@@ -109,15 +113,53 @@ exports.deleteArea = asyncHandler(async (req, res, next) => {
         const mappedAreasToDistrict = district.areas;
         const mappedDistrictsToZone = zone.districts;
         docs.forEach(async (doc) => {
+          // To find Intersection between distributor.areas and district.areas.
+          // district.areas will give the exact territory mapped areas
           const commonAreaIds = doc.areas.filter((area) =>
             mappedAreasToDistrict.includes(area)
           );
 
-          if (commonAreaIds.length <= 1) {
-            const commonDistrictIds = doc.districts.filter((districtId) =>
-              mappedDistrictsToZone.includes(districtId)
+          // To find Intersection between distributor.districts and zone.districts.
+          // zone.districts will give the exact territory mapped districts
+          const commonDistrictIds = doc.districts.filter((districtId) =>
+            mappedDistrictsToZone.includes(districtId)
+          );
+
+          // Only Area in Only District in Only Zone. Take down the ids
+          if (commonAreaIds.length <= 1 && commonDistrictIds.length <= 1) {
+            console.log("Zones, dist, distributor");
+            await DistributorModel.findOneAndUpdate(
+              { _id: doc._id },
+              {
+                $pull: {
+                  zones: zoneId,
+                  districts: districtId,
+                  areas: areaId,
+                },
+              }
             );
 
+            await DistrictModel.findOneAndUpdate(
+              { _id: districtId },
+              {
+                $pull: {
+                  distributors: doc._id,
+                },
+              }
+            );
+
+            await ZoneModel.findOneAndUpdate(
+              { _id: zoneId },
+              {
+                $pull: {
+                  distributors: doc._id,
+                },
+              }
+            );
+          }
+          // Only Area in Only District Take down the ids
+          else if (commonAreaIds.length <= 1) {
+            console.log("dist, distributor");
             await DistributorModel.findOneAndUpdate(
               { _id: doc._id },
               {
@@ -136,7 +178,10 @@ exports.deleteArea = asyncHandler(async (req, res, next) => {
                 },
               }
             );
-          } else {
+          }
+          // Only Area.Take down the id
+          else {
+            console.log("distributor");
             await DistributorModel.findOneAndUpdate(
               { _id: doc._id },
               {

@@ -5,7 +5,10 @@ const DistrictModel = require("../model/DistrictModel");
 const AreaModel = require("../model/AreaModel");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
-const { toSentenceCase } = require("../../utils/CommonUtils");
+const {
+  toSentenceCase,
+  areObjectIdEqualArrays,
+} = require("../../utils/CommonUtils");
 
 // @desc GET Distributors
 // @route GET /api/distributor
@@ -102,7 +105,7 @@ exports.createDistributor = asyncHandler(async (req, res, next) => {
     updatePromises = updatePromises.concat(updateAreasPromises);
   }
 
-  Promise.all(updatePromises);
+  await Promise.all(updatePromises);
 
   res.status(201).json({
     success: true,
@@ -134,6 +137,9 @@ exports.deleteDistributor = asyncHandler(async (req, res, next) => {
 // @route     PATCH /api/distributor/:distributorId
 exports.updateDistributor = asyncHandler(async (req, res, next) => {
   const distributorId = req.params.id;
+  const reqAreas = req.body.areas;
+  const reqDistricts = req.body.districts;
+  const reqZones = req.body.zones;
 
   const distributor = await DistributorModel.findById(distributorId).exec();
 
@@ -156,6 +162,9 @@ exports.updateDistributor = asyncHandler(async (req, res, next) => {
     "deliveryVehiclesCount",
     "existingRetailersCount",
     "currentBrandsDealing",
+    "zones",
+    "districts",
+    "areas",
   ];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
@@ -170,22 +179,86 @@ exports.updateDistributor = asyncHandler(async (req, res, next) => {
     req.body.distributorName = toSentenceCase(req.body.distributorName);
   }
 
-  const reqGstNumber = req.body.gstNumber;
-  // Check for duplicates
-  if (reqGstNumber && reqGstNumber !== distributor.gstNumber) {
-    const createdDistributor = await DistributorModel.findOne({
-      reqGstNumber,
-    });
+  let removePromises = [];
+  let addPromises = [];
+  const areAreasEqual = areObjectIdEqualArrays(distributor.areas, reqAreas);
+  const areDistrictsEqual = areObjectIdEqualArrays(
+    distributor.districts,
+    reqDistricts
+  );
+  const areZonesEqual = areObjectIdEqualArrays(distributor.zones, reqZones);
 
-    if (createdDistributor) {
-      return next(
-        new ErrorResponse(
-          `Distributor with same GST number ${reqGstNumber} already exists`,
-          400
-        )
+  if (!areAreasEqual) {
+    console.log("areas removal");
+    const removeAreasPromises = distributor.areas.map(async (areaId) => {
+      await AreaModel.findOneAndUpdate(
+        { _id: areaId },
+        { $pull: { distributors: distributorId } }
       );
-    }
+    });
+    removePromises = removePromises.concat(removeAreasPromises);
   }
+
+  if (!areDistrictsEqual) {
+    console.log("districts removal");
+    const removeDistrictsPromises = distributor.districts.map(
+      async (districtId) => {
+        await DistrictModel.findOneAndUpdate(
+          { _id: districtId },
+          { $pull: { distributors: distributorId } }
+        );
+      }
+    );
+    removePromises = removePromises.concat(removeDistrictsPromises);
+  }
+
+  if (!areZonesEqual) {
+    console.log("zones removal");
+    const removeAreasPromises = distributor.zones.map(async (zoneId) => {
+      await ZoneModel.findOneAndUpdate(
+        { _id: zoneId },
+        { $pull: { distributors: distributorId } }
+      );
+    });
+    removePromises = removePromises.concat(removeAreasPromises);
+  }
+
+  await Promise.all(removePromises);
+
+  if (!areAreasEqual && reqAreas.length) {
+    console.log("add areas");
+    const updateAreasPromises = reqAreas.map(async (areaId) => {
+      await AreaModel.findOneAndUpdate(
+        { _id: areaId },
+        { $addToSet: { distributors: distributorId } }
+      );
+    });
+    addPromises = addPromises.concat(updateAreasPromises);
+  }
+
+  if (!areDistrictsEqual && reqDistricts.length) {
+    console.log("add districts");
+    const updateDistrictsPromises = reqDistricts.map(async (districtId) => {
+      await DistrictModel.findOneAndUpdate(
+        { _id: districtId },
+        { $addToSet: { distributors: distributorId } }
+      );
+    });
+    addPromises = addPromises.concat(updateDistrictsPromises);
+  }
+
+  if (!areZonesEqual && reqZones.length) {
+    console.log("add zones");
+    const updateZonesPromises = reqZones.map(async (zoneId) => {
+      await ZoneModel.findOneAndUpdate(
+        { _id: zoneId },
+        { $addToSet: { distributors: distributorId } }
+      );
+    });
+    addPromises = addPromises.concat(updateZonesPromises);
+  }
+
+  await Promise.all(addPromises);
 
   const updatedDistributor = await DistributorModel.findByIdAndUpdate(
     distributorId,
