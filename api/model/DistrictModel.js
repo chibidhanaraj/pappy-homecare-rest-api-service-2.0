@@ -48,7 +48,7 @@ DistrictSchema.pre("remove", async function (next) {
   console.log(
     `District Id: ${this._id} is being removed from Zone Collection, and respective Areas and beat areas are being destroyed`
   );
-  Promise.all([
+  await Promise.all([
     await this.model("Zone").findOneAndUpdate(
       { _id: this.zoneId },
       {

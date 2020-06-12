@@ -68,7 +68,7 @@ exports.createBeatArea = asyncHandler(async (req, res, next) => {
 
   const savedDocument = await beatArea.save();
 
-  Promise.all([
+  await Promise.all([
     //update the beatAreaId to Zones Collection
     await ZoneModel.findOneAndUpdate(
       { _id: savedDocument.zoneId },
@@ -193,7 +193,7 @@ exports.updateBeatArea = asyncHandler(async (req, res, next) => {
       return next(new ErrorResponse(`Area Not Found for Id:${reqAreaId}`, 400));
     }
 
-    Promise.all([
+    await Promise.all([
       //1.Remove the beatAreaId from exisiting area
       await AreaModel.findOneAndUpdate(
         { _id: beatArea.areaId },
@@ -225,7 +225,7 @@ exports.updateBeatArea = asyncHandler(async (req, res, next) => {
       );
     }
 
-    Promise.all([
+    await Promise.all([
       //1.Remove the beatAreaId from exisiting district
       await DistrictModel.findOneAndUpdate(
         { _id: beatArea.districtId },
@@ -255,7 +255,7 @@ exports.updateBeatArea = asyncHandler(async (req, res, next) => {
       return next(new ErrorResponse(`Zone Not Found for Id:${reqZone}`, 400));
     }
 
-    Promise.all([
+    await Promise.all([
       //1.Remove the beatAreaId from exisiting zone
       await ZoneModel.findOneAndUpdate(
         { _id: beatArea.zoneId },

@@ -48,7 +48,7 @@ const ZoneSchema = new Schema({
 // Cascade delete district when a zone is deleted
 ZoneSchema.pre("remove", async function (next) {
   console.log(`Districts & Areas being removed for Zone Id: ${this._id}`);
-  Promise.all([
+  await Promise.all([
     await this.model("District").deleteMany({ zoneId: this._id }),
     await this.model("Area").deleteMany({ zoneId: this._id }),
     await this.model("BeatArea").deleteMany({ zoneId: this._id }),

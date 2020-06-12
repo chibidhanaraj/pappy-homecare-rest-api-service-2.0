@@ -47,7 +47,7 @@ AreaSchema.pre("remove", async function (next) {
   console.log(
     `Area Id: ${this._id} is being removed from Zone Collection & District Collection and the respective beat areas are being destroyed`
   );
-  Promise.all([
+  await Promise.all([
     await this.model("Zone").findOneAndUpdate(
       { _id: this.zoneId },
       { $pull: { areas: this._id, beatAreas: { $in: this.beatAreas } } }

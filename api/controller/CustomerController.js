@@ -162,7 +162,7 @@ exports.updateCustomer = asyncHandler(async (req, res, next) => {
   };
 
   if (req.body.customerBeatAreas) {
-    Promise.all([
+    await Promise.all([
       await addCustomerBeatAreas(),
       await updateCustomerIdToBeatAreas(),
     ]);

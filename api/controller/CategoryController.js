@@ -203,7 +203,7 @@ exports.deleteCategory = asyncHandler(async (req, res, next) => {
     );
   };
 
-  Promise.all([
+  await Promise.all([
     await deleteCategory(id),
     await deleteProductsWithCategoryId(id),
   ]);

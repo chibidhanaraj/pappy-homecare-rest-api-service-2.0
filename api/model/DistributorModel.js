@@ -61,10 +61,10 @@ const currentBrandsDealingSchema = new Schema(
       type: String,
     },
     turnOverAmount: {
-      type: Number,
+      type: String,
     },
     brandDealershipPeriod: {
-      type: Number,
+      type: String,
     },
   },
   { _id: false }
@@ -79,11 +79,11 @@ const DistributorSchema = new Schema({
   },
 
   deliveryVehiclesCount: {
-    type: Number,
+    type: String,
   },
 
   existingRetailersCount: {
-    type: Number,
+    type: String,
   },
 
   contact: contactSchema,
@@ -129,7 +129,7 @@ const DistributorSchema = new Schema({
 
 // Cascade delete distributor when a zone is deleted
 DistributorSchema.pre("remove", async function (next) {
-  Promise.all([
+  await Promise.all([
     await this.model("Zone").updateMany(
       { _id: { $in: this.zones } },
       {

@@ -67,7 +67,7 @@ exports.createArea = asyncHandler(async (req, res, next) => {
 
   const savedDocument = await area.save();
 
-  Promise.all([
+  await Promise.all([
     //update the areaId to Zones Collection
     await ZoneModel.findOneAndUpdate(
       { _id: savedDocument.zoneId },
@@ -268,7 +268,7 @@ exports.updateArea = asyncHandler(async (req, res, next) => {
       );
     }
 
-    Promise.all([
+    await Promise.all([
       //1.Remove the area from existing district
       await DistrictModel.findOneAndUpdate(
         { _id: area.districtId },
@@ -311,7 +311,7 @@ exports.updateArea = asyncHandler(async (req, res, next) => {
       return next(new ErrorResponse(`Zone Not Found for Id:${reqZoneId}`, 400));
     }
 
-    Promise.all([
+    await Promise.all([
       //1.Remove the area from existing zone
       await ZoneModel.findOneAndUpdate(
         { _id: area.zoneId },

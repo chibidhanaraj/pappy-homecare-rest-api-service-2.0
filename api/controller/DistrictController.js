@@ -217,7 +217,7 @@ exports.updateDistrict = asyncHandler(async (req, res, next) => {
       return next(new ErrorResponse(`Zone Not Found for Id:${reqZoneId}`, 400));
     }
 
-    Promise.all([
+    await Promise.all([
       //1.Remove the DistrictId, Areas, BeatAreas from exisiting zone
       await ZoneModel.findOneAndUpdate(
         { _id: district.zoneId },

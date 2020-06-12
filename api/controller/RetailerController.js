@@ -216,7 +216,7 @@ exports.updateRetailer = asyncHandler(async (req, res, next) => {
         );
       }
 
-      Promise.all([
+      await Promise.all([
         //1.Remove the retailerId from exisiting zone
         await ZoneModel.findOneAndUpdate(
           { _id: retailer.zoneId },
@@ -273,7 +273,7 @@ exports.updateRetailer = asyncHandler(async (req, res, next) => {
         );
       }
 
-      Promise.all([
+      await Promise.all([
         //1.Remove the retailerId from exisiting zone
         await DistrictModel.findOneAndUpdate(
           { _id: retailer.districtId },
@@ -330,7 +330,7 @@ exports.updateRetailer = asyncHandler(async (req, res, next) => {
         );
       }
 
-      Promise.all([
+      await Promise.all([
         //1.Remove the retailerId from exisiting Area
         await AreaModel.findOneAndUpdate(
           { _id: retailer.areaId },
@@ -387,7 +387,7 @@ exports.updateRetailer = asyncHandler(async (req, res, next) => {
         );
       }
 
-      Promise.all([
+      await Promise.all([
         //1.Remove the retailerId from exisiting Beat BeatArea
         await BeatAreaModel.findOneAndUpdate(
           { _id: retailer.beatAreaId },
@@ -449,7 +449,7 @@ exports.updateRetailer = asyncHandler(async (req, res, next) => {
         );
       }
 
-      Promise.all([
+      await Promise.all([
         //1.Remove the retailerId from exisiting Distributor
         await DistributorModel.findOneAndUpdate(
           { _id: retailer.distributorId },
