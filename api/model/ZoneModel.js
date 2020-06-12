@@ -19,10 +19,10 @@ const ZoneSchema = new Schema({
       ref: "District",
     },
   ],
-  divisions: [
+  areas: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Division",
+      ref: "Area",
     },
   ],
   beatAreas: [
@@ -31,19 +31,63 @@ const ZoneSchema = new Schema({
       ref: "BeatArea",
     },
   ],
+  distributors: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Distributor",
+    },
+  ],
+  retailers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Retailer",
+    },
+  ],
 });
+
 // Cascade delete district when a zone is deleted
 ZoneSchema.pre("remove", async function (next) {
-  console.log(`Districts & Divisions being removed for Zone Id: ${this._id}`);
-  await this.model("District").deleteMany({ zoneId: this._id });
-  await this.model("Division").deleteMany({ zoneId: this._id });
-  await this.model("BeatArea").deleteMany({ zoneId: this._id });
+  console.log(`Districts & Areas being removed for Zone Id: ${this._id}`);
+  Promise.all([
+    await this.model("District").deleteMany({ zoneId: this._id }),
+    await this.model("Area").deleteMany({ zoneId: this._id }),
+    await this.model("BeatArea").deleteMany({ zoneId: this._id }),
+    await this.model("Retailer").updateMany(
+      { zoneId: this._id },
+      {
+        $set: {
+          zoneId: null,
+          districtId: null,
+          areaId: null,
+          beatAreaId: null,
+        },
+      },
+      { multi: true }
+    ),
+    await this.model("Distributor").updateMany(
+      { _id: { $in: this.distributors } },
+      {
+        $pull: {
+          zones: this._id,
+          districts: { $in: this.districts }, //remove the matching districts from distributor
+          areas: { $in: this.areas }, //remove the matching areas from distributor
+        },
+      },
+      { multi: true }
+    ),
+  ]);
+
   next();
 });
 
 // Ensure virtual fields are serialised.
 ZoneSchema.set("toJSON", {
   virtuals: true,
+  transform: function (doc, ret, options) {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+  },
 });
 
 const ZoneModel = mongoose.model("Zone", ZoneSchema);

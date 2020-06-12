@@ -5,11 +5,12 @@ const contactSchema = new Schema(
   {
     contactPersonName: {
       type: String,
-      required: [true, "Please add the Contact Person Name"],
     },
     contactNumber: {
       type: String,
-      required: [true, "Please add the Contact Person Number"],
+    },
+    additionalContactNumber: {
+      type: String,
     },
     emailAddress: {
       type: String,
@@ -26,6 +27,9 @@ const additionalContactSchema = new Schema(
     contactNumber: {
       type: String,
     },
+    role: {
+      type: String,
+    },
   },
   { _id: false }
 );
@@ -35,7 +39,10 @@ const AddressSchema = new Schema(
     doorNumber: {
       type: String,
     },
-    streetAddress: {
+    addressOne: {
+      type: String,
+    },
+    addressTwo: {
       type: String,
     },
     landmark: {
@@ -44,7 +51,19 @@ const AddressSchema = new Schema(
     place: {
       type: String,
     },
-    pincode: {
+  },
+  { _id: false }
+);
+
+const currentBrandsDealingSchema = new Schema(
+  {
+    brandName: {
+      type: String,
+    },
+    turnOverAmount: {
+      type: Number,
+    },
+    brandDealershipPeriod: {
       type: Number,
     },
   },
@@ -59,24 +78,102 @@ const DistributorSchema = new Schema({
     required: [true, "Please add the Distributor Name"],
   },
 
+  deliveryVehiclesCount: {
+    type: Number,
+  },
+
+  existingRetailersCount: {
+    type: Number,
+  },
+
   contact: contactSchema,
 
   additionalContacts: [additionalContactSchema],
+
+  currentBrandsDealing: [currentBrandsDealingSchema],
 
   address: AddressSchema,
 
   gstNumber: {
     type: String,
-    required: [true, "Please add a GST number"],
-    unique: true,
   },
 
-  customerBeatAreas: [
+  zones: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "BeatArea",
+      ref: "Zone",
     },
   ],
+
+  districts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "District",
+    },
+  ],
+
+  areas: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Area",
+    },
+  ],
+
+  retailers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Retailer",
+    },
+  ],
+});
+
+// Cascade delete distributor when a zone is deleted
+DistributorSchema.pre("remove", async function (next) {
+  Promise.all([
+    await this.model("Zone").updateMany(
+      { _id: { $in: this.zones } },
+      {
+        $pull: {
+          distributors: this._id,
+        },
+      },
+      { multi: true }
+    ),
+    await this.model("District").updateMany(
+      { _id: { $in: this.districts } },
+      {
+        $pull: {
+          distributors: this._id,
+        },
+      },
+      { multi: true }
+    ),
+    await this.model("Area").updateMany(
+      { _id: { $in: this.areas } },
+      {
+        $pull: {
+          distributors: this._id,
+        },
+      },
+      { multi: true }
+    ),
+    await this.model("Retailer").updateMany(
+      { distributorId: this._id },
+      { $set: { distributorId: null } },
+      { multi: true }
+    ),
+  ]);
+
+  next();
+});
+
+DistributorSchema.set("toJSON", {
+  virtuals: true,
+  transform: function (doc, ret, options) {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+  },
 });
 
 const DistributorModel = mongoose.model("Distributor", DistributorSchema);

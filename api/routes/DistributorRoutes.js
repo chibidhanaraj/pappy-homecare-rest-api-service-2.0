@@ -13,7 +13,7 @@ router.route("/").get(getAllDistributors).post(createDistributor);
 router
   .route("/:id")
   .get(getDistributor)
-  .put(updateDistributor)
+  .patch(updateDistributor)
   .delete(deleteDistributor);
 
 module.exports = router;

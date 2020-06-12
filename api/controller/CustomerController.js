@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const CustomerModel = require("../model/CustomerModel");
 const BeatAreaModel = require("../model/BeatAreaModel");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");

@@ -13,7 +13,7 @@ router.route("/").get(getAllBeatAreas).post(createBeatArea);
 router
   .route("/:id")
   .get(getBeatArea)
-  .put(updateBeatArea)
+  .patch(updateBeatArea)
   .delete(deleteBeatArea);
 
 module.exports = router;

@@ -1,8 +1,9 @@
 const mongoose = require("mongoose");
 const ZoneModel = require("../model/ZoneModel");
 const DistrictModel = require("../model/DistrictModel");
-const DivisionModel = require("../model/DivisionModel");
+const AreaModel = require("../model/AreaModel");
 const BeatAreaModel = require("../model/BeatAreaModel");
+const DistributorModel = require("../model/DistributorModel");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
 const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");
@@ -79,14 +80,66 @@ exports.createDistrict = asyncHandler(async (req, res, next) => {
 });
 
 exports.deleteDistrict = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
-  const district = await DistrictModel.findById(id).exec();
+  const districtId = req.params.id;
+  const district = await DistrictModel.findById(districtId).exec();
+  const { zoneId, distributors } = district;
 
   if (!district) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        `No valid entry found for provided ID ${districtId}`,
+        404
+      )
     );
   }
+
+  const zone = await ZoneModel.findById(zoneId).exec();
+  if (distributors.length)
+    await DistributorModel.find(
+      { _id: { $in: distributors } },
+      (error, docs) => {
+        const mappedDistrictsToZone = zone.districts;
+        docs.forEach(async (doc) => {
+          const commonDistrictIds = doc.districts.filter((districtId) =>
+            mappedDistrictsToZone.includes(districtId)
+          );
+
+          if (commonDistrictIds.length <= 1) {
+            console.log("Inside <=1 ");
+            await DistributorModel.findOneAndUpdate(
+              { _id: doc._id },
+              {
+                $pull: {
+                  zones: district.zoneId,
+                  districts: districtId,
+                  areas: { $in: district.areas }, //remove the matching areas from distributor
+                },
+              }
+            );
+
+            await ZoneModel.findOneAndUpdate(
+              { _id: district.zoneId },
+              {
+                $pull: {
+                  distributors: doc._id,
+                },
+              }
+            );
+          } else {
+            console.log("Inside > 1 ");
+            await DistributorModel.findOneAndUpdate(
+              { _id: doc._id },
+              {
+                $pull: {
+                  districts: districtId,
+                  areas: { $in: district.areas }, //remove the matching areas from distributor
+                },
+              }
+            );
+          }
+        });
+      }
+    );
 
   await district.remove();
 
@@ -153,23 +206,54 @@ exports.updateDistrict = asyncHandler(async (req, res, next) => {
     }
   );
 
-  //update the districtId to Zone
+  //update the district to changed Zone(if new zoneId)
   if (req.body.zoneId !== district.zoneId) {
+    console.log("Updating the districtId to Zone Collection");
+    const reqZoneId = req.body.zoneId;
+    // Check for the district
+    const reqZone = await ZoneModel.findById(reqZoneId).exec();
+
+    if (!reqZone) {
+      return next(new ErrorResponse(`Zone Not Found for Id:${reqZoneId}`, 400));
+    }
+
     Promise.all([
-      //1.Remove the DistrictId from exisiting zone
+      //1.Remove the DistrictId, Areas, BeatAreas from exisiting zone
       await ZoneModel.findOneAndUpdate(
         { _id: district.zoneId },
-        { $pull: { districts: districtId } }
+        {
+          $pull: {
+            districts: districtId,
+            areas: { $in: district.areas },
+            beatAreas: { $in: district.beatAreas },
+          },
+        }
       ),
 
-      //2. Add the DistrictId to another zone
+      //2. Add the DistrictId, Areas, BeatAreas to another zone
       await ZoneModel.findOneAndUpdate(
         { _id: req.body.zoneId },
         {
           $addToSet: {
             districts: districtId,
+            areas: { $each: district.areas },
+            beatAreas: { $each: district.beatAreas },
           },
         }
+      ),
+
+      //3. Update the changed Zone Id to Areas
+      await AreaModel.updateMany(
+        { districtId: districtId },
+        { $set: { zoneId: reqZoneId } },
+        { multi: true }
+      ),
+
+      //4. Update the changed Zone Id to Beat Areas
+      await BeatAreaModel.updateMany(
+        { districtId: districtId },
+        { $set: { zoneId: reqZoneId } },
+        { multi: true }
       ),
     ]);
   }
