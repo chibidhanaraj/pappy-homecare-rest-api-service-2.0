@@ -1,8 +1,13 @@
 const mongoose = require("mongoose");
 const SuperStockistModel = require("../model/SuperStockistModel");
+const ZoneModel = require("../model/ZoneModel");
+const DistrictModel = require("../model/DistrictModel");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
-const { toSentenceCase } = require("../../utils/CommonUtils");
+const {
+  toSentenceCase,
+  areObjectIdEqualArrays,
+} = require("../../utils/CommonUtils");
 
 // @desc GET Super Stockists
 // @route GET /api/superstockist
@@ -48,20 +53,8 @@ exports.createSuperStockist = asyncHandler(async (req, res, next) => {
   const gstNumber = req.body.gstNumber;
   const existingDistributorsCount = req.body.existingDistributorsCount;
   const currentBrandsDealing = req.body.currentBrandsDealing;
-
-  // Check for Already existing superStockist with GST number
-  const findSuperStockist = await SuperStockistModel.findOne({
-    gstNumber,
-  });
-
-  if (findSuperStockist) {
-    return next(
-      new ErrorResponse(
-        `Super Stockist already exists with GST Number: ${gstNumber}`,
-        400
-      )
-    );
-  }
+  const zones = req.body.zones || [];
+  const districts = req.body.districts || [];
 
   const superStockist = new SuperStockistModel({
     _id: new mongoose.Types.ObjectId(),
@@ -72,9 +65,38 @@ exports.createSuperStockist = asyncHandler(async (req, res, next) => {
     gstNumber,
     existingDistributorsCount,
     currentBrandsDealing,
+    zones,
+    districts,
   });
 
   const savedSuperStockistDocument = await superStockist.save();
+
+  let updatePromises = [];
+
+  if (zones.length) {
+    const updateZonesPromises = zones.map(async (zoneId) => {
+      await ZoneModel.findOneAndUpdate(
+        { _id: zoneId },
+        { $push: { superStockists: savedSuperStockistDocument._id } },
+        { new: true, upsert: true }
+      );
+    });
+    updatePromises = updatePromises.concat(updateZonesPromises);
+  }
+
+  if (districts.length) {
+    const updateDistrictsPromises = districts.map(async (districtId) => {
+      await DistrictModel.findOneAndUpdate(
+        { _id: districtId },
+        { $push: { superStockists: savedSuperStockistDocument._id } },
+        { new: true, upsert: true }
+      );
+    });
+    updatePromises = updatePromises.concat(updateDistrictsPromises);
+  }
+
+  await Promise.all(updatePromises);
+
   res.status(201).json({
     success: true,
     superStockist: savedSuperStockistDocument,
@@ -93,7 +115,7 @@ exports.deleteSuperStockist = asyncHandler(async (req, res, next) => {
     );
   }
 
-  await SuperStockistModel.findByIdAndRemove(id).exec();
+  await superStockist.remove();
 
   res.status(200).json({
     success: true,
@@ -105,6 +127,8 @@ exports.deleteSuperStockist = asyncHandler(async (req, res, next) => {
 // @route     PATCH /api/superstockist/:superstockistId
 exports.updateSuperStockist = asyncHandler(async (req, res, next) => {
   const superStockistId = req.params.id;
+  const reqDistricts = req.body.districts;
+  const reqZones = req.body.zones;
 
   const superStockist = await SuperStockistModel.findById(
     superStockistId
@@ -128,6 +152,8 @@ exports.updateSuperStockist = asyncHandler(async (req, res, next) => {
     "gstNumber",
     "existingDistributorsCount",
     "currentBrandsDealing",
+    "zones",
+    "districts",
   ];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
@@ -142,22 +168,64 @@ exports.updateSuperStockist = asyncHandler(async (req, res, next) => {
     req.body.superStockistName = toSentenceCase(req.body.superStockistName);
   }
 
-  const reqGstNumber = req.body.gstNumber;
-  // Check for duplicates
-  if (reqGstNumber && reqGstNumber !== superStockist.gstNumber) {
-    const createdSuperStockist = await SuperStockistModel.findOne({
-      reqGstNumber,
-    });
+  let removePromises = [];
+  let addPromises = [];
 
-    if (createdSuperStockist) {
-      return next(
-        new ErrorResponse(
-          `Super Stockist with same GST number ${reqGstNumber} already exists`,
-          400
-        )
-      );
-    }
+  const areDistrictsEqual = areObjectIdEqualArrays(
+    superStockist.districts,
+    reqDistricts
+  );
+  const areZonesEqual = areObjectIdEqualArrays(superStockist.zones, reqZones);
+
+  if (!areDistrictsEqual) {
+    console.log("Removing the Districts for Super Stockist");
+    const removeDistrictsPromises = superStockist.districts.map(
+      async (districtId) => {
+        await DistrictModel.findOneAndUpdate(
+          { _id: districtId },
+          { $pull: { superStockists: superStockistId } }
+        );
+      }
+    );
+    removePromises = removePromises.concat(removeDistrictsPromises);
   }
+
+  if (!areZonesEqual) {
+    console.log("Removing the Zones for Super Stockist");
+    const removeAreasPromises = superStockist.zones.map(async (zoneId) => {
+      await ZoneModel.findOneAndUpdate(
+        { _id: zoneId },
+        { $pull: { superStockists: superStockistId } }
+      );
+    });
+    removePromises = removePromises.concat(removeAreasPromises);
+  }
+
+  await Promise.all(removePromises);
+
+  if (!areDistrictsEqual && reqDistricts.length) {
+    console.log("Adding the Districts for Super Stockist");
+    const updateDistrictsPromises = reqDistricts.map(async (districtId) => {
+      await DistrictModel.findOneAndUpdate(
+        { _id: districtId },
+        { $addToSet: { superStockists: superStockistId } }
+      );
+    });
+    addPromises = addPromises.concat(updateDistrictsPromises);
+  }
+
+  if (!areZonesEqual && reqZones.length) {
+    console.log("Adding the Zones for Super Stockist");
+    const updateZonesPromises = reqZones.map(async (zoneId) => {
+      await ZoneModel.findOneAndUpdate(
+        { _id: zoneId },
+        { $addToSet: { superStockists: superStockistId } }
+      );
+    });
+    addPromises = addPromises.concat(updateZonesPromises);
+  }
+
+  await Promise.all(addPromises);
 
   const updatedSuperStockist = await SuperStockistModel.findByIdAndUpdate(
     superStockistId,

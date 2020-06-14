@@ -1,8 +1,5 @@
 const mongoose = require("mongoose");
 const ZoneModel = require("../model/ZoneModel");
-const DistrictModel = require("../model/DistrictModel");
-const AreaModel = require("../model/AreaModel");
-const BeatAreaModel = require("../model/BeatAreaModel");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
 const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");

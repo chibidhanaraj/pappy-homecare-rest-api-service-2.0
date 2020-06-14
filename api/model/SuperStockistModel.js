@@ -5,14 +5,12 @@ const contactSchema = new Schema(
   {
     contactPersonName: {
       type: String,
-      required: [true, "Please add the Contact Person Name"],
     },
     contactNumber: {
-      type: Number,
-      required: [true, "Please add the Contact Person Number"],
+      type: String,
     },
     additionalContactNumber: {
-      type: Number,
+      type: String,
     },
     emailAddress: {
       type: String,
@@ -27,7 +25,7 @@ const additionalContactSchema = new Schema(
       type: String,
     },
     contactNumber: {
-      type: Number,
+      type: String,
     },
     role: {
       type: String,
@@ -42,10 +40,10 @@ const currentBrandsDealingSchema = new Schema(
       type: String,
     },
     turnOverAmount: {
-      type: Number,
+      type: String,
     },
     brandDealershipPeriod: {
-      type: Number,
+      type: String,
     },
   },
   { _id: false }
@@ -68,10 +66,6 @@ const AddressSchema = new Schema(
     place: {
       type: String,
     },
-    districtId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "District",
-    },
   },
   { _id: false }
 );
@@ -85,7 +79,7 @@ const SuperStockistSchema = new Schema({
   },
 
   existingDistributorsCount: {
-    type: Number,
+    type: String,
   },
 
   contact: contactSchema,
@@ -98,9 +92,59 @@ const SuperStockistSchema = new Schema({
 
   gstNumber: {
     type: String,
-    required: [true, "Please add a GST number"],
-    unique: true,
   },
+
+  zones: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Zone",
+    },
+  ],
+
+  districts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "District",
+    },
+  ],
+
+  distributors: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Distributor",
+    },
+  ],
+});
+
+// Cascade delete Super Stockist
+SuperStockistSchema.pre("remove", async function (next) {
+  await Promise.all([
+    await this.model("Zone").updateMany(
+      { _id: { $in: this.zones } },
+      {
+        $pull: {
+          superStockists: this._id,
+        },
+      },
+      { multi: true }
+    ),
+    await this.model("District").updateMany(
+      { _id: { $in: this.districts } },
+      {
+        $pull: {
+          superStockists: this._id,
+        },
+      },
+      { multi: true }
+    ),
+    await this.model("Distributor").updateMany(
+      { superStockistId: this._id },
+      { $set: { superStockistId: null } },
+      { multi: true }
+    ),
+  ]);
+
+  next();
 });
 
 // Ensure virtual fields are serialised.

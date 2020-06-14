@@ -98,6 +98,11 @@ const DistributorSchema = new Schema({
     type: String,
   },
 
+  superStockistId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "SuperStockist",
+  },
+
   zones: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -127,7 +132,7 @@ const DistributorSchema = new Schema({
   ],
 });
 
-// Cascade delete distributor when a zone is deleted
+// Cascade delete distributor
 DistributorSchema.pre("remove", async function (next) {
   await Promise.all([
     await this.model("Zone").updateMany(
@@ -163,7 +168,6 @@ DistributorSchema.pre("remove", async function (next) {
       { multi: true }
     ),
   ]);
-
   next();
 });
 

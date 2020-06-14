@@ -31,6 +31,12 @@ const ZoneSchema = new Schema({
       ref: "BeatArea",
     },
   ],
+  superStockists: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SuperStockist",
+    },
+  ],
   distributors: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -52,14 +58,12 @@ ZoneSchema.pre("remove", async function (next) {
     await this.model("District").deleteMany({ zoneId: this._id }),
     await this.model("Area").deleteMany({ zoneId: this._id }),
     await this.model("BeatArea").deleteMany({ zoneId: this._id }),
-    await this.model("Retailer").updateMany(
-      { zoneId: this._id },
+    await this.model("SuperStockist").updateMany(
+      { _id: { $in: this.superStockists } },
       {
-        $set: {
-          zoneId: null,
-          districtId: null,
-          areaId: null,
-          beatAreaId: null,
+        $pull: {
+          zones: this._id,
+          districts: { $in: this.districts }, //remove the matching districts from distributor
         },
       },
       { multi: true }
@@ -71,6 +75,18 @@ ZoneSchema.pre("remove", async function (next) {
           zones: this._id,
           districts: { $in: this.districts }, //remove the matching districts from distributor
           areas: { $in: this.areas }, //remove the matching areas from distributor
+        },
+      },
+      { multi: true }
+    ),
+    await this.model("Retailer").updateMany(
+      { zoneId: this._id },
+      {
+        $set: {
+          zoneId: null,
+          districtId: null,
+          areaId: null,
+          beatAreaId: null,
         },
       },
       { multi: true }

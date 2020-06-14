@@ -5,14 +5,12 @@ const contactSchema = new Schema(
   {
     contactPersonName: {
       type: String,
-      required: [true, "Please add the Contact Person Name"],
     },
     contactNumber: {
-      type: Number,
-      required: [true, "Please add the Contact Person Number"],
+      type: String,
     },
     additionalContactNumber: {
-      type: Number,
+      type: String,
     },
     emailAddress: {
       type: String,
@@ -27,7 +25,7 @@ const additionalContactSchema = new Schema(
       type: String,
     },
     contactNumber: {
-      type: Number,
+      type: String,
     },
     role: {
       type: String,
@@ -77,8 +75,6 @@ const WholeSalerSchema = new Schema({
 
   gstNumber: {
     type: String,
-    required: [true, "Please add a GST number"],
-    unique: true,
   },
 });
 

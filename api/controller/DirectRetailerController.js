@@ -47,20 +47,6 @@ exports.createDirectRetailer = asyncHandler(async (req, res, next) => {
   const address = req.body.address;
   const gstNumber = req.body.gstNumber;
 
-  // Check for Already existing Direct Retailer with GST number
-  const findDirectRetailer = await DirectRetailerModel.findOne({
-    gstNumber,
-  });
-
-  if (findDirectRetailer) {
-    return next(
-      new ErrorResponse(
-        `Direct Retailer already exists with GST Number: ${gstNumber}`,
-        400
-      )
-    );
-  }
-
   const directRetailer = new DirectRetailerModel({
     _id: new mongoose.Types.ObjectId(),
     directRetailerName,
@@ -137,21 +123,6 @@ exports.updateDirectRetailer = asyncHandler(async (req, res, next) => {
   }
 
   const reqGstNumber = req.body.gstNumber;
-  // Check for duplicates
-  if (reqGstNumber && reqGstNumber !== directRetailer.gstNumber) {
-    const createddirectRetailer = await DirectRetailerModel.findOne({
-      reqGstNumber,
-    });
-
-    if (createddirectRetailer) {
-      return next(
-        new ErrorResponse(
-          `Direct Retailer with same GST number ${reqGstNumber} already exists`,
-          400
-        )
-      );
-    }
-  }
 
   const updatedDirectRetailer = await DirectRetailerModel.findByIdAndUpdate(
     directRetailerId,

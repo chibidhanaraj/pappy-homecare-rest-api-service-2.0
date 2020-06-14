@@ -9,6 +9,7 @@ const {
   toSentenceCase,
   areObjectIdEqualArrays,
 } = require("../../utils/CommonUtils");
+const SuperStockistModel = require("../model/SuperStockistModel");
 
 // @desc GET Distributors
 // @route GET /api/distributor
@@ -50,9 +51,10 @@ exports.createDistributor = asyncHandler(async (req, res, next) => {
   const deliveryVehiclesCount = req.body.deliveryVehiclesCount;
   const existingRetailersCount = req.body.existingRetailersCount;
   const currentBrandsDealing = req.body.currentBrandsDealing;
-  const zones = req.body.zones;
-  const districts = req.body.districts;
+  const zones = req.body.zones || [];
+  const districts = req.body.districts || [];
   const areas = req.body.areas;
+  const superStockistId = req.body.superStockistId || null;
 
   const distributor = new DistributorModel({
     _id: new mongoose.Types.ObjectId(),
@@ -67,9 +69,11 @@ exports.createDistributor = asyncHandler(async (req, res, next) => {
     zones,
     districts,
     areas,
+    superStockistId,
   });
 
   const savedDistributorDocument = await distributor.save();
+
   let updatePromises = [];
 
   if (zones.length) {
@@ -103,6 +107,14 @@ exports.createDistributor = asyncHandler(async (req, res, next) => {
       );
     });
     updatePromises = updatePromises.concat(updateAreasPromises);
+  }
+
+  if (superStockistId) {
+    await SuperStockistModel.findOneAndUpdate(
+      { _id: savedDistributorDocument.superStockistId },
+      { $push: { distributors: savedDistributorDocument._id } },
+      { new: true, upsert: true }
+    );
   }
 
   await Promise.all(updatePromises);
@@ -165,6 +177,7 @@ exports.updateDistributor = asyncHandler(async (req, res, next) => {
     "zones",
     "districts",
     "areas",
+    "superStockistId",
   ];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
@@ -259,6 +272,82 @@ exports.updateDistributor = asyncHandler(async (req, res, next) => {
   }
 
   await Promise.all(addPromises);
+
+  if (
+    !req.body.superStockistId ||
+    !distributor.superStockistId ||
+    distributor.superStockistId.toString() !==
+      req.body.superStockistId.toString()
+  ) {
+    const reqSuperStockistId = req.body.superStockistId;
+    if (!reqSuperStockistId) {
+      /*
+      1.distributor.superStockistId has already been assigned previously
+      2.Update now  is empty/null distributor.superStockistId
+      3.Pull the DistributorID from SuperStockist
+      */
+      console.log(
+        "UnAssigning the distributorId from SuperStockist Collection"
+      );
+      await SuperStockistModel.findOneAndUpdate(
+        { _id: distributor.superStockistId },
+        { $pull: { distributors: distributorId } }
+      );
+      req.body.superStockistId = null;
+    } else if (!distributor.superStockistId) {
+      /*
+      1.distributor.superStockistId is falsy value previously null/undefined/""
+      2. Update now as empty/null distributor.superStockistId
+      */
+      console.log("Assigning the distributorId to Super Stockist Collection");
+      await SuperStockistModel.findOneAndUpdate(
+        { _id: reqSuperStockistId },
+        {
+          $addToSet: {
+            distributors: distributorId,
+          },
+        }
+      );
+    } else {
+      /*
+      1.distributor.superStockistId has a assigned value previously 
+      2. Update now with new distributor.superStockistId ID
+      */
+      console.log("Updating the retailerId to Super Stockist  Collection");
+
+      // Check for existing SuperStockist
+      const reqSuperStockist = await SuperStockistModel.findById(
+        reqSuperStockistId
+      ).exec();
+
+      if (!reqSuperStockist) {
+        return next(
+          new ErrorResponse(
+            `Super Stockist Not Found for Id:${reqSuperStockistId}`,
+            400
+          )
+        );
+      }
+
+      await Promise.all([
+        //1.Remove the distributorId from exisiting Super Stockist
+        await SuperStockistModel.findOneAndUpdate(
+          { _id: distributor.superStockistId },
+          { $pull: { distributors: distributorId } }
+        ),
+
+        //2. Add the distributorId to another Super Stockist
+        await SuperStockistModel.findOneAndUpdate(
+          { _id: reqSuperStockistId },
+          {
+            $addToSet: {
+              distributors: distributorId,
+            },
+          }
+        ),
+      ]);
+    }
+  }
 
   const updatedDistributor = await DistributorModel.findByIdAndUpdate(
     distributorId,

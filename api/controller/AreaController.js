@@ -268,6 +268,60 @@ exports.updateArea = asyncHandler(async (req, res, next) => {
       );
     }
 
+    /* districtId is also connected with Distributors records. Only the removal of districtId from distributors is below.
+      This is handled seperately as Promise.all below might result in documents update conflicts
+    */
+    if (area.distributors.length) {
+      const district = await DistrictModel.findById(area.districtId).exec();
+      const zone = await ZoneModel.findById(area.zoneId).exec();
+      const { distributors } = area;
+
+      await DistributorModel.find(
+        { _id: { $in: distributors } },
+        (error, docs) => {
+          const mappedAreasToDistrict = district.areas;
+          const mappedDistrictsToZone = zone.districts;
+          docs.forEach(async (doc) => {
+            // To find Intersection between distributor.areas and district.areas.
+            // district.areas will give the exact territory mapped areas
+            const commonAreaIds = doc.areas.filter((area) =>
+              mappedAreasToDistrict.includes(area)
+            );
+
+            // To find Intersection between distributor.districts and zone.districts.
+            // zone.districts will give the exact territory mapped districts
+            const commonDistrictIds = doc.districts.filter((districtId) =>
+              mappedDistrictsToZone.includes(districtId)
+            );
+
+            /* Only Area in Only District in Only Area in the distributor
+            Hence we will remove the districtId and zoneId
+            */
+            if (commonAreaIds.length <= 1 && commonDistrictIds.length <= 1) {
+              await DistributorModel.findOneAndUpdate(
+                { _id: doc._id },
+                {
+                  $pull: {
+                    districts: area.districtId,
+                    zones: area.zoneId,
+                  },
+                }
+              );
+            } else if (commonAreaIds.length <= 1) {
+              await DistributorModel.findOneAndUpdate(
+                { _id: doc._id },
+                {
+                  $pull: {
+                    districts: area.districtId,
+                  },
+                }
+              );
+            }
+          });
+        }
+      );
+    }
+
     await Promise.all([
       //1.Remove the area from existing district
       await DistrictModel.findOneAndUpdate(
@@ -276,6 +330,7 @@ exports.updateArea = asyncHandler(async (req, res, next) => {
           $pull: {
             areas: areaId,
             beatAreas: { $in: area.beatAreas },
+            distributors: { $in: area.distributors },
           },
         }
       ),
@@ -287,6 +342,7 @@ exports.updateArea = asyncHandler(async (req, res, next) => {
           $addToSet: {
             areas: areaId,
             beatAreas: { $each: area.beatAreas },
+            distributors: { $each: area.distributors },
           },
         }
       ),
@@ -295,6 +351,13 @@ exports.updateArea = asyncHandler(async (req, res, next) => {
       await BeatAreaModel.updateMany(
         { areaId: areaId },
         { $set: { districtId: reqDistrictId } },
+        { multi: true }
+      ),
+
+      //4. Update the District Id to distributor.  $addtoSet to handle the duplicates in array
+      await DistributorModel.updateMany(
+        { areas: { $in: areaId } },
+        { $addToSet: { districts: reqDistrictId } },
         { multi: true }
       ),
     ]);
@@ -338,6 +401,13 @@ exports.updateArea = asyncHandler(async (req, res, next) => {
       await BeatAreaModel.updateMany(
         { areaId: areaId },
         { $set: { zoneId: reqZoneId } },
+        { multi: true }
+      ),
+
+      //4. Update the Zone Id to distributor.  $addtoSet to handle the duplicates in array
+      await DistributorModel.updateMany(
+        { areas: { $in: areaId } },
+        { $addToSet: { zones: reqZoneId } },
         { multi: true }
       ),
     ]);

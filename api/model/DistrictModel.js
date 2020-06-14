@@ -29,6 +29,12 @@ const DistrictSchema = new Schema({
       ref: "BeatArea",
     },
   ],
+  superStockists: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SuperStockist",
+    },
+  ],
   distributors: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -66,18 +72,6 @@ DistrictSchema.pre("remove", async function (next) {
       { $set: { districtId: null, areaId: null, beatAreaId: null } },
       { multi: true }
     ),
-
-    // await this.model("Distributor").updateMany(
-    //   { _id: { $in: this.distributors } },
-    //   {
-    //     $pull: {
-    //       zones: this.zoneId,
-    //       districts: this._id,
-    //       areas: { $in: this.areas }, //remove the matching areas from distributor
-    //     },
-    //   },
-    //   { multi: true }
-    // ),
   ]);
 
   next();

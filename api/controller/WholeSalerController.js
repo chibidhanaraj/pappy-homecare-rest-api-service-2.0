@@ -42,20 +42,6 @@ exports.createWholeSaler = asyncHandler(async (req, res, next) => {
   const address = req.body.address;
   const gstNumber = req.body.gstNumber;
 
-  // Check for created wholeSaler with the GST number
-  const createdWholeSaler = await WholeSalerModel.findOne({
-    gstNumber,
-  });
-
-  if (createdWholeSaler) {
-    return next(
-      new ErrorResponse(
-        `'${wholeSalerName}' with gst:${gstNumber} has already been created`,
-        400
-      )
-    );
-  }
-
   const wholeSaler = new WholeSalerModel({
     _id: new mongoose.Types.ObjectId(),
     wholeSalerName,
@@ -127,23 +113,6 @@ exports.updateWholeSaler = asyncHandler(async (req, res, next) => {
 
   if (req.body.wholeSalerName) {
     req.body.wholeSalerName = toSentenceCase(req.body.wholeSalerName);
-  }
-
-  const reqGstNumber = req.body.gstNumber;
-  // Check for duplicates
-  if (reqGstNumber && reqGstNumber !== wholeSaler.gstNumber) {
-    const createdWholeSaler = await WholeSalerModel.findOne({
-      reqGstNumber,
-    });
-
-    if (createdWholeSaler) {
-      return next(
-        new ErrorResponse(
-          `wholeSaler with same GST number ${reqGstNumber} already exists`,
-          400
-        )
-      );
-    }
   }
 
   const updatedWholeSaler = await WholeSalerModel.findByIdAndUpdate(
