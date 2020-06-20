@@ -96,10 +96,6 @@ ZoneSchema.pre("remove", async function (next) {
       },
       { multi: true }
     ),
-    await this.model("User").findOneAndUpdate(
-      { _id: this.regionalSalesManagerId },
-      { $pull: { zones: this._id } }
-    ),
   ]);
 
   next();

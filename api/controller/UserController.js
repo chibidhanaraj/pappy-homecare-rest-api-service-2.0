@@ -46,7 +46,7 @@ exports.createUser = asyncHandler(async (req, res, next) => {
     mobileNumber,
     password,
     role,
-    isReportingToMd,
+    isReportingToAdmin,
     reportingTo,
     zones,
     districts,
@@ -59,7 +59,7 @@ exports.createUser = asyncHandler(async (req, res, next) => {
     mobileNumber,
     password,
     role,
-    isReportingToMd,
+    isReportingToAdmin,
     reportingTo,
     zones,
     districts,
@@ -76,8 +76,7 @@ exports.createUser = asyncHandler(async (req, res, next) => {
     );
   }
 
-  if (!isReportingToMd && reportingTo) {
-    console.log("Inside Reporting to");
+  if (!isReportingToAdmin && reportingTo) {
     const reportingToUser = await UserModel.findOne({
       _id: reportingTo,
     });
@@ -88,30 +87,6 @@ exports.createUser = asyncHandler(async (req, res, next) => {
   }
 
   const savedUserDocument = await user.save();
-
-  const {
-    zones: savedUserAssignedZones,
-    role: savedUserRole,
-  } = savedUserDocument;
-
-  let updatePromises = [];
-
-  if (
-    savedUserAssignedZones.length &&
-    savedUserRole === USER_ROLES_CONSTANTS.REGIONAL_SALES_MANAGER
-  ) {
-    console.log("iNSIDE Zones");
-    const updateZonesPromises = zones.map(async (zoneId) => {
-      await ZoneModel.findOneAndUpdate(
-        { _id: zoneId },
-        { $set: { regionalSalesManagerId: savedUserDocument._id } },
-        { new: true, upsert: true }
-      );
-    });
-    updatePromises = updatePromises.concat(updateZonesPromises);
-  }
-
-  await Promise.all(updatePromises);
 
   res.status(201).json({
     success: true,
@@ -138,7 +113,7 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     "name",
     "mobileNumber",
     "role",
-    "isReportingToMd",
+    "isReportingToAdmin",
     "reportingTo",
     "zones",
     "districts",
@@ -153,47 +128,14 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Invalid Updates for ${userId}`));
   }
 
-  const { zones: reqZones } = req.body;
-
-  const { role: userRole, zones: userZones } = user;
-  let removePromises = [];
-  let addPromises = [];
-
-  if (userRole === USER_ROLES_CONSTANTS.REGIONAL_SALES_MANAGER) {
-    const areZonesEqual = areObjectIdEqualArrays(user.zones, reqZones);
-
-    if (!areZonesEqual) {
-      const removeZonesPromises = userZones.map(async (zoneId) => {
-        await ZoneModel.findOneAndUpdate(
-          { _id: zoneId },
-          { $set: { regionalSalesManagerId: null } }
-        );
-      });
-      removePromises = removePromises.concat(removeZonesPromises);
-    }
-    await Promise.all(removePromises);
-
-    if (!areZonesEqual && reqZones.length) {
-      const updateZonesPromises = reqZones.map(async (zoneId) => {
-        await ZoneModel.findOneAndUpdate(
-          { _id: zoneId },
-          { $set: { regionalSalesManagerId: userId } }
-        );
-      });
-      addPromises = addPromises.concat(updateZonesPromises);
-    }
-
-    await Promise.all(addPromises);
-  }
-
-  const updatesUser = await UserModel.findByIdAndUpdate(userId, req.body, {
+  const updatedUser = await UserModel.findByIdAndUpdate(userId, req.body, {
     new: true,
     runValidators: true,
   });
 
   res.status(200).json({
     success: true,
-    user: updatesUser,
+    user: updatedUser,
   });
 });
 
@@ -211,24 +153,7 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
     );
   }
 
-  let removePromises = [];
-
-  if (
-    userZones.length &&
-    userRole === USER_ROLES_CONSTANTS.REGIONAL_SALES_MANAGER
-  ) {
-    const removeZonesPromises = userZones.map(async (zoneId) => {
-      await ZoneModel.findOneAndUpdate(
-        { _id: zoneId },
-        { $set: { regionalSalesManagerId: null } }
-      );
-    });
-    removePromises = removePromises.concat(removeZonesPromises);
-  }
-
   await UserModel.findByIdAndDelete(id).exec();
-
-  await Promise.all(removePromises);
 
   res.status(200).json({
     success: true,

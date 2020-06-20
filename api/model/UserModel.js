@@ -36,7 +36,7 @@ const UserSchema = new Schema({
     default: "BACKOFFICE_ADMIN",
   },
 
-  isReportingToMd: {
+  isReportingToAdmin: {
     type: Boolean,
     default: false,
   },
@@ -83,13 +83,6 @@ UserSchema.pre("save", async function (next) {
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-
-  if (this.reportingTo) {
-    await this.model("User").findOneAndUpdate(
-      { _id: this.reportingTo },
-      { $addToSet: { reporters: this._id } }
-    );
-  }
 });
 
 // Match user entered password to hashed password in database
