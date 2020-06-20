@@ -227,13 +227,13 @@ exports.updateDistributor = asyncHandler(async (req, res, next) => {
 
   if (!areZonesEqual) {
     console.log("zones removal");
-    const removeAreasPromises = distributor.zones.map(async (zoneId) => {
+    const removeZonesPromises = distributor.zones.map(async (zoneId) => {
       await ZoneModel.findOneAndUpdate(
         { _id: zoneId },
         { $pull: { distributors: distributorId } }
       );
     });
-    removePromises = removePromises.concat(removeAreasPromises);
+    removePromises = removePromises.concat(removeZonesPromises);
   }
 
   await Promise.all(removePromises);

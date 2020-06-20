@@ -49,6 +49,11 @@ const ZoneSchema = new Schema({
       ref: "Retailer",
     },
   ],
+
+  regionalSalesManagerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
 });
 
 // Cascade delete district when a zone is deleted
@@ -90,6 +95,10 @@ ZoneSchema.pre("remove", async function (next) {
         },
       },
       { multi: true }
+    ),
+    await this.model("User").findOneAndUpdate(
+      { _id: this.regionalSalesManagerId },
+      { $pull: { zones: this._id } }
     ),
   ]);
 

@@ -13,16 +13,11 @@ const { toUpperCase } = require("../../utils/CommonUtils");
 // @desc      Get all product
 // @route     GET /api/product
 exports.getAllProducts = asyncHandler(async (req, res, next) => {
-  const fetchedProducts = await ProductModel.find()
-    .select("-__v")
-    .populate("category")
-    .exec();
+  const fetchedProducts = await ProductModel.find().populate("category").exec();
 
-  const customerTypes = await CustomerTypeModel.find().exec();
-  const products = buildAllProductsPayload(fetchedProducts, customerTypes);
   res.status(200).json({
     success: true,
-    products,
+    products: fetchedProducts,
   });
 });
 
@@ -31,7 +26,6 @@ exports.getAllProducts = asyncHandler(async (req, res, next) => {
 exports.getProduct = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
   const fetchedProduct = await ProductModel.findById(id)
-    .select("-__v")
     .populate("category")
     .exec();
 
@@ -41,12 +35,9 @@ exports.getProduct = asyncHandler(async (req, res, next) => {
     );
   }
 
-  const customerTypes = await CustomerTypeModel.find().exec();
-  const product = buildProductPayload(fetchedProduct, customerTypes);
-
   res.status(200).json({
     success: true,
-    product,
+    product: fetchedProduct,
   });
 });
 
@@ -55,19 +46,6 @@ exports.getProduct = asyncHandler(async (req, res, next) => {
 exports.createProduct = asyncHandler(async (req, res, next) => {
   const productName = req.body.productName;
   const productCode = toUpperCase(productName);
-
-  const product = new ProductModel({
-    _id: new mongoose.Types.ObjectId(),
-    productName,
-    productCode,
-    category: req.body.categoryId,
-    fragrance: req.body.fragrance,
-    size: req.body.size,
-    perCaseQuantity: req.body.perCaseQuantity,
-    mrp: req.body.mrp,
-    gst: req.body.gst,
-    specialPrice: req.body.specialPrice,
-  });
 
   // Check for created product
   const createdProduct = await ProductModel.findOne({
@@ -83,14 +61,25 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
     );
   }
 
-  const savedDocument = await product.save();
-  console.log(savedDocument);
-  const customerTypes = await CustomerTypeModel.find().exec();
-  const productPayload = buildProductPayload(savedDocument, customerTypes);
+  const product = new ProductModel({
+    _id: new mongoose.Types.ObjectId(),
+    productName,
+    productCode,
+    category: req.body.categoryId,
+    fragranceId: req.body.fragranceId,
+    quantityId: req.body.quantityId,
+    perCaseQuantity: req.body.perCaseQuantity,
+    mrp: req.body.mrp,
+    gst: req.body.gst,
+  });
+
+  const savedProductDocument = await product.save();
+
+  console.log(savedProductDocument);
 
   res.status(201).json({
     success: true,
-    product: productPayload,
+    product: savedProductDocument,
   });
 });
 

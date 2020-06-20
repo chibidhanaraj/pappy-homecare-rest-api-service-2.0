@@ -18,15 +18,11 @@ const ProductSchema = new Schema({
     required: true,
     ref: "Category",
   },
-  fragrance: {
-    type: {
-      fragranceName: String,
-    },
+  fragranceId: {
+    type: mongoose.Schema.Types.ObjectId,
   },
-  size: {
-    type: {
-      sizeValue: String,
-    },
+  quantityId: {
+    type: mongoose.Schema.Types.ObjectId,
   },
   perCaseQuantity: {
     type: Number,

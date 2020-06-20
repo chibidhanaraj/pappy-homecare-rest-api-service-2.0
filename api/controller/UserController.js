@@ -2,6 +2,9 @@ const mongoose = require("mongoose");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
 const UserModel = require("../model/UserModel");
+const ZoneModel = require("../model/ZoneModel");
+const { USER_ROLES_CONSTANTS } = require("../../constants/constants");
+const { areObjectIdEqualArrays } = require("../../utils/CommonUtils");
 
 // @desc      Get all users
 // @route     GET /api/user
@@ -38,32 +41,81 @@ exports.getUser = asyncHandler(async (req, res, next) => {
 // @route     POST /api/user
 // @access    Private/Admin
 exports.createUser = asyncHandler(async (req, res, next) => {
+  const {
+    name,
+    mobileNumber,
+    password,
+    role,
+    isReportingToMd,
+    reportingTo,
+    zones,
+    districts,
+    areas,
+  } = req.body;
+
   const user = new UserModel({
     _id: new mongoose.Types.ObjectId(),
-    name: req.body.name,
-    mobileNumber: req.body.mobileNumber,
-    password: req.body.password,
-    role: req.body.role,
+    name,
+    mobileNumber,
+    password,
+    role,
+    isReportingToMd,
+    reportingTo,
+    zones,
+    districts,
+    areas,
   });
 
   const createdUser = await UserModel.findOne({
-    mobileNumber: user.mobileNumber,
+    mobileNumber: mobileNumber,
   });
 
   if (createdUser) {
     return next(
-      new ErrorResponse(`${user.mobileNumber} has already been created`, 400)
+      new ErrorResponse(`${mobileNumber} has already been created`, 400)
     );
   }
 
-  const savedDocument = await user.save();
+  if (!isReportingToMd && reportingTo) {
+    console.log("Inside Reporting to");
+    const reportingToUser = await UserModel.findOne({
+      _id: reportingTo,
+    });
+
+    if (!reportingToUser) {
+      return next(new ErrorResponse(`${reportingToUser} does not exist`, 400));
+    }
+  }
+
+  const savedUserDocument = await user.save();
+
+  const {
+    zones: savedUserAssignedZones,
+    role: savedUserRole,
+  } = savedUserDocument;
+
+  let updatePromises = [];
+
+  if (
+    savedUserAssignedZones.length &&
+    savedUserRole === USER_ROLES_CONSTANTS.REGIONAL_SALES_MANAGER
+  ) {
+    console.log("iNSIDE Zones");
+    const updateZonesPromises = zones.map(async (zoneId) => {
+      await ZoneModel.findOneAndUpdate(
+        { _id: zoneId },
+        { $set: { regionalSalesManagerId: savedUserDocument._id } },
+        { new: true, upsert: true }
+      );
+    });
+    updatePromises = updatePromises.concat(updateZonesPromises);
+  }
+
+  await Promise.all(updatePromises);
+
   res.status(201).json({
     success: true,
-    user: {
-      name: savedDocument.name,
-      mobileNumber: savedDocument.mobileNumber,
-      role: savedDocument.role,
-    },
+    user: savedUserDocument,
   });
 });
 
@@ -72,8 +124,26 @@ exports.createUser = asyncHandler(async (req, res, next) => {
 // @access    Private/Admin
 exports.updateUser = asyncHandler(async (req, res, next) => {
   const userId = req.params.id;
+
+  const user = await UserModel.findById(userId).exec();
+
+  if (!user) {
+    return next(
+      new ErrorResponse(`No valid entry found for provided ID ${userId}`, 404)
+    );
+  }
+
   const receivedUpdateProperties = Object.keys(req.body);
-  const allowedUpdateProperties = ["name", "mobileNumber", "password", "role"];
+  const allowedUpdateProperties = [
+    "name",
+    "mobileNumber",
+    "role",
+    "isReportingToMd",
+    "reportingTo",
+    "zones",
+    "districts",
+    "areas",
+  ];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
     allowedUpdateProperties.includes(key)
@@ -83,14 +153,47 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Invalid Updates for ${userId}`));
   }
 
-  const user = await UserModel.findByIdAndUpdate(userId, req.body, {
+  const { zones: reqZones } = req.body;
+
+  const { role: userRole, zones: userZones } = user;
+  let removePromises = [];
+  let addPromises = [];
+
+  if (userRole === USER_ROLES_CONSTANTS.REGIONAL_SALES_MANAGER) {
+    const areZonesEqual = areObjectIdEqualArrays(user.zones, reqZones);
+
+    if (!areZonesEqual) {
+      const removeZonesPromises = userZones.map(async (zoneId) => {
+        await ZoneModel.findOneAndUpdate(
+          { _id: zoneId },
+          { $set: { regionalSalesManagerId: null } }
+        );
+      });
+      removePromises = removePromises.concat(removeZonesPromises);
+    }
+    await Promise.all(removePromises);
+
+    if (!areZonesEqual && reqZones.length) {
+      const updateZonesPromises = reqZones.map(async (zoneId) => {
+        await ZoneModel.findOneAndUpdate(
+          { _id: zoneId },
+          { $set: { regionalSalesManagerId: userId } }
+        );
+      });
+      addPromises = addPromises.concat(updateZonesPromises);
+    }
+
+    await Promise.all(addPromises);
+  }
+
+  const updatesUser = await UserModel.findByIdAndUpdate(userId, req.body, {
     new: true,
     runValidators: true,
   });
 
   res.status(200).json({
     success: true,
-    user,
+    user: updatesUser,
   });
 });
 
@@ -100,6 +203,7 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
 exports.deleteUser = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
   const user = await UserModel.findById(id).exec();
+  const { role: userRole, zones: userZones } = user;
 
   if (!user) {
     return next(
@@ -107,7 +211,24 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
     );
   }
 
+  let removePromises = [];
+
+  if (
+    userZones.length &&
+    userRole === USER_ROLES_CONSTANTS.REGIONAL_SALES_MANAGER
+  ) {
+    const removeZonesPromises = userZones.map(async (zoneId) => {
+      await ZoneModel.findOneAndUpdate(
+        { _id: zoneId },
+        { $set: { regionalSalesManagerId: null } }
+      );
+    });
+    removePromises = removePromises.concat(removeZonesPromises);
+  }
+
   await UserModel.findByIdAndDelete(id).exec();
+
+  await Promise.all(removePromises);
 
   res.status(200).json({
     success: true,

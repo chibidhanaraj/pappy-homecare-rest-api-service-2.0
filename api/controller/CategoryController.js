@@ -19,15 +19,10 @@ const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");
 // @desc      Get all categories
 // @route     GET /api/category
 exports.getAllCategories = asyncHandler(async (req, res, next) => {
-  const categories = await CategoryModel.find()
-    .select(
-      "brandName categoryName categoryCode categoryType fragrances sizes _id"
-    )
-    .exec();
+  const categories = await CategoryModel.find().exec();
   const categoriesCodeNames = await getAllCategoriesCodeNames(categories);
   res.status(200).json({
     success: true,
-    count: categories.length,
     categoriesCodeNames,
     categories,
   });
@@ -37,11 +32,7 @@ exports.getAllCategories = asyncHandler(async (req, res, next) => {
 // @route     GET /api/category/:id
 exports.getCategory = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
-  const category = await CategoryModel.findById(id)
-    .select(
-      "brandName categoryName categoryCode categoryType fragrances sizes _id"
-    )
-    .exec();
+  const category = await CategoryModel.findById(id).exec();
   if (!category) {
     return next(
       new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
@@ -66,7 +57,7 @@ exports.createCategory = asyncHandler(async (req, res, next) => {
     categoryCode,
     categoryType: req.body.categoryType,
     fragrances: req.body.fragrances,
-    sizes: req.body.sizes,
+    quantities: req.body.quantities,
   });
 
   const createdCategory = await CategoryModel.findOne({
@@ -82,57 +73,81 @@ exports.createCategory = asyncHandler(async (req, res, next) => {
     );
   }
 
-  const savedDocument = await category.save();
+  const savedCategoryDocument = await category.save();
   res.status(201).json({
     success: true,
-    category: {
-      _id: savedDocument._id,
-      brandName: req.body.brandName,
-      categoryName: savedDocument.categoryName,
-      categoryCode: savedDocument.categoryCode,
-      categoryType: req.body.categoryType,
-      fragrances: savedDocument.fragrances,
-      sizes: savedDocument.sizes,
-    },
+    category: savedCategoryDocument,
   });
 });
 
 // @desc      Update category
 // @route     PUT /api/category/
 exports.updateCategory = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
-  const brandName = req.body.brandName;
-  const categoryName = toSentenceCase(req.body.categoryName);
-  const categoryCode = toUpperCase(categoryName);
-  const categoryType = req.body.categoryType;
-
-  const category = await CategoryModel.findById(id).exec();
+  const categoryId = req.params.id;
+  const reqCategoryCode = toUpperCase(req.body.categoryName);
+  const category = await CategoryModel.findById(categoryId).exec();
 
   if (!category) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        `No valid entry found for provided ID ${categoryId}`,
+        404
+      )
     );
   }
 
+  if (category.categoryCode !== reqCategoryCode) {
+    const createdCategory = await CategoryModel.findOne({
+      reqCategoryCode,
+    });
+
+    if (createdCategory) {
+      return next(
+        new ErrorResponse(
+          `Category Name Already exists: ${reqCategoryCode}`,
+          400
+        )
+      );
+    }
+  }
+
+  const receivedUpdateProperties = Object.keys(req.body);
+  const allowedUpdateProperties = [
+    "brandName",
+    "categoryName",
+    "categoryType",
+    "fragrances",
+    "quantities",
+  ];
+
+  const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
+    allowedUpdateProperties.includes(key)
+  );
+
+  if (!isValidUpdateOperation) {
+    return next(new ErrorResponse(`Invalid Updates for ${categoryId}`));
+  }
+
+  if (req.body.categoryName) {
+    req.body.categoryName = toSentenceCase(req.body.categoryName);
+  }
+
   const dataToUpdate = {
-    brandName,
-    categoryName,
-    categoryCode,
-    categoryType,
+    ...req.body,
+    categoryCode: toUpperCase(req.body.categoryName),
     fragrances: req.body.fragrances,
-    sizes: req.body.sizes,
+    quantites: req.body.quantites,
   };
 
   const updatedCategory = await CategoryModel.findByIdAndUpdate(
-    id,
+    categoryId,
     dataToUpdate,
     {
       new: true,
       runValidators: true,
     }
-  ).select(
-    "brandName categoryName categoryCode categoryType fragrances sizes _id"
   );
+
   res.status(200).json({ success: true, category: updatedCategory });
 });
 
@@ -182,31 +197,8 @@ exports.deleteCategory = asyncHandler(async (req, res, next) => {
       new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
     );
   }
-  const deleteCategory = (categoryId) => {
-    return CategoryModel.findByIdAndRemove(categoryId).exec();
-  };
 
-  const deleteProductsWithCategoryId = (categoryId) => {
-    return ProductModel.deleteMany(
-      { category: categoryId },
-      { multi: true },
-      (error) => {
-        if (error) {
-          return next(
-            new ErrorResponse(
-              `Could not delete the products for category Id ${categoryId}`,
-              404
-            )
-          );
-        }
-      }
-    );
-  };
-
-  await Promise.all([
-    await deleteCategory(id),
-    await deleteProductsWithCategoryId(id),
-  ]);
+  await category.remove();
 
   res.status(200).json({
     success: true,

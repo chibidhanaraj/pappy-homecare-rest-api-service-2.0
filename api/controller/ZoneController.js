@@ -2,7 +2,11 @@ const mongoose = require("mongoose");
 const ZoneModel = require("../model/ZoneModel");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
-const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");
+const {
+  toUpperCase,
+  toSentenceCase,
+  removeFalsy,
+} = require("../../utils/CommonUtils");
 
 // @desc      Get all zones
 // @route     GET /api/zone
@@ -19,9 +23,7 @@ exports.getAllZones = asyncHandler(async (req, res, next) => {
 // @route     GET /api/zone/:id
 exports.getZone = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
-  const zone = await ZoneModel.findById(id).select(
-    "_id zoneName zoneCode districts"
-  );
+  const zone = await ZoneModel.findById(id).exec();
 
   if (!zone) {
     return next(

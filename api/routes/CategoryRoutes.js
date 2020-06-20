@@ -15,7 +15,7 @@ router.route("/").get(getAllCategories).post(createCategory);
 router
   .route("/:id")
   .get(getCategory)
-  .put(updateCategory)
+  .patch(updateCategory)
   .delete(deleteCategory);
 
 router

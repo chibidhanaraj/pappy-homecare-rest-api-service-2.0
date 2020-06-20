@@ -7,9 +7,14 @@ const FragranceSchema = new Schema({
   },
 });
 
-const SizeSchema = new Schema({
-  sizeValue: {
+const QuantitySchema = new Schema({
+  quantity: {
+    type: Number,
+  },
+  unit: {
     type: String,
+    enum: ["mL", "L", "Kg", "g"],
+    default: "g",
   },
 });
 
@@ -35,13 +40,20 @@ const CategorySchema = new Schema({
   },
   fragrances: {
     type: [FragranceSchema],
-    required: true,
   },
-  sizes: {
-    type: [SizeSchema],
-    required: true,
+  quantities: {
+    type: [QuantitySchema],
   },
 });
+
+// Cascade delete district when a zone is deleted
+CategorySchema.pre("remove", async function (next) {
+  console.log(`Delete Category `);
+
+  await this.model("Product").deleteMany({ category: this._id });
+  next();
+});
+
 CategorySchema.set("toJSON", {
   virtuals: true,
   transform: function (doc, ret, options) {
