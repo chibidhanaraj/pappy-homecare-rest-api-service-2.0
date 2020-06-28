@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 // create District Schema & model
 const DistrictSchema = new Schema(
   {
-    districtName: {
+    name: {
       type: String,
       required: true,
     },

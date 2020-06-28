@@ -33,20 +33,14 @@ exports.getProduct = asyncHandler(async (req, res, next) => {
 // @desc      Post product
 // @route     POST /api/product/
 exports.createProduct = asyncHandler(async (req, res, next) => {
-  const {
-    brandName,
-    productName,
-    productType,
-    fragrances,
-    quantities,
-  } = req.body;
+  const { brandName, name, productType, fragrances, quantities } = req.body;
 
-  const productCode = toUpperCase(productName);
+  const productCode = toUpperCase(name);
 
   const product = new ProductModel({
     _id: new mongoose.Types.ObjectId(),
     brandName,
-    productName,
+    name,
     productCode,
     productType,
     fragrances,
@@ -60,7 +54,7 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
   if (createdProduct) {
     return next(
       new ErrorResponse(
-        `The product ${product.productName} has already been created`,
+        `The product ${product.name} has already been created`,
         400
       )
     );
@@ -78,7 +72,7 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
 // @route     PUT /api/product/
 exports.updateProduct = asyncHandler(async (req, res, next) => {
   const productId = req.params.id;
-  const reqProductCode = toUpperCase(req.body.productName);
+  const reqProductCode = toUpperCase(req.body.name);
   const product = await ProductModel.findById(productId).exec();
 
   if (!product) {
@@ -105,7 +99,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
   const receivedUpdateProperties = Object.keys(req.body);
   const allowedUpdateProperties = [
     "brandName",
-    "productName",
+    "name",
     "productType",
     "fragrances",
     "quantities",
@@ -119,13 +113,13 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Invalid Updates for ${productId}`));
   }
 
-  if (req.body.productName) {
-    req.body.productName = toSentenceCase(req.body.productName);
+  if (req.body.name) {
+    req.body.name = toSentenceCase(req.body.name);
   }
 
   const dataToUpdate = {
     ...req.body,
-    productCode: toUpperCase(req.body.productName),
+    productCode: toUpperCase(req.body.name),
     fragrances: req.body.fragrances,
     quantites: req.body.quantites,
   };

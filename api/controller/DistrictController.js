@@ -12,9 +12,7 @@ const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");
 // @desc      Get all districts
 // @route     GET /api/district
 exports.getAllDistricts = asyncHandler(async (req, res, next) => {
-  const districts = await DistrictModel.find()
-    .populate("zone", "zoneName")
-    .exec();
+  const districts = await DistrictModel.find().populate("zone", "name").exec();
 
   res.status(200).json({
     success: true,
@@ -27,7 +25,7 @@ exports.getAllDistricts = asyncHandler(async (req, res, next) => {
 exports.getDistrict = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
   const district = await DistrictModel.findById(id)
-    .populate("zone", "zoneName")
+    .populate("zone", "name")
     .exec();
 
   if (!district) {
@@ -45,8 +43,8 @@ exports.getDistrict = asyncHandler(async (req, res, next) => {
 // @desc      Post district
 // @route     POST /api/district/
 exports.createDistrict = asyncHandler(async (req, res, next) => {
-  const districtName = toSentenceCase(req.body.districtName);
-  const districtCode = toUpperCase(districtName);
+  const name = toSentenceCase(req.body.name);
+  const districtCode = toUpperCase(name);
 
   // Check for already created district
   const createdDistrict = await DistrictModel.findOne({
@@ -63,7 +61,7 @@ exports.createDistrict = asyncHandler(async (req, res, next) => {
   }
 
   const district = new DistrictModel({
-    districtName,
+    name,
     districtCode,
     zoneId: req.body.zoneId,
   });
@@ -219,7 +217,7 @@ exports.updateDistrict = asyncHandler(async (req, res, next) => {
 
   // Match for Updates
   const receivedUpdateProperties = Object.keys(req.body);
-  const allowedUpdateProperties = ["districtName", "zoneId"];
+  const allowedUpdateProperties = ["name", "zoneId"];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
     allowedUpdateProperties.includes(key)
@@ -229,7 +227,7 @@ exports.updateDistrict = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Invalid Updates for ${districtId}`));
   }
 
-  const reqDistrictName = toSentenceCase(req.body.districtName);
+  const reqDistrictName = toSentenceCase(req.body.name);
   const reqDistrictCode = toUpperCase(reqDistrictName);
 
   // Check for duplicates

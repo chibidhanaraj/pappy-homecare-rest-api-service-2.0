@@ -11,9 +11,7 @@ const DistributorModel = require("../model/DistributorModel");
 // @desc      Get all areas
 // @route     GET /api/area
 exports.getAllAreas = asyncHandler(async (req, res, next) => {
-  const areas = await AreaModel.find()
-    .populate("zone district", "zoneName districtName")
-    .exec();
+  const areas = await AreaModel.find().populate("zone district", "name").exec();
 
   res.status(200).json({
     success: true,
@@ -26,7 +24,7 @@ exports.getAllAreas = asyncHandler(async (req, res, next) => {
 exports.getArea = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
   const area = await AreaModel.findById(id)
-    .populate("zone district", "zoneName districtName")
+    .populate("zone district", "name")
     .exec();
 
   if (!area) {
@@ -44,8 +42,8 @@ exports.getArea = asyncHandler(async (req, res, next) => {
 // @desc      Post area
 // @route     POST /api/area/
 exports.createArea = asyncHandler(async (req, res, next) => {
-  const areaName = toSentenceCase(req.body.areaName);
-  const areaCode = toUpperCase(areaName);
+  const name = toSentenceCase(req.body.name);
+  const areaCode = toUpperCase(name);
 
   // Check for created area
   const createdArea = await AreaModel.findOne({
@@ -62,7 +60,7 @@ exports.createArea = asyncHandler(async (req, res, next) => {
   }
 
   const area = new AreaModel({
-    areaName,
+    name,
     areaCode,
     districtId: req.body.districtId,
     zoneId: req.body.zoneId,
@@ -221,7 +219,7 @@ exports.updateArea = asyncHandler(async (req, res, next) => {
 
   // Match for Updates
   const receivedUpdateProperties = Object.keys(req.body);
-  const allowedUpdateProperties = ["areaName", "districtId", "zoneId"];
+  const allowedUpdateProperties = ["name", "districtId", "zoneId"];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
     allowedUpdateProperties.includes(key)
@@ -231,7 +229,7 @@ exports.updateArea = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Invalid Updates for ${areaId}`));
   }
 
-  const reqAreaName = toSentenceCase(req.body.areaName);
+  const reqAreaName = toSentenceCase(req.body.name);
   const reqAreaCode = toUpperCase(reqAreaName);
 
   // Check for duplicates

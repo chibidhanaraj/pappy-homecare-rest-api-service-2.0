@@ -40,8 +40,8 @@ exports.getZone = asyncHandler(async (req, res, next) => {
 // @desc      Post zone
 // @route     POST /api/zone/
 exports.createZone = asyncHandler(async (req, res, next) => {
-  const zoneName = toSentenceCase(req.body.zoneName);
-  const zoneCode = toUpperCase(zoneName);
+  const name = toSentenceCase(req.body.name);
+  const zoneCode = toUpperCase(name);
 
   // Check for created zone
   const createdZone = await ZoneModel.findOne({
@@ -51,14 +51,14 @@ exports.createZone = asyncHandler(async (req, res, next) => {
   if (createdZone) {
     return next(
       new ErrorResponse(
-        `Zone name: '${zoneName}' has already been created with Zone code: ${zoneCode}`,
+        `Zone name: '${name}' has already been created with Zone code: ${zoneCode}`,
         400
       )
     );
   }
 
   const zone = new ZoneModel({
-    zoneName,
+    name,
     zoneCode,
   });
 
@@ -83,7 +83,7 @@ exports.updateZone = asyncHandler(async (req, res, next) => {
   }
 
   const receivedUpdateProperties = Object.keys(req.body);
-  const allowedUpdateProperties = ["zoneName"];
+  const allowedUpdateProperties = ["name"];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
     allowedUpdateProperties.includes(key)
@@ -93,11 +93,11 @@ exports.updateZone = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Invalid Updates for ${zoneId}`));
   }
 
-  const zoneName = toSentenceCase(req.body.zoneName);
-  const zoneCode = toUpperCase(zoneName);
+  const name = toSentenceCase(req.body.name);
+  const zoneCode = toUpperCase(name);
 
   const dataToUpdate = {
-    zoneName,
+    name,
     zoneCode,
   };
 

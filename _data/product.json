@@ -2,7 +2,7 @@
   "products": [
     {
       "brandName": "Pappy",
-      "productName": "Floor Cleaner",
+      "name": "Floor Cleaner",
       "categoryType": "LIQUID",
       "fragrances": [
         { "fragranceName": "Rose" },

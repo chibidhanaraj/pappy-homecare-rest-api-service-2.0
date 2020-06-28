@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 // create Area Schema & model
 const AreaSchema = new Schema(
   {
-    areaName: {
+    name: {
       type: String,
       required: true,
     },

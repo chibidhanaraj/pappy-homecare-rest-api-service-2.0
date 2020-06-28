@@ -22,7 +22,7 @@ exports.getAllDistributors = asyncHandler(async (req, res, next) => {
     .lean()
     .populate(
       "zonesPayload districtsPayload areasPayload superStockist",
-      "zoneName districtName areaName superStockistName"
+      "name"
     )
     .exec();
 
@@ -53,7 +53,7 @@ exports.getDistributor = asyncHandler(async (req, res, next) => {
 // @desc      Post Distributor
 // @route     POST /api/distributor/
 exports.createDistributor = asyncHandler(async (req, res, next) => {
-  const distributorName = toSentenceCase(req.body.distributorName);
+  const name = toSentenceCase(req.body.name);
   const contact = req.body.contact;
   const additionalContacts = req.body.additionalContacts;
   const address = req.body.address;
@@ -68,7 +68,7 @@ exports.createDistributor = asyncHandler(async (req, res, next) => {
 
   const distributor = new DistributorModel({
     _id: new mongoose.Types.ObjectId(),
-    distributorName,
+    name,
     contact,
     additionalContacts,
     address,
@@ -176,7 +176,7 @@ exports.updateDistributor = asyncHandler(async (req, res, next) => {
 
   const receivedUpdateProperties = Object.keys(req.body);
   const allowedUpdateProperties = [
-    "distributorName",
+    "name",
     "contact",
     "additionalContacts",
     "address",
@@ -198,8 +198,8 @@ exports.updateDistributor = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Invalid Updates for ${distributorId}`));
   }
 
-  if (req.body.distributorName) {
-    req.body.distributorName = toSentenceCase(req.body.distributorName);
+  if (req.body.name) {
+    req.body.name = toSentenceCase(req.body.name);
   }
 
   let removePromises = [];

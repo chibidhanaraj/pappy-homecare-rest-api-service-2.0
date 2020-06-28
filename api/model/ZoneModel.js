@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 // create Zone Schema & model
 const ZoneSchema = new Schema(
   {
-    zoneName: {
+    name: {
       type: String,
       required: true,
     },

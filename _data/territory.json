@@ -1,11 +1,11 @@
 {
   "zones": [
     {
-      "zoneName": "South Zone",
+      "name": "South Zone",
       "zoneCode": "001South",
       "districts": [
         {
-          "districtName": "Karur",
+          "name": "Karur",
           "districtCode": "001SouthKarur",
           "divisions": [
             {
@@ -40,7 +40,7 @@
           ]
         },
         {
-          "districtName": "Erode",
+          "name": "Erode",
           "districtCode": "001SouthErode",
           "divisions": [
             {
@@ -76,11 +76,11 @@
       ]
     },
     {
-      "zoneName": "North Zone",
+      "name": "North Zone",
       "zoneCode": "001North",
       "districts": [
         {
-          "districtName": "Chennai",
+          "name": "Chennai",
           "districtCode": "001NorthChennai",
           "divisions": [
             {
@@ -114,7 +114,7 @@
           ]
         },
         {
-          "districtName": "Kancheepuram",
+          "name": "Kancheepuram",
           "districtCode": "001NorthKancheepuram",
           "divisions": [
             {

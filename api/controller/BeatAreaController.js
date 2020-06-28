@@ -11,7 +11,7 @@ const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");
 // @route     GET /api/beatArea
 exports.getAllBeatAreas = asyncHandler(async (req, res, next) => {
   const beatAreas = await BeatAreaModel.find()
-    .populate("zone district area", "zoneName districtName areaName")
+    .populate("zone district area", "name")
     .exec();
 
   res.status(200).json({
@@ -25,7 +25,7 @@ exports.getAllBeatAreas = asyncHandler(async (req, res, next) => {
 exports.getBeatArea = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
   const beatArea = await BeatAreaModel.findById(id)
-    .populate("zone district area", "zoneName districtName areaName")
+    .populate("zone district area", "name")
     .exec();
 
   if (!beatArea) {
@@ -44,8 +44,8 @@ exports.getBeatArea = asyncHandler(async (req, res, next) => {
 // @route     POST /api/beatArea/
 exports.createBeatArea = asyncHandler(async (req, res, next) => {
   const areaCode = req.body.areaCode || ""; // Not saved in db. Used only for Code creation
-  const beatAreaName = toSentenceCase(req.body.beatAreaName);
-  const beatAreaCode = toUpperCase(areaCode.concat(beatAreaName));
+  const name = toSentenceCase(req.body.name);
+  const beatAreaCode = toUpperCase(areaCode.concat(name));
 
   // Check for created beatArea
   const createdBeatArea = await BeatAreaModel.findOne({
@@ -62,7 +62,7 @@ exports.createBeatArea = asyncHandler(async (req, res, next) => {
   }
 
   const beatArea = new BeatAreaModel({
-    beatAreaName,
+    name,
     beatAreaCode,
     areaId: req.body.areaId,
     districtId: req.body.districtId,
@@ -135,12 +135,7 @@ exports.updateBeatArea = asyncHandler(async (req, res, next) => {
 
   // Match for Updates
   const receivedUpdateProperties = Object.keys(req.body);
-  const allowedUpdateProperties = [
-    "beatAreaName",
-    "areaId",
-    "districtId",
-    "zoneId",
-  ];
+  const allowedUpdateProperties = ["name", "areaId", "districtId", "zoneId"];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
     allowedUpdateProperties.includes(key)
@@ -150,7 +145,7 @@ exports.updateBeatArea = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Invalid Updates for ${beatAreaId}`));
   }
 
-  const reqBeatAreaName = toSentenceCase(req.body.beatAreaName);
+  const reqBeatAreaName = toSentenceCase(req.body.name);
   const reqBeatAreaCode = toUpperCase(reqBeatAreaName);
 
   // Check for duplicates

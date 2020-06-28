@@ -73,7 +73,7 @@ const AddressSchema = new Schema(
 const SuperStockistSchema = new Schema({
   _id: mongoose.Schema.Types.ObjectId,
 
-  superStockistName: {
+  name: {
     type: String,
     required: [true, "Please add the Super Stockist Name"],
   },

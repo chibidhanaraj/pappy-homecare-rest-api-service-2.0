@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const SkuSchema = new Schema({
   _id: mongoose.Schema.Types.ObjectId,
 
-  skuName: {
+  name: {
     type: String,
     required: true,
   },

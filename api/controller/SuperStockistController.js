@@ -13,7 +13,7 @@ const {
 // @route GET /api/superstockist
 exports.getAllSuperStockists = asyncHandler(async (req, res, next) => {
   const superStockists = await SuperStockistModel.find()
-    .populate("zonesPayload districtsPayload", "zoneName districtName")
+    .populate("zonesPayload districtsPayload", "name")
     .exec();
 
   res.status(200).json({
@@ -48,7 +48,7 @@ exports.getSuperStockist = asyncHandler(async (req, res, next) => {
 // @desc      Post Super Stockist
 // @route     POST /api/superstockist/
 exports.createSuperStockist = asyncHandler(async (req, res, next) => {
-  const superStockistName = toSentenceCase(req.body.superStockistName);
+  const name = toSentenceCase(req.body.name);
   const contact = req.body.contact;
   const additionalContacts = req.body.additionalContacts;
   const address = req.body.address;
@@ -60,7 +60,7 @@ exports.createSuperStockist = asyncHandler(async (req, res, next) => {
 
   const superStockist = new SuperStockistModel({
     _id: new mongoose.Types.ObjectId(),
-    superStockistName,
+    name,
     contact,
     additionalContacts,
     address,
@@ -147,7 +147,7 @@ exports.updateSuperStockist = asyncHandler(async (req, res, next) => {
 
   const receivedUpdateProperties = Object.keys(req.body);
   const allowedUpdateProperties = [
-    "superStockistName",
+    "name",
     "contact",
     "additionalContacts",
     "address",
@@ -166,8 +166,8 @@ exports.updateSuperStockist = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Invalid Updates for ${superStockistId}`));
   }
 
-  if (req.body.superStockistName) {
-    req.body.superStockistName = toSentenceCase(req.body.superStockistName);
+  if (req.body.name) {
+    req.body.name = toSentenceCase(req.body.name);
   }
 
   let removePromises = [];

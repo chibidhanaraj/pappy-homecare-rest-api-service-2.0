@@ -73,7 +73,7 @@ const currentBrandsDealingSchema = new Schema(
 const DistributorSchema = new Schema({
   _id: mongoose.Schema.Types.ObjectId,
 
-  distributorName: {
+  name: {
     type: String,
     required: [true, "Please add the Distributor Name"],
   },

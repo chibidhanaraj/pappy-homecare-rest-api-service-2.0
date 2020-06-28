@@ -58,7 +58,7 @@ const AddressSchema = new Schema(
 const RetailerSchema = new Schema({
   _id: mongoose.Schema.Types.ObjectId,
 
-  retailerName: {
+  name: {
     type: String,
     required: [true, "Please add the Retailer Name"],
   },

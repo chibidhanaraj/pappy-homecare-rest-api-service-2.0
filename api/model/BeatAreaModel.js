@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 // create BeatArea Schema & model
 const BeatAreaSchema = new Schema(
   {
-    beatAreaName: {
+    name: {
       type: String,
       required: true,
     },

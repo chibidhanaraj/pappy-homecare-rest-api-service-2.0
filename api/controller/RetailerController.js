@@ -18,10 +18,7 @@ const {
 exports.getAllRetailers = asyncHandler(async (req, res, next) => {
   const retailers = await RetailerModel.find()
     .lean()
-    .populate(
-      "zone district area beatArea distributor",
-      "zoneName districtName areaName beatAreaName distributorName"
-    )
+    .populate("zone district area beatArea distributor", "name")
     .exec();
 
   res.status(200).json({
@@ -35,10 +32,7 @@ exports.getAllRetailers = asyncHandler(async (req, res, next) => {
 exports.getRetailer = asyncHandler(async (req, res, next) => {
   const retailerId = req.params.id;
   const retailer = await RetailerModel.findById(retailerId)
-    .populate(
-      "zone district area beatArea distributor",
-      "zoneName districtName areaName beatAreaName distributorName"
-    )
+    .populate("zone district area beatArea distributor", "name")
     .exec();
 
   if (!retailer) {
@@ -59,7 +53,7 @@ exports.getRetailer = asyncHandler(async (req, res, next) => {
 // @desc      Post  Retailer
 // @route     POST /api/retailer/
 exports.createRetailer = asyncHandler(async (req, res, next) => {
-  const retailerName = toSentenceCase(req.body.retailerName);
+  const name = toSentenceCase(req.body.name);
   const retailerType = req.body.retailerType;
   const gstNumber = req.body.gstNumber;
   const contact = req.body.contact;
@@ -73,7 +67,7 @@ exports.createRetailer = asyncHandler(async (req, res, next) => {
 
   const retailer = new RetailerModel({
     _id: new mongoose.Types.ObjectId(),
-    retailerName,
+    name,
     retailerType,
     contact,
     additionalContacts,
@@ -171,7 +165,7 @@ exports.updateRetailer = asyncHandler(async (req, res, next) => {
 
   const receivedUpdateProperties = Object.keys(req.body);
   const allowedUpdateProperties = [
-    "retailerName",
+    "name",
     "retailerType",
     "contact",
     "additionalContacts",
@@ -192,8 +186,8 @@ exports.updateRetailer = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Invalid Updates for ${retailerId}`));
   }
 
-  if (req.body.retailerName) {
-    req.body.retailerName = toSentenceCase(req.body.retailerName);
+  if (req.body.name) {
+    req.body.name = toSentenceCase(req.body.name);
   }
 
   if (
@@ -491,16 +485,11 @@ exports.updateRetailer = asyncHandler(async (req, res, next) => {
       runValidators: true,
     }
   )
-    .populate(
-      "zone district area beatArea distributor",
-      "zoneName districtName areaName beatAreaName distributorName"
-    )
+    .populate("zone district area beatArea distributor", "name")
     .exec();
 
-  res
-    .status(200)
-    .json({
-      success: true,
-      retailer: buildRetailerPayload(updatedRetailer.toObject()),
-    });
+  res.status(200).json({
+    success: true,
+    retailer: buildRetailerPayload(updatedRetailer.toObject()),
+  });
 });

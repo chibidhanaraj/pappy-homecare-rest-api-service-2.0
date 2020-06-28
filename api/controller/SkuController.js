@@ -41,7 +41,7 @@ exports.getSku = asyncHandler(async (req, res, next) => {
 // @route     POST /api/sku/
 exports.createSku = asyncHandler(async (req, res, next) => {
   const {
-    skuName,
+    name,
     productId,
     fragranceId,
     quantityId,
@@ -55,7 +55,7 @@ exports.createSku = asyncHandler(async (req, res, next) => {
     retailerMargin,
   } = req.body;
 
-  const skuCode = toSentenceCase(skuName);
+  const skuCode = toSentenceCase(name);
 
   // Check for created sku
   const createdSku = await SkuModel.findOne({
@@ -70,7 +70,7 @@ exports.createSku = asyncHandler(async (req, res, next) => {
 
   const sku = new SkuModel({
     _id: new mongoose.Types.ObjectId(),
-    skuName,
+    name,
     skuCode,
     product: productId,
     fragranceId,
@@ -98,8 +98,8 @@ exports.createSku = asyncHandler(async (req, res, next) => {
 
 exports.updateSku = asyncHandler(async (req, res, next) => {
   const skuId = req.params.id;
-  const { skuName } = req.body;
-  const reqSkuCode = toSentenceCase(skuName);
+  const { name } = req.body;
+  const reqSkuCode = toSentenceCase(name);
   const sku = await SkuModel.findById(skuId).exec();
 
   if (!sku) {
@@ -122,7 +122,7 @@ exports.updateSku = asyncHandler(async (req, res, next) => {
 
   const receivedUpdateProperties = Object.keys(req.body);
   const allowedUpdateProperties = [
-    "skuName",
+    "name",
     "productId",
     "fragranceId",
     "quantityId",
@@ -144,13 +144,13 @@ exports.updateSku = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Invalid Updates for ${skuId}`));
   }
 
-  if (skuName) {
-    req.body.skuName = toSentenceCase(skuName);
+  if (name) {
+    req.body.name = toSentenceCase(name);
   }
 
   const dataToUpdate = {
     ...req.body,
-    skuCode: toSentenceCase(req.body.skuName),
+    skuCode: toSentenceCase(req.body.name),
   };
 
   const updatedSku = await SkuModel.findByIdAndUpdate(skuId, dataToUpdate, {
