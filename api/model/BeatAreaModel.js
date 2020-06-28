@@ -2,37 +2,63 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 // create BeatArea Schema & model
-const BeatAreaSchema = new Schema({
-  _id: mongoose.Schema.Types.ObjectId,
-  beatAreaName: {
-    type: String,
-    required: true,
-  },
-  beatAreaCode: {
-    type: String,
-    required: true,
-  },
-  areaId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "Area",
-  },
-  districtId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "District",
-  },
-  zoneId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "Zone",
-  },
-  retailers: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Retailer",
+const BeatAreaSchema = new Schema(
+  {
+    beatAreaName: {
+      type: String,
+      required: true,
     },
-  ],
+    beatAreaCode: {
+      type: String,
+      required: true,
+    },
+    areaId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "Area",
+    },
+    districtId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "District",
+    },
+    zoneId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "Zone",
+    },
+    retailers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Retailer",
+      },
+    ],
+  },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
+
+BeatAreaSchema.virtual("zone", {
+  ref: "Zone",
+  localField: "zoneId",
+  foreignField: "_id",
+  justOne: true,
+});
+
+BeatAreaSchema.virtual("district", {
+  ref: "District",
+  localField: "districtId",
+  foreignField: "_id",
+  justOne: true,
+});
+
+BeatAreaSchema.virtual("area", {
+  ref: "Area",
+  localField: "areaId",
+  foreignField: "_id",
+  justOne: true,
 });
 
 // Cascade delete beatAreasId in Zone, District, Area Models
@@ -54,7 +80,7 @@ BeatAreaSchema.pre("remove", async function (next) {
   );
   await this.model("Retailer").updateMany(
     { beatAreaId: this._id },
-    { $set: { beatAreadId: null } },
+    { $set: { beatAreaId: null } },
     { multi: true }
   );
   next();

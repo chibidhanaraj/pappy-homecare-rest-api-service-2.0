@@ -10,7 +10,9 @@ const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");
 // @desc      Get all beatAreas
 // @route     GET /api/beatArea
 exports.getAllBeatAreas = asyncHandler(async (req, res, next) => {
-  const beatAreas = await BeatAreaModel.find().select("-__v").exec();
+  const beatAreas = await BeatAreaModel.find()
+    .populate("zone district area", "zoneName districtName areaName")
+    .exec();
 
   res.status(200).json({
     success: true,
@@ -22,7 +24,9 @@ exports.getAllBeatAreas = asyncHandler(async (req, res, next) => {
 // @route     GET /api/beatArea/:id
 exports.getBeatArea = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
-  const beatArea = await BeatAreaModel.findById(id).select("-__v").exec();
+  const beatArea = await BeatAreaModel.findById(id)
+    .populate("zone district area", "zoneName districtName areaName")
+    .exec();
 
   if (!beatArea) {
     return next(
@@ -58,7 +62,6 @@ exports.createBeatArea = asyncHandler(async (req, res, next) => {
   }
 
   const beatArea = new BeatAreaModel({
-    _id: new mongoose.Types.ObjectId(),
     beatAreaName,
     beatAreaCode,
     areaId: req.body.areaId,

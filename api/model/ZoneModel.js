@@ -2,59 +2,63 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 // create Zone Schema & model
-const ZoneSchema = new Schema({
-  _id: mongoose.Schema.Types.ObjectId,
-  zoneName: {
-    type: String,
-    required: true,
+const ZoneSchema = new Schema(
+  {
+    zoneName: {
+      type: String,
+      required: true,
+    },
+    zoneCode: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    districts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "District",
+      },
+    ],
+    areas: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Area",
+      },
+    ],
+    beatAreas: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "BeatArea",
+      },
+    ],
+    superStockists: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "SuperStockist",
+      },
+    ],
+    distributors: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Distributor",
+      },
+    ],
+    retailers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Retailer",
+      },
+    ],
+    regionalSalesManagerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
-  zoneCode: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  districts: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "District",
-    },
-  ],
-  areas: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Area",
-    },
-  ],
-  beatAreas: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "BeatArea",
-    },
-  ],
-  superStockists: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "SuperStockist",
-    },
-  ],
-  distributors: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Distributor",
-    },
-  ],
-  retailers: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Retailer",
-    },
-  ],
-
-  regionalSalesManagerId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-  },
-});
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
 
 // Cascade delete district when a zone is deleted
 ZoneSchema.pre("remove", async function (next) {

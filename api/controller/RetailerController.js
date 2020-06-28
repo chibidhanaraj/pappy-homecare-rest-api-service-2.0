@@ -8,15 +8,25 @@ const BeatAreaModel = require("../model/BeatAreaModel");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
 const { toSentenceCase } = require("../../utils/CommonUtils");
+const {
+  buildAllRetailersPayload,
+  buildRetailerPayload,
+} = require("../../helpers/RetailerHelper");
 
 // @desc GET Retailer
 // @route GET /api/retailer
 exports.getAllRetailers = asyncHandler(async (req, res, next) => {
-  const retailers = await RetailerModel.find().exec();
+  const retailers = await RetailerModel.find()
+    .lean()
+    .populate(
+      "zone district area beatArea distributor",
+      "zoneName districtName areaName beatAreaName distributorName"
+    )
+    .exec();
 
   res.status(200).json({
     success: true,
-    retailers,
+    retailers: buildAllRetailersPayload(retailers),
   });
 });
 
@@ -24,7 +34,12 @@ exports.getAllRetailers = asyncHandler(async (req, res, next) => {
 // @route    GET /api/retailer/:retailerId
 exports.getRetailer = asyncHandler(async (req, res, next) => {
   const retailerId = req.params.id;
-  const retailer = await RetailerModel.findById(retailerId).exec();
+  const retailer = await RetailerModel.findById(retailerId)
+    .populate(
+      "zone district area beatArea distributor",
+      "zoneName districtName areaName beatAreaName distributorName"
+    )
+    .exec();
 
   if (!retailer) {
     return next(
@@ -37,7 +52,7 @@ exports.getRetailer = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    retailer,
+    retailer: buildRetailerPayload(retailer.toObject()),
   });
 });
 
@@ -72,7 +87,6 @@ exports.createRetailer = asyncHandler(async (req, res, next) => {
   });
 
   const savedRetailerDocument = await retailer.save();
-
   if (zoneId) {
     await ZoneModel.findOneAndUpdate(
       { _id: savedRetailerDocument.zoneId },
@@ -115,7 +129,7 @@ exports.createRetailer = asyncHandler(async (req, res, next) => {
 
   res.status(201).json({
     success: true,
-    retailer: savedRetailerDocument,
+    retailer: buildRetailerPayload(savedRetailerDocument.toObject()),
   });
 });
 
@@ -476,7 +490,17 @@ exports.updateRetailer = asyncHandler(async (req, res, next) => {
       new: true,
       runValidators: true,
     }
-  );
+  )
+    .populate(
+      "zone district area beatArea distributor",
+      "zoneName districtName areaName beatAreaName distributorName"
+    )
+    .exec();
 
-  res.status(200).json({ success: true, retailer: updatedRetailer });
+  res
+    .status(200)
+    .json({
+      success: true,
+      retailer: buildRetailerPayload(updatedRetailer.toObject()),
+    });
 });

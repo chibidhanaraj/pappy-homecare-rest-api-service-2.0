@@ -2,44 +2,63 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 // create Area Schema & model
-const AreaSchema = new Schema({
-  _id: mongoose.Schema.Types.ObjectId,
-  areaName: {
-    type: String,
-    required: true,
-  },
-  areaCode: {
-    type: String,
-    required: true,
-  },
-  districtId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "District",
-  },
-  zoneId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "Zone",
-  },
-  beatAreas: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "BeatArea",
+const AreaSchema = new Schema(
+  {
+    areaName: {
+      type: String,
+      required: true,
     },
-  ],
-  distributors: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Distributor",
+    areaCode: {
+      type: String,
+      required: true,
     },
-  ],
-  retailers: [
-    {
+    zoneId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Retailer",
+      required: true,
+      ref: "Zone",
     },
-  ],
+    districtId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "District",
+    },
+    beatAreas: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "BeatArea",
+      },
+    ],
+    distributors: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Distributor",
+      },
+    ],
+    retailers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Retailer",
+      },
+    ],
+  },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
+
+AreaSchema.virtual("zone", {
+  ref: "Zone",
+  localField: "zoneId",
+  foreignField: "_id",
+  justOne: true,
+});
+
+AreaSchema.virtual("district", {
+  ref: "District",
+  localField: "districtId",
+  foreignField: "_id",
+  justOne: true,
 });
 
 // Cascade delete district when a zone is deleted

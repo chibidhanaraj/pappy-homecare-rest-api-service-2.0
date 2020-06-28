@@ -9,8 +9,8 @@ const morgan = require("morgan");
 const errorHandler = require("./middleware/errorHandler");
 
 //Routes path
-const categoryRoutes = require("./api/routes/CategoryRoutes");
 const productRoutes = require("./api/routes/ProductRoutes");
+const skuRoutes = require("./api/routes/SkuRoutes");
 const zoneRoutes = require("./api/routes/ZoneRoutes");
 const districtRoutes = require("./api/routes/DistrictRoutes");
 const areaRoutes = require("./api/routes/AreaRoutes");
@@ -39,9 +39,13 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(morgan("dev"));
+
+app.use((req, res, next) => {
+  setTimeout(() => next(), 2500);
+});
 // Routes which should handle requests
-app.use("/api/category", categoryRoutes);
 app.use("/api/product", productRoutes);
+app.use("/api/sku", skuRoutes);
 app.use("/api/zone", zoneRoutes);
 app.use("/api/district", districtRoutes);
 app.use("/api/area", areaRoutes);

@@ -11,7 +11,9 @@ const DistributorModel = require("../model/DistributorModel");
 // @desc      Get all areas
 // @route     GET /api/area
 exports.getAllAreas = asyncHandler(async (req, res, next) => {
-  const areas = await AreaModel.find().exec();
+  const areas = await AreaModel.find()
+    .populate("zone district", "zoneName districtName")
+    .exec();
 
   res.status(200).json({
     success: true,
@@ -23,7 +25,9 @@ exports.getAllAreas = asyncHandler(async (req, res, next) => {
 // @route     GET /api/area/:id
 exports.getArea = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
-  const area = await AreaModel.findById(id).exec();
+  const area = await AreaModel.findById(id)
+    .populate("zone district", "zoneName districtName")
+    .exec();
 
   if (!area) {
     return next(
@@ -58,7 +62,6 @@ exports.createArea = asyncHandler(async (req, res, next) => {
   }
 
   const area = new AreaModel({
-    _id: new mongoose.Types.ObjectId(),
     areaName,
     areaCode,
     districtId: req.body.districtId,

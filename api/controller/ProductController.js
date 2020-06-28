@@ -1,23 +1,16 @@
 const mongoose = require("mongoose");
 const ProductModel = require("../model/ProductModel");
-const CustomerTypeModel = require("../model/CustomerTypeModel");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
-const {
-  buildAllProductsPayload,
-  buildProductPayload,
-} = require("../../utils/ProductUtils");
+const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");
 
-const { toUpperCase } = require("../../utils/CommonUtils");
-
-// @desc      Get all product
+// @desc      Get all products
 // @route     GET /api/product
 exports.getAllProducts = asyncHandler(async (req, res, next) => {
-  const fetchedProducts = await ProductModel.find().populate("category").exec();
-
+  const products = await ProductModel.find().exec();
   res.status(200).json({
     success: true,
-    products: fetchedProducts,
+    products,
   });
 });
 
@@ -25,57 +18,55 @@ exports.getAllProducts = asyncHandler(async (req, res, next) => {
 // @route     GET /api/product/:id
 exports.getProduct = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
-  const fetchedProduct = await ProductModel.findById(id)
-    .populate("category")
-    .exec();
-
-  if (!fetchedProduct) {
+  const product = await ProductModel.findById(id).exec();
+  if (!product) {
     return next(
       new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
     );
   }
-
   res.status(200).json({
     success: true,
-    product: fetchedProduct,
+    product,
   });
 });
 
 // @desc      Post product
 // @route     POST /api/product/
 exports.createProduct = asyncHandler(async (req, res, next) => {
-  const productName = req.body.productName;
+  const {
+    brandName,
+    productName,
+    productType,
+    fragrances,
+    quantities,
+  } = req.body;
+
   const productCode = toUpperCase(productName);
 
-  // Check for created product
+  const product = new ProductModel({
+    _id: new mongoose.Types.ObjectId(),
+    brandName,
+    productName,
+    productCode,
+    productType,
+    fragrances,
+    quantities,
+  });
+
   const createdProduct = await ProductModel.findOne({
-    productCode: productCode,
+    productCode: product.productCode,
   });
 
   if (createdProduct) {
     return next(
       new ErrorResponse(
-        `The category ${productCode} has already been created`,
+        `The product ${product.productName} has already been created`,
         400
       )
     );
   }
 
-  const product = new ProductModel({
-    _id: new mongoose.Types.ObjectId(),
-    productName,
-    productCode,
-    category: req.body.categoryId,
-    fragranceId: req.body.fragranceId,
-    quantityId: req.body.quantityId,
-    perCaseQuantity: req.body.perCaseQuantity,
-    mrp: req.body.mrp,
-    gst: req.body.gst,
-  });
-
   const savedProductDocument = await product.save();
-
-  console.log(savedProductDocument);
 
   res.status(201).json({
     success: true,
@@ -84,30 +75,75 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
 });
 
 // @desc      Update product
-// @route     PUT /api/product/:id
+// @route     PUT /api/product/
 exports.updateProduct = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
-  const product = await ProductModel.findById(id).exec();
+  const productId = req.params.id;
+  const reqProductCode = toUpperCase(req.body.productName);
+  const product = await ProductModel.findById(productId).exec();
 
   if (!product) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        `No valid entry found for provided ID ${productId}`,
+        404
+      )
     );
   }
 
-  const updatedProduct = await ProductModel.findByIdAndUpdate(id, req.body, {
-    new: true,
-    runValidators: true,
-  }).populate("category");
+  if (product.productCode !== reqProductCode) {
+    const createdProduct = await ProductModel.findOne({
+      reqProductCode,
+    });
 
-  const customerTypes = await CustomerTypeModel.find().exec();
-  const productPayload = buildProductPayload(updatedProduct, customerTypes);
+    if (createdProduct) {
+      return next(
+        new ErrorResponse(`Product Name Already exists: ${reqProductCode}`, 400)
+      );
+    }
+  }
 
-  res.status(200).json({ success: true, product: productPayload });
+  const receivedUpdateProperties = Object.keys(req.body);
+  const allowedUpdateProperties = [
+    "brandName",
+    "productName",
+    "productType",
+    "fragrances",
+    "quantities",
+  ];
+
+  const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
+    allowedUpdateProperties.includes(key)
+  );
+
+  if (!isValidUpdateOperation) {
+    return next(new ErrorResponse(`Invalid Updates for ${productId}`));
+  }
+
+  if (req.body.productName) {
+    req.body.productName = toSentenceCase(req.body.productName);
+  }
+
+  const dataToUpdate = {
+    ...req.body,
+    productCode: toUpperCase(req.body.productName),
+    fragrances: req.body.fragrances,
+    quantites: req.body.quantites,
+  };
+
+  const updatedProduct = await ProductModel.findByIdAndUpdate(
+    productId,
+    dataToUpdate,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  res.status(200).json({ success: true, product: updatedProduct });
 });
 
-// @desc      Update product
-// @route     DELETE /api/product/:id
+// @desc      Delete product
+// @route     DELETE /api/product/
 exports.deleteProduct = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
   const product = await ProductModel.findById(id).exec();
@@ -117,7 +153,9 @@ exports.deleteProduct = asyncHandler(async (req, res, next) => {
       new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
     );
   }
-  await ProductModel.findByIdAndRemove(id).exec();
+
+  await product.remove();
+
   res.status(200).json({
     success: true,
     product: {},

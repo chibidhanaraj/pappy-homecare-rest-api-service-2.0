@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const DistributorModel = require("../model/DistributorModel");
 const ZoneModel = require("../model/ZoneModel");
 const DistrictModel = require("../model/DistrictModel");
+const SuperStockistModel = require("../model/SuperStockistModel");
 const AreaModel = require("../model/AreaModel");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
@@ -9,16 +10,25 @@ const {
   toSentenceCase,
   areObjectIdEqualArrays,
 } = require("../../utils/CommonUtils");
-const SuperStockistModel = require("../model/SuperStockistModel");
+const {
+  buildDistributorPayload,
+  buildAllDistributorsPayload,
+} = require("../../helpers/DistributorHelper");
 
 // @desc GET Distributors
 // @route GET /api/distributor
 exports.getAllDistributors = asyncHandler(async (req, res, next) => {
-  const distributors = await DistributorModel.find().exec();
+  const distributors = await DistributorModel.find()
+    .lean()
+    .populate(
+      "zonesPayload districtsPayload areasPayload superStockist",
+      "zoneName districtName areaName superStockistName"
+    )
+    .exec();
 
   res.status(200).json({
     success: true,
-    distributors,
+    distributors: buildAllDistributorsPayload(distributors),
   });
 });
 

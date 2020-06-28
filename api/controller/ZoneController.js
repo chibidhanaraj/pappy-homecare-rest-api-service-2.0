@@ -58,7 +58,6 @@ exports.createZone = asyncHandler(async (req, res, next) => {
   }
 
   const zone = new ZoneModel({
-    _id: new mongoose.Types.ObjectId(),
     zoneName,
     zoneCode,
   });

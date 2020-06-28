@@ -116,6 +116,18 @@ const SuperStockistSchema = new Schema({
   ],
 });
 
+SuperStockistSchema.virtual("zonesPayload", {
+  ref: "Zone",
+  localField: "zones",
+  foreignField: "_id",
+});
+
+SuperStockistSchema.virtual("districtsPayload", {
+  ref: "District",
+  localField: "districts",
+  foreignField: "_id",
+});
+
 // Cascade delete Super Stockist
 SuperStockistSchema.pre("remove", async function (next) {
   await Promise.all([

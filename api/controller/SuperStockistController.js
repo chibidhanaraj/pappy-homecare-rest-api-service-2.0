@@ -12,7 +12,9 @@ const {
 // @desc GET Super Stockists
 // @route GET /api/superstockist
 exports.getAllSuperStockists = asyncHandler(async (req, res, next) => {
-  const superStockists = await SuperStockistModel.find().exec();
+  const superStockists = await SuperStockistModel.find()
+    .populate("zonesPayload districtsPayload", "zoneName districtName")
+    .exec();
 
   res.status(200).json({
     success: true,

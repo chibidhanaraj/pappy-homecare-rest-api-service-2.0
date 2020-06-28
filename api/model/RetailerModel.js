@@ -65,7 +65,6 @@ const RetailerSchema = new Schema({
 
   retailerType: {
     type: String,
-    required: true,
     enum: [
       "SMALL_SHOP",
       "MEDIUM_SHOP",
@@ -111,6 +110,41 @@ const RetailerSchema = new Schema({
   },
 });
 
+RetailerSchema.virtual("zone", {
+  ref: "Zone",
+  localField: "zoneId",
+  foreignField: "_id",
+  justOne: true,
+});
+
+RetailerSchema.virtual("district", {
+  ref: "District",
+  localField: "districtId",
+  foreignField: "_id",
+  justOne: true,
+});
+
+RetailerSchema.virtual("area", {
+  ref: "Area",
+  localField: "areaId",
+  foreignField: "_id",
+  justOne: true,
+});
+
+RetailerSchema.virtual("beatArea", {
+  ref: "BeatArea",
+  localField: "beatAreaId",
+  foreignField: "_id",
+  justOne: true,
+});
+
+RetailerSchema.virtual("distributor", {
+  ref: "Distributor",
+  localField: "distributorId",
+  foreignField: "_id",
+  justOne: true,
+});
+
 // Cascade delete retailerId in Zone, District, Area, BeatArea, Distributor Models
 RetailerSchema.pre("remove", async function (next) {
   console.log(
@@ -137,15 +171,6 @@ RetailerSchema.pre("remove", async function (next) {
     { $pull: { retailers: this._id } }
   );
   next();
-});
-
-RetailerSchema.set("toJSON", {
-  virtuals: true,
-  transform: function (doc, ret, options) {
-    ret.id = ret._id;
-    delete ret._id;
-    delete ret.__v;
-  },
 });
 
 const RetailerModel = mongoose.model("Retailer", RetailerSchema);

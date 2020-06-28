@@ -12,7 +12,9 @@ const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");
 // @desc      Get all districts
 // @route     GET /api/district
 exports.getAllDistricts = asyncHandler(async (req, res, next) => {
-  const districts = await DistrictModel.find().exec();
+  const districts = await DistrictModel.find()
+    .populate("zone", "zoneName")
+    .exec();
 
   res.status(200).json({
     success: true,
@@ -24,7 +26,9 @@ exports.getAllDistricts = asyncHandler(async (req, res, next) => {
 // @route     GET /api/district/:id
 exports.getDistrict = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
-  const district = await DistrictModel.findById(id).exec();
+  const district = await DistrictModel.findById(id)
+    .populate("zone", "zoneName")
+    .exec();
 
   if (!district) {
     return next(
@@ -59,7 +63,6 @@ exports.createDistrict = asyncHandler(async (req, res, next) => {
   }
 
   const district = new DistrictModel({
-    _id: new mongoose.Types.ObjectId(),
     districtName,
     districtCode,
     zoneId: req.body.zoneId,
@@ -199,7 +202,7 @@ exports.deleteDistrict = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    product: {},
+    district: {},
   });
 });
 

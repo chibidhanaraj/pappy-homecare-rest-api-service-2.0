@@ -1,0 +1,15 @@
+{
+  "skus": [
+    {
+      "skuName": "Floor Cleaner 200ml Rose",
+      "productId": "",
+      "fragranceId": "",
+      "quantityId": "",
+      "quantityPerCarton": "24",
+      "mrp": "98",
+      "sgst": "9",
+      "cgst": "9",
+      "igst": "9"
+    }
+  ]
+}

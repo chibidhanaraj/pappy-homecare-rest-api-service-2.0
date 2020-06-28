@@ -132,6 +132,31 @@ const DistributorSchema = new Schema({
   ],
 });
 
+DistributorSchema.virtual("zonesPayload", {
+  ref: "Zone",
+  localField: "zones",
+  foreignField: "_id",
+});
+
+DistributorSchema.virtual("districtsPayload", {
+  ref: "District",
+  localField: "districts",
+  foreignField: "_id",
+});
+
+DistributorSchema.virtual("areasPayload", {
+  ref: "Area",
+  localField: "areas",
+  foreignField: "_id",
+});
+
+DistributorSchema.virtual("superStockist", {
+  ref: "SuperStockist",
+  localField: "superStockistId",
+  foreignField: "_id",
+  justOne: true,
+});
+
 // Cascade delete distributor
 DistributorSchema.pre("remove", async function (next) {
   await Promise.all([

@@ -2,51 +2,63 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 // create District Schema & model
-const DistrictSchema = new Schema({
-  _id: mongoose.Schema.Types.ObjectId,
-  districtName: {
-    type: String,
-    required: true,
+const DistrictSchema = new Schema(
+  {
+    districtName: {
+      type: String,
+      required: true,
+    },
+    districtCode: {
+      type: String,
+      required: true,
+    },
+    zoneId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "Zone",
+    },
+    areas: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Area",
+      },
+    ],
+    beatAreas: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "BeatArea",
+      },
+    ],
+    superStockists: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "SuperStockist",
+      },
+    ],
+    distributors: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Distributor",
+      },
+    ],
+    retailers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Retailer",
+      },
+    ],
   },
-  districtCode: {
-    type: String,
-    required: true,
-  },
-  zoneId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "Zone",
-  },
-  areas: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Area",
-    },
-  ],
-  beatAreas: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "BeatArea",
-    },
-  ],
-  superStockists: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "SuperStockist",
-    },
-  ],
-  distributors: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Distributor",
-    },
-  ],
-  retailers: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Retailer",
-    },
-  ],
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
+
+DistrictSchema.virtual("zone", {
+  ref: "Zone",
+  localField: "zoneId",
+  foreignField: "_id",
+  justOne: true,
 });
 
 // Cascade delete district when a zone is deleted

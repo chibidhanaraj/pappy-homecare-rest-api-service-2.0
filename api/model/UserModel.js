@@ -41,10 +41,12 @@ const UserSchema = new Schema({
     default: false,
   },
 
-  reportingTo: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-  },
+  reportingTo: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
 
   reporters: [
     {
