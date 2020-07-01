@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const app = express();
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const { dbConnection } = require("./config/dbConnection");
@@ -14,7 +13,6 @@ const PORT = process.env.PORT || 3000;
 
 //Connect to db
 dbConnection();
-
 //Routes path
 const productRoutes = require("./api/routes/ProductRoutes");
 const skuRoutes = require("./api/routes/SkuRoutes");
@@ -31,6 +29,8 @@ const directRetailerRoutes = require("./api/routes/DirectRetailerRoutes");
 const retailerRoutes = require("./api/routes/RetailerRoutes");
 const userRoutes = require("./api/routes/UserRoutes");
 const authRoutes = require("./api/routes/AuthRoutes");
+
+const app = express();
 
 //Middlewares
 app.use(cors());
@@ -65,7 +65,12 @@ app.use("/api/auth", authRoutes);
 
 app.use(errorHandler);
 
-app.listen(PORT, () => console.log(`server running on ${PORT}`.bgBrightBlue));
+const server = app.listen(
+  PORT,
+  console.log(
+    `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold
+  )
+);
 
 // Handle unhandled promise rejections
 process.on("unhandledRejection", (err, promise) => {
