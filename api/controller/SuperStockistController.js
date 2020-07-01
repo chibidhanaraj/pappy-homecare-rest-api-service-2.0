@@ -8,6 +8,11 @@ const {
   toSentenceCase,
   areObjectIdEqualArrays,
 } = require("../../utils/CommonUtils");
+const {
+  STATUS,
+  SUPER_STOCKIST_CONTROLLER_CONSTANTS,
+} = require("../../constants/controller.constants");
+const { ERROR_TYPES } = require("../../constants/error.constant");
 
 // @desc GET Super Stockists
 // @route GET /api/superstockist
@@ -17,7 +22,9 @@ exports.getAllSuperStockists = asyncHandler(async (req, res, next) => {
     .exec();
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: SUPER_STOCKIST_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     superStockists,
   });
 });
@@ -33,14 +40,17 @@ exports.getSuperStockist = asyncHandler(async (req, res, next) => {
   if (!superStockist) {
     return next(
       new ErrorResponse(
-        `No valid entry found for provided ID ${superStockistId}`,
-        404
+        SUPER_STOCKIST_CONTROLLER_CONSTANTS.SUPER_STOCKIST_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
       )
     );
   }
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: SUPER_STOCKIST_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     superStockist,
   });
 });
@@ -71,7 +81,11 @@ exports.createSuperStockist = asyncHandler(async (req, res, next) => {
     districts,
   });
 
-  const savedSuperStockistDocument = await superStockist.save();
+  const savedSuperStockistDocument = await superStockist
+    .save()
+    .then((doc) =>
+      doc.populate("zonesPayload districtsPayload", "name").execPopulate()
+    );
 
   let updatePromises = [];
 
@@ -99,29 +113,13 @@ exports.createSuperStockist = asyncHandler(async (req, res, next) => {
 
   await Promise.all(updatePromises);
 
+  console.log(savedSuperStockistDocument);
+
   res.status(201).json({
-    success: true,
+    status: STATUS.OK,
+    message: SUPER_STOCKIST_CONTROLLER_CONSTANTS.CREATE_SUCCESS,
+    error: "",
     superStockist: savedSuperStockistDocument,
-  });
-});
-
-// @desc      Delete Super Stockist
-// @route     delete /api/superstockist/:superstockistId
-exports.deleteSuperStockist = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
-  const superStockist = await SuperStockistModel.findById(id).exec();
-
-  if (!superStockist) {
-    return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
-    );
-  }
-
-  await superStockist.remove();
-
-  res.status(200).json({
-    success: true,
-    superStockist: {},
   });
 });
 
@@ -139,8 +137,9 @@ exports.updateSuperStockist = asyncHandler(async (req, res, next) => {
   if (!superStockist) {
     return next(
       new ErrorResponse(
-        `No valid entry found for provided ID ${superStockistId}`,
-        404
+        SUPER_STOCKIST_CONTROLLER_CONSTANTS.SUPER_STOCKIST_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
       )
     );
   }
@@ -236,7 +235,44 @@ exports.updateSuperStockist = asyncHandler(async (req, res, next) => {
       new: true,
       runValidators: true,
     }
-  );
+  )
+    .populate("zonesPayload districtsPayload", "name")
+    .exec(function (err, doc) {
+      if (err) {
+        new ErrorResponse(`SuperStockist Update failure ${req.body.name}`, 400);
+      } else {
+        res.status(200).json({
+          status: STATUS.OK,
+          message: SUPER_STOCKIST_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
+          error: "",
+          superStockist: doc,
+        });
+      }
+    });
+});
 
-  res.status(200).json({ success: true, superStockist: updatedSuperStockist });
+// @desc      Delete Super Stockist
+// @route     delete /api/superstockist/:superstockistId
+exports.deleteSuperStockist = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+  const superStockist = await SuperStockistModel.findById(id).exec();
+
+  if (!superStockist) {
+    return next(
+      new ErrorResponse(
+        SUPER_STOCKIST_CONTROLLER_CONSTANTS.SUPER_STOCKIST_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
+    );
+  }
+
+  await superStockist.remove();
+
+  res.status(200).json({
+    status: STATUS.OK,
+    message: SUPER_STOCKIST_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
+    error: "",
+    superStockist: {},
+  });
 });

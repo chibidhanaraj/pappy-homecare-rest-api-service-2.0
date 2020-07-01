@@ -2,11 +2,17 @@ const mongoose = require("mongoose");
 const SkuModel = require("../model/SkuModel");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
-const { toSentenceCase } = require("../../utils/CommonUtils");
+const { toSentenceCase, toTitleCase } = require("../../utils/CommonUtils");
 const {
   buildSkuPayload,
   buildAllSkusPayload,
 } = require("../../utils/SkuUtils");
+const {
+  STATUS,
+  SKU_CONTROLLER_CONSTANTS,
+  PRODUCT_CONTROLLER_CONSTANTS,
+} = require("../../constants/controller.constants");
+const { ERROR_TYPES } = require("../../constants/error.constant");
 
 // @desc      Get all sku
 // @route     GET /api/sku
@@ -14,7 +20,9 @@ exports.getAllSkus = asyncHandler(async (req, res, next) => {
   const fetchedSkus = await SkuModel.find().lean().populate("product").exec();
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: SKU_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     skus: buildAllSkusPayload(fetchedSkus),
   });
 });
@@ -27,12 +35,18 @@ exports.getSku = asyncHandler(async (req, res, next) => {
 
   if (!fetchedSku) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        SKU_CONTROLLER_CONSTANTS.SKU_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: SKU_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     sku: buildSkuPayload(fetchedSku.toObject()),
   });
 });
@@ -55,7 +69,7 @@ exports.createSku = asyncHandler(async (req, res, next) => {
     retailerMargin,
   } = req.body;
 
-  const skuCode = toSentenceCase(name);
+  const skuCode = toTitleCase(name);
 
   // Check for created sku
   const createdSku = await SkuModel.findOne({
@@ -64,7 +78,11 @@ exports.createSku = asyncHandler(async (req, res, next) => {
 
   if (createdSku) {
     return next(
-      new ErrorResponse(`The sku ${skuCode} has already been created`, 400)
+      new ErrorResponse(
+        SKU_CONTROLLER_CONSTANTS.SKU_DUPLICATE_NAME.replace("{{name}}", name),
+        400,
+        ERROR_TYPES.DUPLICATE_NAME
+      )
     );
   }
 
@@ -75,21 +93,25 @@ exports.createSku = asyncHandler(async (req, res, next) => {
     product: productId,
     fragranceId,
     quantityId,
-    piecesPerCarton,
+    piecesPerCarton: piecesPerCarton || 0,
     mrp,
-    sgst,
-    cgst,
-    igst,
-    superStockistMargin,
-    distributorMargin,
-    retailerMargin,
+    sgst: sgst || 0,
+    cgst: cgst || 0,
+    igst: igst || 0,
+    superStockistMargin: superStockistMargin || 0,
+    distributorMargin: distributorMargin || 0,
+    retailerMargin: retailerMargin || 0,
   });
 
-  const savedSkuDocument = await sku.save();
+  const savedSkuDocument = await sku
+    .save()
+    .then((doc) => doc.populate("product").execPopulate());
 
   res.status(201).json({
-    success: true,
-    sku: savedSkuDocument,
+    status: STATUS.OK,
+    message: SKU_CONTROLLER_CONSTANTS.CREATE_SUCCESS,
+    error: "",
+    sku: buildSkuPayload(savedSkuDocument.toObject()),
   });
 });
 
@@ -99,12 +121,16 @@ exports.createSku = asyncHandler(async (req, res, next) => {
 exports.updateSku = asyncHandler(async (req, res, next) => {
   const skuId = req.params.id;
   const { name } = req.body;
-  const reqSkuCode = toSentenceCase(name);
+  const reqSkuCode = toTitleCase(name);
   const sku = await SkuModel.findById(skuId).exec();
 
   if (!sku) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${skuId}`, 404)
+      new ErrorResponse(
+        SKU_CONTROLLER_CONSTANTS.SKU_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
 
@@ -115,7 +141,11 @@ exports.updateSku = asyncHandler(async (req, res, next) => {
 
     if (createdSku) {
       return next(
-        new ErrorResponse(`Sku Name Already exists: ${reqSkuCode}`, 400)
+        new ErrorResponse(
+          SKU_CONTROLLER_CONSTANTS.SKU_DUPLICATE_NAME.replace("{{name}}", name),
+          400,
+          ERROR_TYPES.DUPLICATE_NAME
+        )
       );
     }
   }
@@ -156,9 +186,20 @@ exports.updateSku = asyncHandler(async (req, res, next) => {
   const updatedSku = await SkuModel.findByIdAndUpdate(skuId, dataToUpdate, {
     new: true,
     runValidators: true,
-  });
-
-  res.status(200).json({ success: true, sku: updatedSku });
+  })
+    .populate("product")
+    .exec(function (err, doc) {
+      if (err) {
+        new ErrorResponse(`Product Update failure ${req.body.name}`, 400);
+      } else {
+        res.status(200).json({
+          status: STATUS.OK,
+          message: PRODUCT_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
+          error: "",
+          sku: buildSkuPayload(doc.toObject()),
+        });
+      }
+    });
 });
 
 // @desc      Update sku
@@ -169,13 +210,20 @@ exports.deleteSku = asyncHandler(async (req, res, next) => {
 
   if (!sku) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        SKU_CONTROLLER_CONSTANTS.SKU_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
+
   await sku.remove();
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: SKU_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
+    error: "",
     sku: {},
   });
 });

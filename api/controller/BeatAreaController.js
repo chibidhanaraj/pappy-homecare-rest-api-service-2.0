@@ -6,6 +6,11 @@ const BeatAreaModel = require("../model/BeatAreaModel");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
 const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");
+const {
+  STATUS,
+  BEAT_AREA_CONTROLLER_CONSTANTS,
+} = require("../../constants/controller.constants");
+const { ERROR_TYPES } = require("../../constants/error.constant");
 
 // @desc      Get all beatAreas
 // @route     GET /api/beatArea
@@ -15,7 +20,9 @@ exports.getAllBeatAreas = asyncHandler(async (req, res, next) => {
     .exec();
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: BEAT_AREA_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     beatAreas,
   });
 });
@@ -30,12 +37,18 @@ exports.getBeatArea = asyncHandler(async (req, res, next) => {
 
   if (!beatArea) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        BEAT_AREA_CONTROLLER_CONSTANTS.BEAT_AREA_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: BEAT_AREA_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     beatArea,
   });
 });
@@ -55,8 +68,12 @@ exports.createBeatArea = asyncHandler(async (req, res, next) => {
   if (createdBeatArea) {
     return next(
       new ErrorResponse(
-        `Id:${createdBeatArea._id} has already been created with BeatArea code: ${beatAreaCode}`,
-        400
+        BEAT_AREA_CONTROLLER_CONSTANTS.BEAT_AREA_DUPLICATE_NAME.replace(
+          "{{name}}",
+          name
+        ),
+        400,
+        ERROR_TYPES.DUPLICATE_NAME
       )
     );
   }
@@ -69,7 +86,9 @@ exports.createBeatArea = asyncHandler(async (req, res, next) => {
     zoneId: req.body.zoneId,
   });
 
-  const savedDocument = await beatArea.save();
+  const savedDocument = await beatArea
+    .save()
+    .then((doc) => doc.populate("zone district area", "name").execPopulate());
 
   await Promise.all([
     //update the beatAreaId to Zones Collection
@@ -94,26 +113,10 @@ exports.createBeatArea = asyncHandler(async (req, res, next) => {
   ]);
 
   res.status(201).json({
-    success: true,
+    status: STATUS.OK,
+    message: BEAT_AREA_CONTROLLER_CONSTANTS.CREATE_SUCCESS,
+    error: "",
     beatArea: savedDocument,
-  });
-});
-
-exports.deleteBeatArea = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
-  const beatArea = await BeatAreaModel.findById(id).exec();
-
-  if (!beatArea) {
-    return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
-    );
-  }
-
-  await beatArea.remove();
-
-  res.status(200).json({
-    success: true,
-    beatArea: {},
   });
 });
 
@@ -127,8 +130,9 @@ exports.updateBeatArea = asyncHandler(async (req, res, next) => {
   if (!beatArea) {
     return next(
       new ErrorResponse(
-        `No valid area found for provided ID ${beatAreaId}`,
-        404
+        BEAT_AREA_CONTROLLER_CONSTANTS.BEAT_AREA_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
       )
     );
   }
@@ -158,8 +162,9 @@ exports.updateBeatArea = asyncHandler(async (req, res, next) => {
     if (checkBeatArea) {
       return next(
         new ErrorResponse(
-          `Beat Area with Name Already exists: ${reqBeatAreaCode}`,
-          400
+          BEAT_AREA_CONTROLLER_CONSTANTS.BEAT_AREA_DUPLICATE_NAME,
+          400,
+          ERROR_TYPES.DUPLICATE_NAME
         )
       );
     }
@@ -170,15 +175,6 @@ exports.updateBeatArea = asyncHandler(async (req, res, next) => {
     reqBeatAreaName,
     reqBeatAreaCode,
   };
-
-  const updatedBeatArea = await BeatAreaModel.findByIdAndUpdate(
-    beatAreaId,
-    dataToUpdate,
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
 
   //update the beatArea to changed Area(if new areaId)
   if (req.body.areaId !== beatArea.areaId) {
@@ -271,5 +267,48 @@ exports.updateBeatArea = asyncHandler(async (req, res, next) => {
       ),
     ]);
   }
-  res.status(200).json({ success: true, beatArea: updatedBeatArea });
+
+  const updatedBeatArea = await BeatAreaModel.findByIdAndUpdate(
+    beatAreaId,
+    dataToUpdate,
+    {
+      new: true,
+      runValidators: true,
+    }
+  )
+    .populate("zone district area", "name")
+    .exec(function (err, doc) {
+      if (err) {
+        new ErrorResponse(`Beat update failure ${reqBeatAreaName}`, 400);
+      } else {
+        res.status(200).json({
+          status: STATUS.OK,
+          message: BEAT_AREA_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
+          error: "",
+          beatArea: doc,
+        });
+      }
+    });
+});
+
+exports.deleteBeatArea = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+  const beatArea = await BeatAreaModel.findById(id).exec();
+
+  if (!beatArea) {
+    new ErrorResponse(
+      BEAT_AREA_CONTROLLER_CONSTANTS.BEAT_AREA_NOT_FOUND,
+      404,
+      ERROR_TYPES.NOT_FOUND
+    );
+  }
+
+  await beatArea.remove();
+
+  res.status(200).json({
+    status: STATUS.OK,
+    message: BEAT_AREA_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
+    error: "",
+    beatArea: {},
+  });
 });

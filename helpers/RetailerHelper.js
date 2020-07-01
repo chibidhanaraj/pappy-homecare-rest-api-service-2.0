@@ -1,6 +1,7 @@
 const { cloneDeep } = require("lodash");
 
 const buildRetailerPayload = (retailerData) => {
+  console.log(retailerData);
   const retailer = cloneDeep(retailerData);
 
   retailer.id = retailer._id;

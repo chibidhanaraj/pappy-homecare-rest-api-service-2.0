@@ -3,13 +3,21 @@ const ProductModel = require("../model/ProductModel");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
 const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");
+const {
+  STATUS,
+  PRODUCT_CONTROLLER_CONSTANTS,
+} = require("../../constants/controller.constants");
+const { ERROR_TYPES } = require("../../constants/error.constant");
 
 // @desc      Get all products
 // @route     GET /api/product
 exports.getAllProducts = asyncHandler(async (req, res, next) => {
   const products = await ProductModel.find().exec();
+
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: PRODUCT_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     products,
   });
 });
@@ -19,13 +27,21 @@ exports.getAllProducts = asyncHandler(async (req, res, next) => {
 exports.getProduct = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
   const product = await ProductModel.findById(id).exec();
+
   if (!product) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        PRODUCT_CONTROLLER_CONSTANTS.PRODUCT_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
+
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: PRODUCT_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     product,
   });
 });
@@ -54,8 +70,12 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
   if (createdProduct) {
     return next(
       new ErrorResponse(
-        `The product ${product.name} has already been created`,
-        400
+        PRODUCT_CONTROLLER_CONSTANTS.PRODUCT_DUPLICATE_NAME.replace(
+          "{{name}}",
+          name
+        ),
+        400,
+        ERROR_TYPES.DUPLICATE_NAME
       )
     );
   }
@@ -63,7 +83,9 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
   const savedProductDocument = await product.save();
 
   res.status(201).json({
-    success: true,
+    status: STATUS.OK,
+    message: PRODUCT_CONTROLLER_CONSTANTS.CREATE_SUCCESS,
+    error: "",
     product: savedProductDocument,
   });
 });
@@ -78,8 +100,9 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
   if (!product) {
     return next(
       new ErrorResponse(
-        `No valid entry found for provided ID ${productId}`,
-        404
+        PRODUCT_CONTROLLER_CONSTANTS.PRODUCT_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
       )
     );
   }
@@ -90,8 +113,13 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
     });
 
     if (createdProduct) {
-      return next(
-        new ErrorResponse(`Product Name Already exists: ${reqProductCode}`, 400)
+      new ErrorResponse(
+        PRODUCT_CONTROLLER_CONSTANTS.PRODUCT_DUPLICATE_NAME.replace(
+          "{{name}}",
+          name
+        ),
+        400,
+        ERROR_TYPES.DUPLICATE_NAME
       );
     }
   }
@@ -132,8 +160,12 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
       runValidators: true,
     }
   );
-
-  res.status(200).json({ success: true, product: updatedProduct });
+  res.status(200).json({
+    status: STATUS.OK,
+    message: PRODUCT_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
+    error: "",
+    product: updatedProduct,
+  });
 });
 
 // @desc      Delete product
@@ -144,14 +176,20 @@ exports.deleteProduct = asyncHandler(async (req, res, next) => {
 
   if (!product) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        PRODUCT_CONTROLLER_CONSTANTS.PRODUCT_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
 
   await product.remove();
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: PRODUCT_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
+    error: "",
     product: {},
   });
 });

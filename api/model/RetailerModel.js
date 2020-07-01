@@ -55,60 +55,66 @@ const AddressSchema = new Schema(
   { _id: false }
 );
 
-const RetailerSchema = new Schema({
-  _id: mongoose.Schema.Types.ObjectId,
+const RetailerSchema = new Schema(
+  {
+    _id: mongoose.Schema.Types.ObjectId,
 
-  name: {
-    type: String,
-    required: [true, "Please add the Retailer Name"],
+    name: {
+      type: String,
+      required: [true, "Please add the Retailer Name"],
+    },
+
+    retailerType: {
+      type: String,
+      enum: [
+        "SMALL_SHOP",
+        "MEDIUM_SHOP",
+        "LARGE_SHOP",
+        "DEPARTMENTAL_STORE",
+        "CHAIN_STORE",
+      ],
+    },
+
+    contact: contactSchema,
+
+    additionalContacts: [additionalContactSchema],
+
+    address: AddressSchema,
+
+    gstNumber: {
+      type: String,
+    },
+
+    zoneId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Zone",
+    },
+
+    districtId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "District",
+    },
+
+    areaId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Area",
+    },
+
+    beatAreaId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BeatArea",
+    },
+
+    distributorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Distributor",
+    },
   },
-
-  retailerType: {
-    type: String,
-    enum: [
-      "SMALL_SHOP",
-      "MEDIUM_SHOP",
-      "LARGE_SHOP",
-      "DEPARTMENTAL_STORE",
-      "CHAIN_STORE",
-    ],
-  },
-
-  contact: contactSchema,
-
-  additionalContacts: [additionalContactSchema],
-
-  address: AddressSchema,
-
-  gstNumber: {
-    type: String,
-  },
-
-  zoneId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Zone",
-  },
-
-  districtId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "District",
-  },
-
-  areaId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Area",
-  },
-
-  beatAreaId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "BeatArea",
-  },
-
-  distributorId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Distributor",
-  },
-});
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
 
 RetailerSchema.virtual("zone", {
   ref: "Zone",

@@ -12,6 +12,11 @@ const {
   buildAllRetailersPayload,
   buildRetailerPayload,
 } = require("../../helpers/RetailerHelper");
+const {
+  STATUS,
+  RETAILER_CONTROLLER_CONSTANTS,
+} = require("../../constants/controller.constants");
+const { ERROR_TYPES } = require("../../constants/error.constant");
 
 // @desc GET Retailer
 // @route GET /api/retailer
@@ -22,7 +27,9 @@ exports.getAllRetailers = asyncHandler(async (req, res, next) => {
     .exec();
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: RETAILER_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     retailers: buildAllRetailersPayload(retailers),
   });
 });
@@ -38,14 +45,17 @@ exports.getRetailer = asyncHandler(async (req, res, next) => {
   if (!retailer) {
     return next(
       new ErrorResponse(
-        `No valid entry found for provided ID ${retailerId}`,
-        404
+        RETAILER_CONTROLLER_CONSTANTS.RETAILER_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
       )
     );
   }
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: RETAILER_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     retailer: buildRetailerPayload(retailer.toObject()),
   });
 });
@@ -80,7 +90,14 @@ exports.createRetailer = asyncHandler(async (req, res, next) => {
     distributorId,
   });
 
-  const savedRetailerDocument = await retailer.save();
+  const savedRetailerDocument = await retailer
+    .save()
+    .then((doc) =>
+      doc
+        .populate("zone district area beatArea distributor", "name")
+        .execPopulate()
+    );
+
   if (zoneId) {
     await ZoneModel.findOneAndUpdate(
       { _id: savedRetailerDocument.zoneId },
@@ -122,7 +139,9 @@ exports.createRetailer = asyncHandler(async (req, res, next) => {
   }
 
   res.status(201).json({
-    success: true,
+    status: STATUS.OK,
+    message: RETAILER_CONTROLLER_CONSTANTS.CREATE_SUCCESS,
+    error: "",
     retailer: buildRetailerPayload(savedRetailerDocument.toObject()),
   });
 });
@@ -135,14 +154,20 @@ exports.deleteRetailer = asyncHandler(async (req, res, next) => {
 
   if (!retailer) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        RETAILER_CONTROLLER_CONSTANTS.RETAILER_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
 
   await retailer.remove();
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: RETAILER_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
+    error: "",
     retailer: {},
   });
 });
@@ -157,8 +182,9 @@ exports.updateRetailer = asyncHandler(async (req, res, next) => {
   if (!retailer) {
     return next(
       new ErrorResponse(
-        `No valid entry found for provided ID ${retailerId}`,
-        404
+        RETAILER_CONTROLLER_CONSTANTS.RETAILER_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
       )
     );
   }
@@ -486,10 +512,16 @@ exports.updateRetailer = asyncHandler(async (req, res, next) => {
     }
   )
     .populate("zone district area beatArea distributor", "name")
-    .exec();
-
-  res.status(200).json({
-    success: true,
-    retailer: buildRetailerPayload(updatedRetailer.toObject()),
-  });
+    .exec(function (err, doc) {
+      if (err) {
+        new ErrorResponse(`Retailer Update failure ${req.body.name}`, 400);
+      } else {
+        res.status(200).json({
+          status: STATUS.OK,
+          message: RETAILER_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
+          error: "",
+          retailer: buildRetailerPayload(doc.toObject()),
+        });
+      }
+    });
 });

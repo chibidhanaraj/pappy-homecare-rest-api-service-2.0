@@ -12,7 +12,7 @@ exports.getAllCustomerTypes = asyncHandler(async (req, res, next) => {
     .exec();
 
   res.status(200).json({
-    success: true,
+    status: true,
     customerTypes,
   });
 });
@@ -32,7 +32,7 @@ exports.getCustomerType = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({
-    success: true,
+    status: true,
     customerType,
   });
 });
@@ -64,7 +64,7 @@ exports.createCustomerType = asyncHandler(async (req, res, next) => {
 
   const savedDocument = await customerType.save();
   res.status(201).json({
-    success: true,
+    status: true,
     customerType: {
       _id: savedDocument._id,
       customerTypeName: savedDocument.customerTypeName,
@@ -103,7 +103,7 @@ exports.updateCustomerType = asyncHandler(async (req, res, next) => {
       runValidators: true,
     }
   );
-  res.status(200).json({ success: true, customerType: updatedCustomerType });
+  res.status(200).json({ status: true, customerType: updatedCustomerType });
 });
 
 // @desc      Delete Customer Type
@@ -119,7 +119,7 @@ exports.deleteCustomerType = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({
-    success: true,
+    status: true,
     customerType: {},
   });
 });

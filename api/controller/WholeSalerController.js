@@ -10,7 +10,7 @@ exports.getAllWholeSalers = asyncHandler(async (req, res, next) => {
   const wholeSalers = await WholeSalerModel.find().exec();
 
   res.status(200).json({
-    success: true,
+    status: true,
     wholeSalers,
   });
 });
@@ -28,7 +28,7 @@ exports.getWholeSaler = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({
-    success: true,
+    status: true,
     wholeSaler,
   });
 });
@@ -53,7 +53,7 @@ exports.createWholeSaler = asyncHandler(async (req, res, next) => {
 
   const savedWholeSalerDocument = await wholeSaler.save();
   res.status(201).json({
-    success: true,
+    status: true,
     wholeSaler: savedWholeSalerDocument,
   });
 });
@@ -73,7 +73,7 @@ exports.deleteWholeSaler = asyncHandler(async (req, res, next) => {
   await WholeSalerModel.findByIdAndRemove(id).exec();
 
   res.status(200).json({
-    success: true,
+    status: true,
     wholeSaler: {},
   });
 });
@@ -124,5 +124,5 @@ exports.updateWholeSaler = asyncHandler(async (req, res, next) => {
     }
   );
 
-  res.status(200).json({ success: true, wholeSaler: updatedWholeSaler });
+  res.status(200).json({ status: true, wholeSaler: updatedWholeSaler });
 });

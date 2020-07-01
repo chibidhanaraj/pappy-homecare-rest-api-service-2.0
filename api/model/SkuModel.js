@@ -2,78 +2,77 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 // create Product Schema & model
-const SkuSchema = new Schema({
-  _id: mongoose.Schema.Types.ObjectId,
+const SkuSchema = new Schema(
+  {
+    _id: mongoose.Schema.Types.ObjectId,
 
-  name: {
-    type: String,
-    required: true,
-  },
+    name: {
+      type: String,
+      required: true,
+    },
 
-  skuCode: {
-    type: String,
-    required: true,
-    unique: true,
-  },
+    skuCode: {
+      type: String,
+      required: true,
+      unique: true,
+    },
 
-  product: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "Product",
-  },
+    product: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "Product",
+    },
 
-  fragranceId: {
-    type: mongoose.Schema.Types.ObjectId,
-  },
+    fragranceId: {
+      type: mongoose.Schema.Types.ObjectId,
+    },
 
-  quantityId: {
-    type: mongoose.Schema.Types.ObjectId,
-  },
+    quantityId: {
+      type: mongoose.Schema.Types.ObjectId,
+    },
 
-  piecesPerCarton: {
-    type: Number,
-    required: true,
-  },
+    piecesPerCarton: {
+      type: Number,
+    },
 
-  mrp: {
-    type: Number,
-    required: true,
-  },
+    mrp: {
+      type: Number,
+      required: true,
+    },
 
-  specialPrice: {
-    type: Number,
-  },
+    specialPrice: {
+      type: Number,
+    },
 
-  sgst: {
-    type: Number,
-    default: 0,
-  },
+    sgst: {
+      type: Number,
+    },
 
-  cgst: {
-    type: Number,
-    default: 0,
-  },
+    cgst: {
+      type: Number,
+    },
 
-  igst: {
-    type: Number,
-    default: 0,
-  },
+    igst: {
+      type: Number,
+    },
 
-  superStockistMargin: {
-    type: Number,
-    default: 0,
-  },
+    superStockistMargin: {
+      type: Number,
+    },
 
-  distributorMargin: {
-    type: Number,
-    default: 0,
-  },
+    distributorMargin: {
+      type: Number,
+    },
 
-  retailerMargin: {
-    type: Number,
-    default: 0,
+    retailerMargin: {
+      type: Number,
+    },
   },
-});
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
 
 SkuSchema.set("toJSON", {
   virtuals: true,

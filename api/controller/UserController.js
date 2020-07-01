@@ -13,7 +13,7 @@ exports.getAllUsers = asyncHandler(async (req, res, next) => {
   const users = await UserModel.find().exec();
 
   res.json({
-    success: true,
+    status: true,
     users,
   });
 });
@@ -32,7 +32,7 @@ exports.getUser = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({
-    success: true,
+    status: true,
     user,
   });
 });
@@ -89,7 +89,7 @@ exports.createUser = asyncHandler(async (req, res, next) => {
   const savedUserDocument = await user.save();
 
   res.status(201).json({
-    success: true,
+    status: true,
     user: savedUserDocument,
   });
 });
@@ -134,7 +134,7 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
   });
 
   res.status(200).json({
-    success: true,
+    status: true,
     user: updatedUser,
   });
 });
@@ -156,7 +156,7 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
   await UserModel.findByIdAndDelete(id).exec();
 
   res.status(200).json({
-    success: true,
+    status: true,
     data: {},
   });
 });

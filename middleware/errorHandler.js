@@ -1,11 +1,10 @@
 const ErrorResponse = require("../utils/errorResponse");
+const { STATUS } = require("../constants/controller.constants");
 
 const errorHandler = (err, req, res, next) => {
   let error = { ...err };
 
   error.message = err.message;
-
-  console.log(err, "Hi");
 
   // Mongoose Cast error
   if (err.name === "CastError") {
@@ -20,8 +19,9 @@ const errorHandler = (err, req, res, next) => {
   }
 
   res.status(error.statusCode || 500).json({
-    success: false,
+    status: STATUS.ERROR,
     message: error.message || "Server Error",
+    error: error.errorType || "Server Error",
   });
 };
 

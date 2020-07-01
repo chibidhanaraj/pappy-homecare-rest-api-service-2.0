@@ -7,6 +7,11 @@ const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
 const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");
 const DistributorModel = require("../model/DistributorModel");
+const {
+  STATUS,
+  AREA_CONTROLLER_CONSTANTS,
+} = require("../../constants/controller.constants");
+const { ERROR_TYPES } = require("../../constants/error.constant");
 
 // @desc      Get all areas
 // @route     GET /api/area
@@ -14,7 +19,9 @@ exports.getAllAreas = asyncHandler(async (req, res, next) => {
   const areas = await AreaModel.find().populate("zone district", "name").exec();
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: AREA_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     areas,
   });
 });
@@ -29,12 +36,18 @@ exports.getArea = asyncHandler(async (req, res, next) => {
 
   if (!area) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        AREA_CONTROLLER_CONSTANTS.AREA_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: AREA_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     area,
   });
 });
@@ -53,8 +66,9 @@ exports.createArea = asyncHandler(async (req, res, next) => {
   if (createdArea) {
     return next(
       new ErrorResponse(
-        `Id:${createdArea._id} has already been created with area code: ${areaCode}`,
-        400
+        AREA_CONTROLLER_CONSTANTS.AREA_DUPLICATE_NAME.replace("{{name}}", name),
+        400,
+        ERROR_TYPES.DUPLICATE_NAME
       )
     );
   }
@@ -66,7 +80,9 @@ exports.createArea = asyncHandler(async (req, res, next) => {
     zoneId: req.body.zoneId,
   });
 
-  const savedDocument = await area.save();
+  const savedDocument = await area
+    .save()
+    .then((doc) => doc.populate("zone district", "name").execPopulate());
 
   await Promise.all([
     //update the areaId to Zones Collection
@@ -84,123 +100,10 @@ exports.createArea = asyncHandler(async (req, res, next) => {
   ]);
 
   res.status(201).json({
-    success: true,
+    status: STATUS.OK,
+    message: AREA_CONTROLLER_CONSTANTS.CREATE_SUCCESS,
+    error: "",
     area: savedDocument,
-  });
-});
-
-exports.deleteArea = asyncHandler(async (req, res, next) => {
-  const areaId = req.params.id;
-  const area = await AreaModel.findById(areaId).exec();
-  const { distributors, districtId, zoneId } = area;
-
-  if (!area) {
-    return next(
-      new ErrorResponse(`No valid entry found for provided ID ${areaId}`, 404)
-    );
-  }
-
-  /* 
-  This removal of the area id is standalone deletion as arrays are involved. 
-  Client has flexibility in adding the territories to the Distributor
-  Hence, deletion of the area requires updates in several collections
-  */
-  const district = await DistrictModel.findById(districtId).exec();
-  const zone = await ZoneModel.findById(zoneId).exec();
-  if (distributors.length)
-    await DistributorModel.find(
-      { _id: { $in: distributors } },
-      (error, docs) => {
-        const mappedAreasToDistrict = district.areas;
-        const mappedDistrictsToZone = zone.districts;
-        docs.forEach(async (doc) => {
-          // To find Intersection between distributor.areas and district.areas.
-          // district.areas will give the exact territory mapped areas
-          const commonAreaIds = doc.areas.filter((area) =>
-            mappedAreasToDistrict.includes(area)
-          );
-
-          // To find Intersection between distributor.districts and zone.districts.
-          // zone.districts will give the exact territory mapped districts
-          const commonDistrictIds = doc.districts.filter((districtId) =>
-            mappedDistrictsToZone.includes(districtId)
-          );
-
-          // Only Area in Only District in Only Zone. Take down the ids
-          if (commonAreaIds.length <= 1 && commonDistrictIds.length <= 1) {
-            console.log("Zones, dist, distributor");
-            await DistributorModel.findOneAndUpdate(
-              { _id: doc._id },
-              {
-                $pull: {
-                  zones: zoneId,
-                  districts: districtId,
-                  areas: areaId,
-                },
-              }
-            );
-
-            await DistrictModel.findOneAndUpdate(
-              { _id: districtId },
-              {
-                $pull: {
-                  distributors: doc._id,
-                },
-              }
-            );
-
-            await ZoneModel.findOneAndUpdate(
-              { _id: zoneId },
-              {
-                $pull: {
-                  distributors: doc._id,
-                },
-              }
-            );
-          }
-          // Only Area in Only District Take down the ids
-          else if (commonAreaIds.length <= 1) {
-            console.log("dist, distributor");
-            await DistributorModel.findOneAndUpdate(
-              { _id: doc._id },
-              {
-                $pull: {
-                  districts: districtId,
-                  areas: areaId,
-                },
-              }
-            );
-
-            await DistrictModel.findOneAndUpdate(
-              { _id: districtId },
-              {
-                $pull: {
-                  distributors: doc._id,
-                },
-              }
-            );
-          }
-          // Only Area.Take down the id
-          else {
-            console.log("distributor");
-            await DistributorModel.findOneAndUpdate(
-              { _id: doc._id },
-              {
-                $pull: {
-                  areas: areaId,
-                },
-              }
-            );
-          }
-        });
-      }
-    );
-
-  await area.remove();
-
-  res.status(200).json({
-    success: true,
-    area: {},
   });
 });
 
@@ -213,7 +116,11 @@ exports.updateArea = asyncHandler(async (req, res, next) => {
   // Check whether the area already exists
   if (!area) {
     return next(
-      new ErrorResponse(`No valid area found for provided ID ${areaId}`, 404)
+      new ErrorResponse(
+        AREA_CONTROLLER_CONSTANTS.AREA_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
 
@@ -240,7 +147,14 @@ exports.updateArea = asyncHandler(async (req, res, next) => {
 
     if (checkArea) {
       return next(
-        new ErrorResponse(`area Name Already exists: ${reqAreaCode}`, 400)
+        new ErrorResponse(
+          AREA_CONTROLLER_CONSTANTS.AREA_DUPLICATE_NAME.replace(
+            "{{name}}",
+            reqAreaName
+          ),
+          400,
+          ERROR_TYPES.DUPLICATE_NAME
+        )
       );
     }
   }
@@ -250,11 +164,6 @@ exports.updateArea = asyncHandler(async (req, res, next) => {
     reqAreaName,
     reqAreaCode,
   };
-
-  const updatedarea = await AreaModel.findByIdAndUpdate(areaId, dataToUpdate, {
-    new: true,
-    runValidators: true,
-  });
 
   //update the area to changed District(if new districtId)
   if (req.body.districtId !== area.districtId) {
@@ -414,5 +323,140 @@ exports.updateArea = asyncHandler(async (req, res, next) => {
     ]);
   }
 
-  res.status(200).json({ success: true, area: updatedarea });
+  const updatedarea = await AreaModel.findByIdAndUpdate(areaId, dataToUpdate, {
+    new: true,
+    runValidators: true,
+  })
+    .populate("zone district", "name")
+    .exec(function (err, doc) {
+      if (err) {
+        new ErrorResponse(`Area update failure ${reqAreaName}`, 400);
+      } else {
+        res.status(200).json({
+          status: STATUS.OK,
+          message: AREA_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
+          error: "",
+          area: doc,
+        });
+      }
+    });
+});
+
+exports.deleteArea = asyncHandler(async (req, res, next) => {
+  const areaId = req.params.id;
+  const area = await AreaModel.findById(areaId).exec();
+  const { distributors, districtId, zoneId } = area;
+
+  if (!area) {
+    new ErrorResponse(
+      AREA_CONTROLLER_CONSTANTS.AREA_NOT_FOUND,
+      404,
+      ERROR_TYPES.NOT_FOUND
+    );
+  }
+
+  /* 
+  This removal of the area id is standalone deletion as arrays are involved. 
+  Client has flexibility in adding the territories to the Distributor
+  Hence, deletion of the area requires updates in several collections
+  */
+  const district = await DistrictModel.findById(districtId).exec();
+  const zone = await ZoneModel.findById(zoneId).exec();
+  if (distributors.length)
+    await DistributorModel.find(
+      { _id: { $in: distributors } },
+      (error, docs) => {
+        const mappedAreasToDistrict = district.areas;
+        const mappedDistrictsToZone = zone.districts;
+        docs.forEach(async (doc) => {
+          // To find Intersection between distributor.areas and district.areas.
+          // district.areas will give the exact territory mapped areas
+          const commonAreaIds = doc.areas.filter((area) =>
+            mappedAreasToDistrict.includes(area)
+          );
+
+          // To find Intersection between distributor.districts and zone.districts.
+          // zone.districts will give the exact territory mapped districts
+          const commonDistrictIds = doc.districts.filter((districtId) =>
+            mappedDistrictsToZone.includes(districtId)
+          );
+
+          // Only Area in Only District in Only Zone. Take down the ids
+          if (commonAreaIds.length <= 1 && commonDistrictIds.length <= 1) {
+            console.log("Zones, dist, distributor");
+            await DistributorModel.findOneAndUpdate(
+              { _id: doc._id },
+              {
+                $pull: {
+                  zones: zoneId,
+                  districts: districtId,
+                  areas: areaId,
+                },
+              }
+            );
+
+            await DistrictModel.findOneAndUpdate(
+              { _id: districtId },
+              {
+                $pull: {
+                  distributors: doc._id,
+                },
+              }
+            );
+
+            await ZoneModel.findOneAndUpdate(
+              { _id: zoneId },
+              {
+                $pull: {
+                  distributors: doc._id,
+                },
+              }
+            );
+          }
+          // Only Area in Only District Take down the ids
+          else if (commonAreaIds.length <= 1) {
+            console.log("dist, distributor");
+            await DistributorModel.findOneAndUpdate(
+              { _id: doc._id },
+              {
+                $pull: {
+                  districts: districtId,
+                  areas: areaId,
+                },
+              }
+            );
+
+            await DistrictModel.findOneAndUpdate(
+              { _id: districtId },
+              {
+                $pull: {
+                  distributors: doc._id,
+                },
+              }
+            );
+          }
+          // Only Area.Take down the id
+          else {
+            console.log("distributor");
+            await DistributorModel.findOneAndUpdate(
+              { _id: doc._id },
+              {
+                $pull: {
+                  areas: areaId,
+                },
+              }
+            );
+          }
+        });
+      }
+    );
+
+  await area.remove();
+
+  res.status(200).json({
+    status: STATUS.OK,
+    message: AREA_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
+    error: "",
+    area: {},
+  });
 });

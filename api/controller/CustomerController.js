@@ -10,7 +10,7 @@ exports.getAllCustomers = asyncHandler(async (req, res, next) => {
   const customers = await CustomerModel.find().exec();
 
   res.status(200).json({
-    success: true,
+    status: true,
     customers,
   });
 });
@@ -28,7 +28,7 @@ exports.getCustomer = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({
-    success: true,
+    status: true,
     customer,
   });
 });
@@ -70,7 +70,7 @@ exports.createCustomer = asyncHandler(async (req, res, next) => {
 
   const savedDocument = await customer.save();
   res.status(201).json({
-    success: true,
+    status: true,
     customer: {
       _id: savedDocument._id,
       customer: savedDocument,
@@ -166,10 +166,10 @@ exports.updateCustomer = asyncHandler(async (req, res, next) => {
       await addCustomerBeatAreas(),
       await updateCustomerIdToBeatAreas(),
     ]);
-    res.status(200).json({ success: true });
+    res.status(200).json({ status: true });
   } else {
     const updatedCustomerDetails = await updateCustomerModel();
-    res.status(200).json({ success: true, customer: updatedCustomerDetails });
+    res.status(200).json({ status: true, customer: updatedCustomerDetails });
   }
 });
 
@@ -210,7 +210,7 @@ exports.deleteCustomer = asyncHandler(async (req, res, next) => {
   Promise.all([await deleteCustomer(), await removeCustomerIdFromBeatAreas()]);
 
   res.status(200).json({
-    success: true,
+    status: true,
     customer: {},
   });
 });

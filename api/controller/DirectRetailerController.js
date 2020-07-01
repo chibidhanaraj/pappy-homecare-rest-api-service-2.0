@@ -10,7 +10,7 @@ exports.getAllDirectRetailers = asyncHandler(async (req, res, next) => {
   const directRetailers = await DirectRetailerModel.find().exec();
 
   res.status(200).json({
-    success: true,
+    status: true,
     directRetailers,
   });
 });
@@ -33,7 +33,7 @@ exports.getDirectRetailer = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({
-    success: true,
+    status: true,
     directRetailer,
   });
 });
@@ -58,7 +58,7 @@ exports.createDirectRetailer = asyncHandler(async (req, res, next) => {
 
   const savedDirectRetailerDocument = await directRetailer.save();
   res.status(201).json({
-    success: true,
+    status: true,
     directRetailer: savedDirectRetailerDocument,
   });
 });
@@ -78,7 +78,7 @@ exports.deleteDirectRetailer = asyncHandler(async (req, res, next) => {
   await DirectRetailerModel.findByIdAndRemove(id).exec();
 
   res.status(200).json({
-    success: true,
+    status: true,
     directRetailer: {},
   });
 });
@@ -133,7 +133,5 @@ exports.updateDirectRetailer = asyncHandler(async (req, res, next) => {
     }
   );
 
-  res
-    .status(200)
-    .json({ success: true, directRetailer: updatedDirectRetailer });
+  res.status(200).json({ status: true, directRetailer: updatedDirectRetailer });
 });

@@ -9,7 +9,7 @@ exports.getCurrentUser = asyncHandler(async (req, res, next) => {
   const user = await UserModel.findById(req.user.id);
 
   res.status(200).json({
-    success: true,
+    status: true,
     user,
   });
 });
@@ -29,7 +29,7 @@ const sendAuthToken = (model, statusCode, res) => {
   }
 
   res.status(statusCode).cookie("token", token, options).json({
-    success: true,
+    status: true,
     token,
   });
 };
@@ -63,7 +63,7 @@ exports.login = asyncHandler(async (req, res, next) => {
 
   sendAuthToken(user, 200, res);
   res.json({
-    success: true,
+    status: true,
     isMatch,
     token,
   });

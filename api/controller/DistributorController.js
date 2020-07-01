@@ -14,6 +14,11 @@ const {
   buildDistributorPayload,
   buildAllDistributorsPayload,
 } = require("../../helpers/DistributorHelper");
+const {
+  STATUS,
+  DISTRIBUTOR_CONTROLLER_CONSTANTS,
+} = require("../../constants/controller.constants");
+const { ERROR_TYPES } = require("../../constants/error.constant");
 
 // @desc GET Distributors
 // @route GET /api/distributor
@@ -27,7 +32,9 @@ exports.getAllDistributors = asyncHandler(async (req, res, next) => {
     .exec();
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: DISTRIBUTOR_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     distributors: buildAllDistributorsPayload(distributors),
   });
 });
@@ -36,17 +43,28 @@ exports.getAllDistributors = asyncHandler(async (req, res, next) => {
 // @route     GET /api/distributor/:distributorId
 exports.getDistributor = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
-  const distributor = await DistributorModel.findById(id).exec();
+  const distributor = await DistributorModel.findById(id)
+    .populate(
+      "zonesPayload districtsPayload areasPayload superStockist",
+      "name"
+    )
+    .exec();
 
   if (!distributor) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        DISTRIBUTOR_CONTROLLER_CONSTANTS.DISTRIBUTOR_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
 
   res.status(200).json({
-    success: true,
-    distributor,
+    status: STATUS.OK,
+    message: DISTRIBUTOR_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
+    distributor: buildDistributorPayload(distributor.toObject()),
   });
 });
 
@@ -82,7 +100,16 @@ exports.createDistributor = asyncHandler(async (req, res, next) => {
     superStockistId,
   });
 
-  const savedDistributorDocument = await distributor.save();
+  const savedDistributorDocument = await distributor
+    .save()
+    .then((doc) =>
+      doc
+        .populate(
+          "zonesPayload districtsPayload areasPayload superStockist",
+          "name"
+        )
+        .execPopulate()
+    );
 
   let updatePromises = [];
 
@@ -129,29 +156,13 @@ exports.createDistributor = asyncHandler(async (req, res, next) => {
 
   await Promise.all(updatePromises);
 
+  console.log(savedDistributorDocument);
+
   res.status(201).json({
-    success: true,
-    distributor: savedDistributorDocument,
-  });
-});
-
-// @desc      Delete Distributor
-// @route     delete /api/distributor/
-exports.deleteDistributor = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
-  const distributor = await DistributorModel.findById(id).exec();
-
-  if (!distributor) {
-    return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
-    );
-  }
-
-  await distributor.remove();
-
-  res.status(200).json({
-    success: true,
-    distributor: {},
+    status: STATUS.OK,
+    message: DISTRIBUTOR_CONTROLLER_CONSTANTS.CREATE_SUCCESS,
+    error: "",
+    distributor: buildDistributorPayload(savedDistributorDocument.toObject()),
   });
 });
 
@@ -168,8 +179,9 @@ exports.updateDistributor = asyncHandler(async (req, res, next) => {
   if (!distributor) {
     return next(
       new ErrorResponse(
-        `No valid entry found for provided ID ${distributorId}`,
-        404
+        DISTRIBUTOR_CONTROLLER_CONSTANTS.DISTRIBUTOR_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
       )
     );
   }
@@ -366,7 +378,47 @@ exports.updateDistributor = asyncHandler(async (req, res, next) => {
       new: true,
       runValidators: true,
     }
-  );
+  )
+    .populate(
+      "zonesPayload districtsPayload areasPayload superStockist",
+      "name"
+    )
+    .exec(function (err, doc) {
+      if (err) {
+        new ErrorResponse(`Distributor Update failure ${req.body.name}`, 400);
+      } else {
+        res.status(200).json({
+          status: STATUS.OK,
+          message: DISTRIBUTOR_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
+          error: "",
+          distributor: buildDistributorPayload(doc.toObject()),
+        });
+      }
+    });
+});
 
-  res.status(200).json({ success: true, distributor: updatedDistributor });
+// @desc      Delete Distributor
+// @route     delete /api/distributor/
+exports.deleteDistributor = asyncHandler(async (req, res, next) => {
+  const id = req.params.id;
+  const distributor = await DistributorModel.findById(id).exec();
+
+  if (!distributor) {
+    return next(
+      new ErrorResponse(
+        DISTRIBUTOR_CONTROLLER_CONSTANTS.DISTRIBUTOR_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
+    );
+  }
+
+  await distributor.remove();
+
+  res.status(200).json({
+    status: STATUS.OK,
+    message: DISTRIBUTOR_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
+    error: "",
+    distributor: {},
+  });
 });

@@ -7,6 +7,11 @@ const {
   toSentenceCase,
   removeFalsy,
 } = require("../../utils/CommonUtils");
+const {
+  STATUS,
+  ZONE_CONTROLLER_CONSTANTS,
+} = require("../../constants/controller.constants");
+const { ERROR_TYPES } = require("../../constants/error.constant");
 
 // @desc      Get all zones
 // @route     GET /api/zone
@@ -14,7 +19,9 @@ exports.getAllZones = asyncHandler(async (req, res, next) => {
   const zones = await ZoneModel.find().exec();
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: ZONE_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     zones,
   });
 });
@@ -27,12 +34,18 @@ exports.getZone = asyncHandler(async (req, res, next) => {
 
   if (!zone) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        ZONE_CONTROLLER_CONSTANTS.ZONE_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: ZONE_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     zone,
   });
 });
@@ -51,8 +64,9 @@ exports.createZone = asyncHandler(async (req, res, next) => {
   if (createdZone) {
     return next(
       new ErrorResponse(
-        `Zone name: '${name}' has already been created with Zone code: ${zoneCode}`,
-        400
+        ZONE_CONTROLLER_CONSTANTS.ZONE_DUPLICATE_NAME.replace("{{name}}", name),
+        400,
+        ERROR_TYPES.DUPLICATE_NAME
       )
     );
   }
@@ -64,7 +78,9 @@ exports.createZone = asyncHandler(async (req, res, next) => {
 
   const savedDocument = await zone.save();
   res.status(201).json({
-    success: true,
+    status: STATUS.OK,
+    message: ZONE_CONTROLLER_CONSTANTS.CREATE_SUCCESS,
+    error: "",
     zone: savedDocument,
   });
 });
@@ -78,7 +94,11 @@ exports.updateZone = asyncHandler(async (req, res, next) => {
 
   if (!zone) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        ZONE_CONTROLLER_CONSTANTS.ZONE_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
 
@@ -96,6 +116,26 @@ exports.updateZone = asyncHandler(async (req, res, next) => {
   const name = toSentenceCase(req.body.name);
   const zoneCode = toUpperCase(name);
 
+  if (zoneCode !== zone.zoneCode) {
+    // Check for already created zone
+    const createdZone = await ZoneModel.findOne({
+      zoneCode,
+    });
+
+    if (createdZone) {
+      return next(
+        new ErrorResponse(
+          ZONE_CONTROLLER_CONSTANTS.ZONE_DUPLICATE_NAME.replace(
+            "{{name}}",
+            name
+          ),
+          400,
+          ERROR_TYPES.DUPLICATE_NAME
+        )
+      );
+    }
+  }
+
   const dataToUpdate = {
     name,
     zoneCode,
@@ -106,7 +146,12 @@ exports.updateZone = asyncHandler(async (req, res, next) => {
     runValidators: true,
   });
 
-  res.status(200).json({ success: true, zone: updatedZone });
+  res.status(200).json({
+    status: STATUS.OK,
+    message: ZONE_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
+    error: "",
+    zone: updatedZone,
+  });
 });
 
 exports.deleteZone = asyncHandler(async (req, res, next) => {
@@ -115,14 +160,20 @@ exports.deleteZone = asyncHandler(async (req, res, next) => {
 
   if (!zone) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        ZONE_CONTROLLER_CONSTANTS.ZONE_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
 
   await zone.remove();
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: ZONE_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
+    error: "",
     zone: {},
   });
 });

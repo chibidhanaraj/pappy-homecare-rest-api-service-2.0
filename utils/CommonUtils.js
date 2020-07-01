@@ -1,5 +1,12 @@
 const mongoose = require("mongoose");
-const { upperCase, upperFirst, lowerCase, isEqual } = require("lodash");
+const {
+  upperCase,
+  upperFirst,
+  lowerCase,
+  isEqual,
+  startCase,
+  camelCase,
+} = require("lodash");
 
 const toUpperCase = (str) => {
   return upperCase(str).replace(/\s/g, "");
@@ -7,6 +14,10 @@ const toUpperCase = (str) => {
 
 const toSentenceCase = (str) => {
   return upperFirst(lowerCase(str));
+};
+
+const toTitleCase = (str) => {
+  return startCase(camelCase(str));
 };
 
 const toConstantCase = (str) => {
@@ -24,4 +35,5 @@ module.exports = {
   toSentenceCase,
   toConstantCase,
   areObjectIdEqualArrays,
+  toTitleCase,
 };

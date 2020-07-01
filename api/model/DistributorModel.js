@@ -70,67 +70,73 @@ const currentBrandsDealingSchema = new Schema(
   { _id: false }
 );
 
-const DistributorSchema = new Schema({
-  _id: mongoose.Schema.Types.ObjectId,
+const DistributorSchema = new Schema(
+  {
+    _id: mongoose.Schema.Types.ObjectId,
 
-  name: {
-    type: String,
-    required: [true, "Please add the Distributor Name"],
-  },
-
-  deliveryVehiclesCount: {
-    type: String,
-  },
-
-  existingRetailersCount: {
-    type: String,
-  },
-
-  contact: contactSchema,
-
-  additionalContacts: [additionalContactSchema],
-
-  currentBrandsDealing: [currentBrandsDealingSchema],
-
-  address: AddressSchema,
-
-  gstNumber: {
-    type: String,
-  },
-
-  superStockistId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "SuperStockist",
-  },
-
-  zones: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Zone",
+    name: {
+      type: String,
+      required: [true, "Please add the Distributor Name"],
     },
-  ],
 
-  districts: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "District",
+    deliveryVehiclesCount: {
+      type: String,
     },
-  ],
 
-  areas: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Area",
+    existingRetailersCount: {
+      type: String,
     },
-  ],
 
-  retailers: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Retailer",
+    contact: contactSchema,
+
+    additionalContacts: [additionalContactSchema],
+
+    currentBrandsDealing: [currentBrandsDealingSchema],
+
+    address: AddressSchema,
+
+    gstNumber: {
+      type: String,
     },
-  ],
-});
+
+    superStockistId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SuperStockist",
+    },
+
+    zones: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Zone",
+      },
+    ],
+
+    districts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "District",
+      },
+    ],
+
+    areas: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Area",
+      },
+    ],
+
+    retailers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Retailer",
+      },
+    ],
+  },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
 
 DistributorSchema.virtual("zonesPayload", {
   ref: "Zone",
@@ -186,6 +192,14 @@ DistributorSchema.pre("remove", async function (next) {
         },
       },
       { multi: true }
+    ),
+    await this.model("SuperStockist").updateMany(
+      { _id: this.superStockistId },
+      {
+        $pull: {
+          distributors: this._id,
+        },
+      }
     ),
     await this.model("Retailer").updateMany(
       { distributorId: this._id },

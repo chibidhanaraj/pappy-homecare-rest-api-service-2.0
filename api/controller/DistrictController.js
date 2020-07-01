@@ -8,6 +8,11 @@ const DistributorModel = require("../model/DistributorModel");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
 const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");
+const {
+  STATUS,
+  DISTRICT_CONTROLLER_CONSTANTS,
+} = require("../../constants/controller.constants");
+const { ERROR_TYPES } = require("../../constants/error.constant");
 
 // @desc      Get all districts
 // @route     GET /api/district
@@ -15,7 +20,9 @@ exports.getAllDistricts = asyncHandler(async (req, res, next) => {
   const districts = await DistrictModel.find().populate("zone", "name").exec();
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: DISTRICT_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     districts,
   });
 });
@@ -30,12 +37,18 @@ exports.getDistrict = asyncHandler(async (req, res, next) => {
 
   if (!district) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        DISTRICT_CONTROLLER_CONSTANTS.DISTRICT_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
 
   res.status(200).json({
-    success: true,
+    status: STATUS.OK,
+    message: DISTRICT_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     district,
   });
 });
@@ -54,8 +67,12 @@ exports.createDistrict = asyncHandler(async (req, res, next) => {
   if (createdDistrict) {
     return next(
       new ErrorResponse(
-        `Id:${createdDistrict._id} has already been created with District code: ${districtCode}`,
-        400
+        DISTRICT_CONTROLLER_CONSTANTS.DISTRICT_DUPLICATE_NAME.replace(
+          "{{name}}",
+          name
+        ),
+        400,
+        ERROR_TYPES.DUPLICATE_NAME
       )
     );
   }
@@ -66,7 +83,9 @@ exports.createDistrict = asyncHandler(async (req, res, next) => {
     zoneId: req.body.zoneId,
   });
 
-  const savedDocument = await district.save();
+  const savedDocument = await district
+    .save()
+    .then((doc) => doc.populate("zone", "name").execPopulate());
 
   //update the districtId to Zone
   await ZoneModel.findOneAndUpdate(
@@ -76,131 +95,10 @@ exports.createDistrict = asyncHandler(async (req, res, next) => {
   );
 
   res.status(201).json({
-    success: true,
+    status: STATUS.OK,
+    message: DISTRICT_CONTROLLER_CONSTANTS.CREATE_SUCCESS,
+    error: "",
     district: savedDocument,
-  });
-});
-
-exports.deleteDistrict = asyncHandler(async (req, res, next) => {
-  const districtId = req.params.id;
-  const district = await DistrictModel.findById(districtId).exec();
-  const { zoneId, superStockists, distributors } = district;
-
-  if (!district) {
-    return next(
-      new ErrorResponse(
-        `No valid entry found for provided ID ${districtId}`,
-        404
-      )
-    );
-  }
-
-  const zone = await ZoneModel.findById(zoneId).exec();
-  if (superStockists.length) {
-    await SuperStockistModel.find(
-      { _id: { $in: superStockists } },
-      (error, docs) => {
-        const mappedDistrictsToZone = zone.districts;
-        docs.forEach(async (doc) => {
-          const commonDistrictIds = doc.districts.filter((districtId) =>
-            mappedDistrictsToZone.includes(districtId)
-          );
-
-          if (commonDistrictIds.length <= 1) {
-            console.log(
-              "Removing the DistrictId + ZoneId(has only the removing districtId) in Super Stockists records"
-            );
-            await SuperStockistModel.findOneAndUpdate(
-              { _id: doc._id },
-              {
-                $pull: {
-                  zones: district.zoneId,
-                  districts: districtId,
-                },
-              }
-            );
-
-            await ZoneModel.findOneAndUpdate(
-              { _id: district.zoneId },
-              {
-                $pull: {
-                  superStockists: doc._id,
-                },
-              }
-            );
-          } else {
-            console.log(
-              "Removing Only the DistrictId from Super Stockist Records"
-            );
-            await SuperStockistModel.findOneAndUpdate(
-              { _id: doc._id },
-              {
-                $pull: {
-                  districts: districtId,
-                },
-              }
-            );
-          }
-        });
-      }
-    );
-  }
-
-  if (distributors.length) {
-    await DistributorModel.find(
-      { _id: { $in: distributors } },
-      (error, docs) => {
-        const mappedDistrictsToZone = zone.districts;
-        docs.forEach(async (doc) => {
-          const commonDistrictIds = doc.districts.filter((districtId) =>
-            mappedDistrictsToZone.includes(districtId)
-          );
-
-          if (commonDistrictIds.length <= 1) {
-            console.log("Inside <=1 ");
-            await DistributorModel.findOneAndUpdate(
-              { _id: doc._id },
-              {
-                $pull: {
-                  zones: district.zoneId,
-                  districts: districtId,
-                  areas: { $in: district.areas }, //remove the matching areas from distributor
-                },
-              }
-            );
-
-            await ZoneModel.findOneAndUpdate(
-              { _id: district.zoneId },
-              {
-                $pull: {
-                  distributors: doc._id,
-                },
-              }
-            );
-          } else {
-            console.log(
-              "Removing Only the DistrictId from  Distributor Records"
-            );
-            await DistributorModel.findOneAndUpdate(
-              { _id: doc._id },
-              {
-                $pull: {
-                  districts: districtId,
-                  areas: { $in: district.areas }, //remove the matching areas from distributor
-                },
-              }
-            );
-          }
-        });
-      }
-    );
-  }
-
-  await district.remove();
-
-  res.status(200).json({
-    success: true,
-    district: {},
   });
 });
 
@@ -211,7 +109,11 @@ exports.updateDistrict = asyncHandler(async (req, res, next) => {
   // Check whether the district already exists
   if (!district) {
     return next(
-      new ErrorResponse(`No valid district found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        DISTRICT_CONTROLLER_CONSTANTS.DISTRICT_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
 
@@ -239,8 +141,12 @@ exports.updateDistrict = asyncHandler(async (req, res, next) => {
     if (createdDistrict) {
       return next(
         new ErrorResponse(
-          `District Name Already exists: ${reqDistrictCode}`,
-          400
+          DISTRICT_CONTROLLER_CONSTANTS.DISTRICT_DUPLICATE_NAME.replace(
+            "{{name}}",
+            reqDistrictName
+          ),
+          400,
+          ERROR_TYPES.DUPLICATE_NAME
         )
       );
     }
@@ -251,15 +157,6 @@ exports.updateDistrict = asyncHandler(async (req, res, next) => {
     reqDistrictName,
     reqDistrictCode,
   };
-
-  const updatedDistrict = await DistrictModel.findByIdAndUpdate(
-    districtId,
-    dataToUpdate,
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
 
   //update the district to changed Zone(if new zoneId)
   if (req.body.zoneId !== district.zoneId) {
@@ -405,5 +302,152 @@ exports.updateDistrict = asyncHandler(async (req, res, next) => {
     ]);
   }
 
-  res.status(200).json({ success: true, district: updatedDistrict });
+  const updatedDistrict = await DistrictModel.findByIdAndUpdate(
+    districtId,
+    dataToUpdate,
+    {
+      new: true,
+      runValidators: true,
+    }
+  )
+    .populate("zone", "name")
+    .exec(function (err, doc) {
+      if (err) {
+        new ErrorResponse(`District update failure ${reqDistrictName}`, 400);
+      } else {
+        res.status(200).json({
+          status: STATUS.OK,
+          message: DISTRICT_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
+          error: "",
+          district: doc,
+        });
+      }
+    });
+});
+
+exports.deleteDistrict = asyncHandler(async (req, res, next) => {
+  const districtId = req.params.id;
+  const district = await DistrictModel.findById(districtId).exec();
+  const { zoneId, superStockists, distributors } = district;
+
+  if (!district) {
+    return next(
+      new ErrorResponse(
+        DISTRICT_CONTROLLER_CONSTANTS.DISTRICT_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
+    );
+  }
+
+  const zone = await ZoneModel.findById(zoneId).exec();
+
+  if (superStockists.length) {
+    await SuperStockistModel.find(
+      { _id: { $in: superStockists } },
+      (error, docs) => {
+        const mappedDistrictsToZone = zone.districts;
+        docs.forEach(async (doc) => {
+          const commonDistrictIds = doc.districts.filter((districtId) =>
+            mappedDistrictsToZone.includes(districtId)
+          );
+
+          if (commonDistrictIds.length <= 1) {
+            console.log(
+              "Removing the DistrictId + ZoneId(has only the removing districtId) in Super Stockists records"
+            );
+            await SuperStockistModel.findOneAndUpdate(
+              { _id: doc._id },
+              {
+                $pull: {
+                  zones: district.zoneId,
+                  districts: districtId,
+                },
+              }
+            );
+
+            await ZoneModel.findOneAndUpdate(
+              { _id: district.zoneId },
+              {
+                $pull: {
+                  superStockists: doc._id,
+                },
+              }
+            );
+          } else {
+            console.log(
+              "Removing Only the DistrictId from Super Stockist Records"
+            );
+            await SuperStockistModel.findOneAndUpdate(
+              { _id: doc._id },
+              {
+                $pull: {
+                  districts: districtId,
+                },
+              }
+            );
+          }
+        });
+      }
+    );
+  }
+
+  if (distributors.length) {
+    await DistributorModel.find(
+      { _id: { $in: distributors } },
+      (error, docs) => {
+        const mappedDistrictsToZone = zone.districts;
+        docs.forEach(async (doc) => {
+          const commonDistrictIds = doc.districts.filter((districtId) =>
+            mappedDistrictsToZone.includes(districtId)
+          );
+
+          if (commonDistrictIds.length <= 1) {
+            console.log("Inside <=1 ");
+            await DistributorModel.findOneAndUpdate(
+              { _id: doc._id },
+              {
+                $pull: {
+                  zones: district.zoneId,
+                  districts: districtId,
+                  areas: { $in: district.areas }, //remove the matching areas from distributor
+                },
+              }
+            );
+
+            await ZoneModel.findOneAndUpdate(
+              { _id: district.zoneId },
+              {
+                $pull: {
+                  distributors: doc._id,
+                },
+              }
+            );
+          } else {
+            console.log(
+              "Removing Only the DistrictId from  Distributor Records"
+            );
+            await DistributorModel.findOneAndUpdate(
+              { _id: doc._id },
+              {
+                $pull: {
+                  districts: districtId,
+                  areas: { $in: district.areas }, //remove the matching areas from distributor
+                },
+              }
+            );
+          }
+        });
+      }
+    );
+  }
+
+  await district.remove();
+
+  res.status(200).json({
+    status: STATUS.OK,
+    message: DISTRICT_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
+    error: "",
+    district: {},
+  });
 });
