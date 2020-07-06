@@ -8,10 +8,13 @@ const buildSkuPayload = (skuData) => {
   const { fragranceId, quantityId, product = {} } = sku;
   const { fragrances = [], quantities = [] } = product;
 
-  const skuFragrance = fragrances.find((fragrance) => {
-    const { _id: id } = fragrance;
-    return id.toString() === fragranceId.toString();
-  });
+  const skuFragrance =
+    fragranceId &&
+    fragrances.find((fragrance) => {
+      const { _id: id } = fragrance;
+
+      return id.toString() === fragranceId.toString();
+    });
 
   const skuQuantity = quantities.find((qty) => {
     const { _id: id } = qty;
@@ -20,7 +23,8 @@ const buildSkuPayload = (skuData) => {
 
   sku.id = sku._id;
   sku.product.id = sku.product._id;
-  sku.fragranceName = skuFragrance.fragranceName || "";
+  sku.fragranceId = sku.fragranceId || "";
+  sku.fragranceName = (skuFragrance && skuFragrance.fragranceName) || "";
   sku.quantity = skuQuantity.quantity || "";
   sku.unit = skuQuantity.unit || "";
 

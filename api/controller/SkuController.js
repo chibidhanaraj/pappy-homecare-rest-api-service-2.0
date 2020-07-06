@@ -91,7 +91,7 @@ exports.createSku = asyncHandler(async (req, res, next) => {
     name,
     skuCode,
     product: productId,
-    fragranceId,
+    fragranceId: fragranceId || null,
     quantityId,
     piecesPerCarton: piecesPerCarton || 0,
     mrp,
