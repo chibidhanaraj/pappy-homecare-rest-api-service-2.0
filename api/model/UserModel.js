@@ -8,19 +8,29 @@ const UserSchema = new Schema({
 
   name: {
     type: String,
-    required: [true, "Please add a name"],
+    required: true,
+  },
+
+  employeeId: {
+    type: String,
+    required: true,
+    unique: true,
   },
 
   mobileNumber: {
     type: Number,
-    required: [true, "Please add a mobile number"],
+    required: true,
   },
 
   password: {
     type: String,
-    required: [true, "Please add a password"],
-    minlength: 6,
+    required: true,
     select: false,
+  },
+
+  date: {
+    type: Date,
+    default: Date.now,
   },
 
   role: {
@@ -35,46 +45,6 @@ const UserSchema = new Schema({
     ],
     default: "BACKOFFICE_ADMIN",
   },
-
-  isReportingToAdmin: {
-    type: Boolean,
-    default: false,
-  },
-
-  reportingTo: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
-
-  reporters: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
-
-  zones: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Zone",
-    },
-  ],
-
-  districts: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "District",
-    },
-  ],
-
-  areas: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Area",
-    },
-  ],
 });
 
 // Encrypt password using bcrypt

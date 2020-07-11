@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
 const UserModel = require("../model/UserModel");
+const {
+  STATUS,
+  AUTH_CONTROLLER_CONSTANTS,
+} = require("../../constants/controller.constants");
+const { ERROR_TYPES } = require("../../constants/error.constant");
 // @desc      Get current logged in user
 // @route     POST /api/auth/currentUser
 // @access    Private
@@ -17,19 +22,10 @@ exports.getCurrentUser = asyncHandler(async (req, res, next) => {
 const sendAuthToken = (model, statusCode, res) => {
   const token = model.getSignedJwtToken();
 
-  const options = {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true,
-  };
-
-  if (process.env.NODE_ENV === "production") {
-    options.secure = true;
-  }
-
-  res.status(statusCode).cookie("token", token, options).json({
-    status: true,
+  res.status(200).json({
+    status: STATUS.OK,
+    message: AUTH_CONTROLLER_CONSTANTS.AUTH_SUCCESS,
+    error: "",
     token,
   });
 };
@@ -39,32 +35,48 @@ const sendAuthToken = (model, statusCode, res) => {
 // @access    Public
 
 exports.login = asyncHandler(async (req, res, next) => {
-  const { mobileNumber, password } = req.body;
+  const { employeeId, password } = req.body;
 
-  // Validate
-  if (!mobileNumber || !password) {
-    return next(
-      new ErrorResponse("Please provide the username and password", 400)
-    );
-  }
-
-  const user = await UserModel.findOne({ mobileNumber }).select("+password");
+  const user = await UserModel.findOne({ employeeId }).select("+password");
 
   if (!user) {
-    return next(new ErrorResponse("Invalid Credentials", 401));
+    return next(
+      new ErrorResponse(
+        AUTH_CONTROLLER_CONSTANTS.INVALID_CREDENTAILS,
+        401,
+        ERROR_TYPES.VALIDATION_ERROR,
+        [
+          {
+            location: "body",
+            msg: AUTH_CONTROLLER_CONSTANTS.INVALID_CREDENTAILS,
+            param: "employeeId, password",
+            value: "",
+          },
+        ]
+      )
+    );
   }
 
   // Check if password matches
   const isMatch = await user.matchPassword(password);
 
   if (!isMatch) {
-    return next(new ErrorResponse("Invalid credentials", 401));
+    return next(
+      new ErrorResponse(
+        AUTH_CONTROLLER_CONSTANTS.INVALID_CREDENTAILS,
+        401,
+        ERROR_TYPES.VALIDATION_ERROR,
+        [
+          {
+            location: "body",
+            msg: AUTH_CONTROLLER_CONSTANTS.INVALID_CREDENTAILS,
+            param: "employeeId, password",
+            value: "",
+          },
+        ]
+      )
+    );
   }
 
   sendAuthToken(user, 200, res);
-  res.json({
-    status: true,
-    isMatch,
-    token,
-  });
 });

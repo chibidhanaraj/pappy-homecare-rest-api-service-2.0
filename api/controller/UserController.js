@@ -2,9 +2,11 @@ const mongoose = require("mongoose");
 const ErrorResponse = require("../../utils/errorResponse");
 const asyncHandler = require("../../middleware/asyncHandler");
 const UserModel = require("../model/UserModel");
-const ZoneModel = require("../model/ZoneModel");
-const { USER_ROLES_CONSTANTS } = require("../../constants/constants");
-const { areObjectIdEqualArrays } = require("../../utils/CommonUtils");
+const { ERROR_TYPES } = require("../../constants/error.constant");
+const {
+  STATUS,
+  USER_CONTROLLER_CONSTANTS,
+} = require("../../constants/controller.constants");
 
 // @desc      Get all users
 // @route     GET /api/user
@@ -12,8 +14,10 @@ const { areObjectIdEqualArrays } = require("../../utils/CommonUtils");
 exports.getAllUsers = asyncHandler(async (req, res, next) => {
   const users = await UserModel.find().exec();
 
-  res.json({
-    status: true,
+  res.status(200).json({
+    status: STATUS.OK,
+    message: USER_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     users,
   });
 });
@@ -23,16 +27,22 @@ exports.getAllUsers = asyncHandler(async (req, res, next) => {
 // @access    Private/Admin
 exports.getUser = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
-  const user = await UserModel.findById(id);
+  const user = await UserModel.findById(id).select("-password");
 
   if (!user) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        USER_CONTROLLER_CONSTANTS.USER_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
 
   res.status(200).json({
-    status: true,
+    status: STATUS.OK,
+    message: USER_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: "",
     user,
   });
 });
@@ -41,55 +51,40 @@ exports.getUser = asyncHandler(async (req, res, next) => {
 // @route     POST /api/user
 // @access    Private/Admin
 exports.createUser = asyncHandler(async (req, res, next) => {
-  const {
-    name,
-    mobileNumber,
-    password,
-    role,
-    isReportingToAdmin,
-    reportingTo,
-    zones,
-    districts,
-    areas,
-  } = req.body;
+  const { name, employeeId, mobileNumber, password, role } = req.body;
 
   const user = new UserModel({
     _id: new mongoose.Types.ObjectId(),
     name,
+    employeeId,
     mobileNumber,
     password,
     role,
-    isReportingToAdmin,
-    reportingTo,
-    zones,
-    districts,
-    areas,
   });
 
   const createdUser = await UserModel.findOne({
-    mobileNumber: mobileNumber,
+    employeeId: employeeId,
   });
 
   if (createdUser) {
     return next(
-      new ErrorResponse(`${mobileNumber} has already been created`, 400)
+      new ErrorResponse(
+        USER_CONTROLLER_CONSTANTS.USER_DUPLICATE_EMPLOYEEID.replace(
+          "{{employeeId}}",
+          employeeId
+        ),
+        400,
+        ERROR_TYPES.DUPLICATE_USER
+      )
     );
-  }
-
-  if (!isReportingToAdmin && reportingTo) {
-    const reportingToUser = await UserModel.findOne({
-      _id: reportingTo,
-    });
-
-    if (!reportingToUser) {
-      return next(new ErrorResponse(`${reportingToUser} does not exist`, 400));
-    }
   }
 
   const savedUserDocument = await user.save();
 
   res.status(201).json({
-    status: true,
+    status: STATUS.OK,
+    message: USER_CONTROLLER_CONSTANTS.CREATE_SUCCESS,
+    error: "",
     user: savedUserDocument,
   });
 });
@@ -104,20 +99,20 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
 
   if (!user) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${userId}`, 404)
+      new ErrorResponse(
+        USER_CONTROLLER_CONSTANTS.USER_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
 
   const receivedUpdateProperties = Object.keys(req.body);
   const allowedUpdateProperties = [
     "name",
+    "employeeId",
     "mobileNumber",
     "role",
-    "isReportingToAdmin",
-    "reportingTo",
-    "zones",
-    "districts",
-    "areas",
   ];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
@@ -149,7 +144,11 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
 
   if (!user) {
     return next(
-      new ErrorResponse(`No valid entry found for provided ID ${id}`, 404)
+      new ErrorResponse(
+        USER_CONTROLLER_CONSTANTS.USER_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
     );
   }
 
@@ -157,6 +156,6 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     status: true,
-    data: {},
+    user: {},
   });
 });

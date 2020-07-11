@@ -22,6 +22,7 @@ const errorHandler = (err, req, res, next) => {
     status: STATUS.ERROR,
     message: error.message || "Server Error",
     error: error.errorType || "Server Error",
+    validationErrors: error.validationErrors || [],
   });
 };
 

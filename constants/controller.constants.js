@@ -3,6 +3,23 @@ const STATUS = {
   ERROR: "ERROR",
 };
 
+const AUTH_CONTROLLER_CONSTANTS = {
+  AUTH_SUCCESS: "User Authentication Successful",
+  AUTH_FAIL: "User Authentication Failed",
+  INVALID_CREDENTAILS: "Username and Password do not match",
+};
+
+const USER_CONTROLLER_CONSTANTS = {
+  FETCH_SUCCESS: "Fetched Successfully",
+  CREATE_SUCCESS: "User Created Successfully",
+  UPDATE_SUCCESS: "User Updated Successfully",
+  DELETE_SUCCESS: "User Deleted Successfully",
+  USER_NOT_FOUND:
+    "This User does not exist in the server. This User may be deleted before",
+  USER_DUPLICATE_EMPLOYEEID:
+    "EmployeeId {{employeeId}} already exists. Please try again with a new Employee Id",
+};
+
 const ZONE_CONTROLLER_CONSTANTS = {
   FETCH_SUCCESS: "Fetched Successfully",
   CREATE_SUCCESS: "Zone Created Successfully",
@@ -98,6 +115,8 @@ const SKU_CONTROLLER_CONSTANTS = {
 
 module.exports = {
   STATUS,
+  AUTH_CONTROLLER_CONSTANTS,
+  USER_CONTROLLER_CONSTANTS,
   ZONE_CONTROLLER_CONSTANTS,
   DISTRICT_CONTROLLER_CONSTANTS,
   AREA_CONTROLLER_CONSTANTS,
