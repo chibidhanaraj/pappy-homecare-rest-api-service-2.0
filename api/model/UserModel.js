@@ -3,49 +3,61 @@ const Schema = mongoose.Schema;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const UserSchema = new Schema({
-  _id: mongoose.Schema.Types.ObjectId,
+const UserSchema = new Schema(
+  {
+    _id: mongoose.Schema.Types.ObjectId,
 
-  name: {
-    type: String,
-    required: true,
-  },
+    name: {
+      type: String,
+      required: true,
+    },
 
-  employeeId: {
-    type: String,
-    required: true,
-    unique: true,
-  },
+    employeeId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
 
-  mobileNumber: {
-    type: Number,
-    required: true,
-  },
+    mobileNumber: {
+      type: Number,
+      required: true,
+    },
 
-  password: {
-    type: String,
-    required: true,
-    select: false,
-  },
+    password: {
+      type: String,
+      required: true,
+      select: false,
+    },
 
-  date: {
-    type: Date,
-    default: Date.now,
-  },
+    role: {
+      type: String,
+      enum: [
+        "ADMIN",
+        "BACKOFFICE_ADMIN",
+        "REGIONAL_SALES_MANAGER",
+        "AREA_SALES_MANAGER",
+        "SALES_OFFICER",
+        "TERRITORY_SALES_INCHARGE",
+      ],
+      default: "BACKOFFICE_ADMIN",
+    },
 
-  role: {
-    type: String,
-    enum: [
-      "ADMIN",
-      "BACKOFFICE_ADMIN",
-      "REGIONAL_SALES_MANAGER",
-      "AREA_SALES_MANAGER",
-      "SALES_OFFICER",
-      "TERRITORY_SALES_INCHARGE",
-    ],
-    default: "BACKOFFICE_ADMIN",
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
-});
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+    timestamps: { createdAt: true, updatedAt: true },
+  }
+);
 
 // Encrypt password using bcrypt
 UserSchema.pre("save", async function (next) {

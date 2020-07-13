@@ -61,6 +61,8 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
     productType,
     fragrances,
     quantities,
+    createdBy: req.user.id || "",
+    updatedBy: req.user.id || "",
   });
 
   const createdProduct = await ProductModel.findOne({
@@ -150,6 +152,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
     productCode: toUpperCase(req.body.name),
     fragrances: req.body.fragrances,
     quantites: req.body.quantites,
+    updatedBy: req.user.id || "",
   };
 
   const updatedProduct = await ProductModel.findByIdAndUpdate(

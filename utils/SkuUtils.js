@@ -2,6 +2,7 @@ const { calculateSkuPrice } = require("./SkuPriceCalculation");
 const { cloneDeep } = require("lodash");
 
 const buildSkuPayload = (skuData) => {
+  console.log(skuData);
   const sku = cloneDeep(skuData);
   const skuPrices = calculateSkuPrice(sku);
 
@@ -16,10 +17,12 @@ const buildSkuPayload = (skuData) => {
       return id.toString() === fragranceId.toString();
     });
 
-  const skuQuantity = quantities.find((qty) => {
-    const { _id: id } = qty;
-    return id.toString() === quantityId.toString();
-  });
+  const skuQuantity =
+    quantityId &&
+    quantities.find((qty) => {
+      const { _id: id } = qty;
+      return id.toString() === quantityId.toString();
+    });
 
   sku.id = sku._id;
   sku.product.id = sku.product._id;
@@ -35,6 +38,10 @@ const buildSkuPayload = (skuData) => {
   delete sku.product.fragrances;
   delete sku.product.quantities;
   delete sku.product.productCode;
+  delete sku.product.createdBy;
+  delete sku.product.updatedBy;
+  delete sku.product.createdAt;
+  delete sku.product.updatedAt;
 
   return {
     ...sku,

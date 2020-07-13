@@ -74,6 +74,8 @@ exports.createZone = asyncHandler(async (req, res, next) => {
   const zone = new ZoneModel({
     name,
     zoneCode,
+    createdBy: req.user.id || "",
+    updatedBy: req.user.id || "",
   });
 
   const savedDocument = await zone.save();
@@ -139,6 +141,7 @@ exports.updateZone = asyncHandler(async (req, res, next) => {
   const dataToUpdate = {
     name,
     zoneCode,
+    updatedBy: req.user.id || "",
   };
 
   const updatedZone = await ZoneModel.findByIdAndUpdate(zoneId, dataToUpdate, {

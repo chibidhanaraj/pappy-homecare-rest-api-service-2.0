@@ -60,6 +60,8 @@ exports.createUser = asyncHandler(async (req, res, next) => {
     mobileNumber,
     password,
     role,
+    createdBy: req.user.id || "",
+    updatedBy: req.user.id || "",
   });
 
   const createdUser = await UserModel.findOne({
@@ -123,7 +125,12 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Invalid Updates for ${userId}`));
   }
 
-  const updatedUser = await UserModel.findByIdAndUpdate(userId, req.body, {
+  const dataToUpdate = {
+    updatedBy: req.user.id || "",
+    ...req.body,
+  };
+
+  const updatedUser = await UserModel.findByIdAndUpdate(userId, dataToUpdate, {
     new: true,
     runValidators: true,
   });

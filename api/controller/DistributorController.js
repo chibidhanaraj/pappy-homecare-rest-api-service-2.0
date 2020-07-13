@@ -98,6 +98,8 @@ exports.createDistributor = asyncHandler(async (req, res, next) => {
     districts,
     areas,
     superStockistId,
+    createdBy: req.user.id || "",
+    updatedBy: req.user.id || "",
   });
 
   const savedDistributorDocument = await distributor
@@ -371,9 +373,14 @@ exports.updateDistributor = asyncHandler(async (req, res, next) => {
     }
   }
 
+  const dataToUpdate = {
+    ...req.body,
+    updatedBy: req.user.id || "",
+  };
+
   const updatedDistributor = await DistributorModel.findByIdAndUpdate(
     distributorId,
-    req.body,
+    dataToUpdate,
     {
       new: true,
       runValidators: true,

@@ -78,6 +78,8 @@ exports.createArea = asyncHandler(async (req, res, next) => {
     areaCode,
     districtId: req.body.districtId,
     zoneId: req.body.zoneId,
+    createdBy: req.user.id || "",
+    updatedBy: req.user.id || "",
   });
 
   const savedDocument = await area
@@ -163,6 +165,7 @@ exports.updateArea = asyncHandler(async (req, res, next) => {
     ...req.body,
     reqAreaName,
     reqAreaCode,
+    updatedBy: req.user.id || "",
   };
 
   //update the area to changed District(if new districtId)

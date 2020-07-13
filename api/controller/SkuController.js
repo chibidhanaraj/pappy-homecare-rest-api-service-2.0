@@ -90,17 +90,19 @@ exports.createSku = asyncHandler(async (req, res, next) => {
     _id: new mongoose.Types.ObjectId(),
     name,
     skuCode,
-    product: productId,
+    productId: productId || null,
     fragranceId: fragranceId || null,
-    quantityId,
+    quantityId: quantityId || null,
     piecesPerCarton: piecesPerCarton || 0,
-    mrp,
+    mrp: mrp || 0,
     sgst: sgst || 0,
     cgst: cgst || 0,
     igst: igst || 0,
     superStockistMargin: superStockistMargin || 0,
     distributorMargin: distributorMargin || 0,
     retailerMargin: retailerMargin || 0,
+    createdBy: req.user.id || "",
+    updatedBy: req.user.id || "",
   });
 
   const savedSkuDocument = await sku
@@ -181,6 +183,7 @@ exports.updateSku = asyncHandler(async (req, res, next) => {
   const dataToUpdate = {
     ...req.body,
     skuCode: toSentenceCase(req.body.name),
+    updatedBy: req.user.id || "",
   };
 
   const updatedSku = await SkuModel.findByIdAndUpdate(skuId, dataToUpdate, {

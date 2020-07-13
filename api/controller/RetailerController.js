@@ -88,6 +88,8 @@ exports.createRetailer = asyncHandler(async (req, res, next) => {
     areaId,
     beatAreaId,
     distributorId,
+    createdBy: req.user.id || "",
+    updatedBy: req.user.id || "",
   });
 
   const savedRetailerDocument = await retailer
@@ -503,9 +505,15 @@ exports.updateRetailer = asyncHandler(async (req, res, next) => {
     }
   }
 
+  const dataToUpdate = {
+    ...req.body,
+    skuCode: toSentenceCase(req.body.name),
+    updatedBy: req.user.id || "",
+  };
+
   const updatedRetailer = await RetailerModel.findByIdAndUpdate(
     retailerId,
-    req.body,
+    dataToUpdate,
     {
       new: true,
       runValidators: true,

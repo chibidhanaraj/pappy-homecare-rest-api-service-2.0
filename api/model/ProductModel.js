@@ -19,39 +19,54 @@ const QuantitySchema = new Schema({
 });
 
 // create product Schema & model
-const ProductSchema = new Schema({
-  _id: mongoose.Schema.Types.ObjectId,
-  brandName: {
-    type: String,
-    required: true,
+const ProductSchema = new Schema(
+  {
+    _id: mongoose.Schema.Types.ObjectId,
+    brandName: {
+      type: String,
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    productCode: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    productType: {
+      type: String,
+      enum: ["LIQUID", "POWDER", "SOAP", "SCRUBBER", "OTHERS"],
+      default: "LIQUID",
+    },
+    fragrances: {
+      type: [FragranceSchema],
+    },
+    quantities: {
+      type: [QuantitySchema],
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
-  name: {
-    type: String,
-    required: true,
-  },
-  productCode: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  productType: {
-    type: String,
-    enum: ["LIQUID", "POWDER", "SOAP", "SCRUBBER", "OTHERS"],
-    default: "LIQUID",
-  },
-  fragrances: {
-    type: [FragranceSchema],
-  },
-  quantities: {
-    type: [QuantitySchema],
-  },
-});
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+    timestamps: { createdAt: true, updatedAt: true },
+  }
+);
 
-// Cascade delete district when a zone is deleted
+// Cascade delete SKUs when a product is deleted
 ProductSchema.pre("remove", async function (next) {
   console.log(`Delete Product and its Skus `);
 
-  await this.model("Sku").deleteMany({ product: this._id });
+  await this.model("Sku").deleteMany({ productId: this._id });
   next();
 });
 

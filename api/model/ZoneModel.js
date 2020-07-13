@@ -8,48 +8,66 @@ const ZoneSchema = new Schema(
       type: String,
       required: true,
     },
+
     zoneCode: {
       type: String,
       required: true,
       unique: true,
     },
+
     districts: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "District",
       },
     ],
+
     areas: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Area",
       },
     ],
+
     beatAreas: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "BeatArea",
       },
     ],
+
     superStockists: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "SuperStockist",
       },
     ],
+
     distributors: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Distributor",
       },
     ],
+
     retailers: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Retailer",
       },
     ],
+
     regionalSalesManagerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
@@ -57,6 +75,7 @@ const ZoneSchema = new Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    timestamps: { createdAt: true, updatedAt: true },
   }
 );
 

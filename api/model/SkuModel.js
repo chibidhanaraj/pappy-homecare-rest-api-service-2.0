@@ -17,7 +17,7 @@ const SkuSchema = new Schema(
       unique: true,
     },
 
-    product: {
+    productId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "Product",
@@ -67,12 +67,30 @@ const SkuSchema = new Schema(
     retailerMargin: {
       type: Number,
     },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    timestamps: { createdAt: true, updatedAt: true },
   }
 );
+
+SkuSchema.virtual("product", {
+  ref: "Product",
+  localField: "productId",
+  foreignField: "_id",
+  justOne: true,
+});
 
 SkuSchema.set("toJSON", {
   virtuals: true,

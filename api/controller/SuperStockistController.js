@@ -79,6 +79,8 @@ exports.createSuperStockist = asyncHandler(async (req, res, next) => {
     currentBrandsDealing,
     zones,
     districts,
+    createdBy: req.user.id || "",
+    updatedBy: req.user.id || "",
   });
 
   const savedSuperStockistDocument = await superStockist
@@ -228,9 +230,14 @@ exports.updateSuperStockist = asyncHandler(async (req, res, next) => {
 
   await Promise.all(addPromises);
 
+  const dataToUpdate = {
+    updatedBy: req.user.id || "",
+    ...req.body,
+  };
+
   const updatedSuperStockist = await SuperStockistModel.findByIdAndUpdate(
     superStockistId,
-    req.body,
+    dataToUpdate,
     {
       new: true,
       runValidators: true,

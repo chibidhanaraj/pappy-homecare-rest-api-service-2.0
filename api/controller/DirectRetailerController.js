@@ -54,6 +54,8 @@ exports.createDirectRetailer = asyncHandler(async (req, res, next) => {
     additionalContacts,
     address,
     gstNumber,
+    createdBy: req.user.id || "",
+    updatedBy: req.user.id || "",
   });
 
   const savedDirectRetailerDocument = await directRetailer.save();
@@ -124,9 +126,14 @@ exports.updateDirectRetailer = asyncHandler(async (req, res, next) => {
 
   const reqGstNumber = req.body.gstNumber;
 
+  const dataToUpdate = {
+    ...req.body,
+    updatedBy: req.user.id || "",
+  };
+
   const updatedDirectRetailer = await DirectRetailerModel.findByIdAndUpdate(
     directRetailerId,
-    req.body,
+    dataToUpdate,
     {
       new: true,
       runValidators: true,

@@ -84,6 +84,8 @@ exports.createBeatArea = asyncHandler(async (req, res, next) => {
     areaId: req.body.areaId,
     districtId: req.body.districtId,
     zoneId: req.body.zoneId,
+    createdBy: req.user.id || "",
+    updatedBy: req.user.id || "",
   });
 
   const savedDocument = await beatArea
@@ -174,6 +176,7 @@ exports.updateBeatArea = asyncHandler(async (req, res, next) => {
     ...req.body,
     reqBeatAreaName,
     reqBeatAreaCode,
+    updatedBy: req.user.id || "",
   };
 
   //update the beatArea to changed Area(if new areaId)

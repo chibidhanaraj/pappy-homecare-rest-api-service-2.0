@@ -49,6 +49,8 @@ exports.createWholeSaler = asyncHandler(async (req, res, next) => {
     additionalContacts,
     address,
     gstNumber,
+    createdBy: req.user.id || "",
+    updatedBy: req.user.id || "",
   });
 
   const savedWholeSalerDocument = await wholeSaler.save();
@@ -115,9 +117,14 @@ exports.updateWholeSaler = asyncHandler(async (req, res, next) => {
     req.body.wholeSalerName = toSentenceCase(req.body.wholeSalerName);
   }
 
+  const dataToUpdate = {
+    updatedBy: req.user.id || "",
+    ...req.body,
+  };
+
   const updatedWholeSaler = await WholeSalerModel.findByIdAndUpdate(
     wholeSalerId,
-    req.body,
+    dataToUpdate,
     {
       new: true,
       runValidators: true,

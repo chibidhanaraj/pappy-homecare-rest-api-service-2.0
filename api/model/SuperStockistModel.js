@@ -70,51 +70,68 @@ const AddressSchema = new Schema(
   { _id: false }
 );
 
-const SuperStockistSchema = new Schema({
-  _id: mongoose.Schema.Types.ObjectId,
+const SuperStockistSchema = new Schema(
+  {
+    _id: mongoose.Schema.Types.ObjectId,
 
-  name: {
-    type: String,
-    required: [true, "Please add the Super Stockist Name"],
-  },
-
-  existingDistributorsCount: {
-    type: String,
-  },
-
-  contact: contactSchema,
-
-  additionalContacts: [additionalContactSchema],
-
-  currentBrandsDealing: [currentBrandsDealingSchema],
-
-  address: AddressSchema,
-
-  gstNumber: {
-    type: String,
-  },
-
-  zones: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Zone",
+    name: {
+      type: String,
+      required: [true, "Please add the Super Stockist Name"],
     },
-  ],
 
-  districts: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "District",
+    existingDistributorsCount: {
+      type: String,
     },
-  ],
 
-  distributors: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Distributor",
+    contact: contactSchema,
+
+    additionalContacts: [additionalContactSchema],
+
+    currentBrandsDealing: [currentBrandsDealingSchema],
+
+    address: AddressSchema,
+
+    gstNumber: {
+      type: String,
     },
-  ],
-});
+
+    zones: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Zone",
+      },
+    ],
+
+    districts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "District",
+      },
+    ],
+
+    distributors: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Distributor",
+      },
+    ],
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+    timestamps: { createdAt: true, updatedAt: true },
+  }
+);
 
 SuperStockistSchema.virtual("zonesPayload", {
   ref: "Zone",

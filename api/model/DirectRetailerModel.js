@@ -59,24 +59,41 @@ const AddressSchema = new Schema(
   { _id: false }
 );
 
-const DirectRetailerSchema = new Schema({
-  _id: mongoose.Schema.Types.ObjectId,
+const DirectRetailerSchema = new Schema(
+  {
+    _id: mongoose.Schema.Types.ObjectId,
 
-  directRetailerName: {
-    type: String,
-    required: [true, "Please add the Direct Retailer Name"],
+    directRetailerName: {
+      type: String,
+      required: [true, "Please add the Direct Retailer Name"],
+    },
+
+    contact: contactSchema,
+
+    additionalContacts: [additionalContactSchema],
+
+    address: AddressSchema,
+
+    gstNumber: {
+      type: String,
+    },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
-
-  contact: contactSchema,
-
-  additionalContacts: [additionalContactSchema],
-
-  address: AddressSchema,
-
-  gstNumber: {
-    type: String,
-  },
-});
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+    timestamps: { createdAt: true, updatedAt: true },
+  }
+);
 
 DirectRetailerSchema.set("toJSON", {
   virtuals: true,

@@ -81,6 +81,8 @@ exports.createDistrict = asyncHandler(async (req, res, next) => {
     name,
     districtCode,
     zoneId: req.body.zoneId,
+    createdBy: req.user.id || "",
+    updatedBy: req.user.id || "",
   });
 
   const savedDocument = await district
@@ -156,6 +158,7 @@ exports.updateDistrict = asyncHandler(async (req, res, next) => {
     ...req.body,
     reqDistrictName,
     reqDistrictCode,
+    updatedBy: req.user.id || "",
   };
 
   //update the district to changed Zone(if new zoneId)
