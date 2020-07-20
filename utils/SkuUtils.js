@@ -2,7 +2,6 @@ const { calculateSkuPrice } = require("./SkuPriceCalculation");
 const { cloneDeep } = require("lodash");
 
 const buildSkuPayload = (skuData) => {
-  console.log(skuData);
   const sku = cloneDeep(skuData);
   const skuPrices = calculateSkuPrice(sku);
 

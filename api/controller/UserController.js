@@ -60,8 +60,8 @@ exports.createUser = asyncHandler(async (req, res, next) => {
     mobileNumber,
     password,
     role,
-    createdBy: req.user.id || "",
-    updatedBy: req.user.id || "",
+    createdBy: (req.user && req.user.id) || "SUPER_ADMIN",
+    updatedBy: (req.user && req.user.id) || "SUPER_ADMIN",
   });
 
   const createdUser = await UserModel.findOne({

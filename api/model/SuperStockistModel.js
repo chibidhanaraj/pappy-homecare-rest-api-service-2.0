@@ -1,4 +1,8 @@
 const mongoose = require("mongoose");
+const {
+  DISTRIBUTION_TYPES,
+  CUSTOMER_CONSTANTS,
+} = require("../../constants/constants");
 const Schema = mongoose.Schema;
 
 const contactSchema = new Schema(
@@ -143,6 +147,14 @@ SuperStockistSchema.virtual("districtsPayload", {
   ref: "District",
   localField: "districts",
   foreignField: "_id",
+});
+
+SuperStockistSchema.virtual("distributionType").get(function () {
+  return DISTRIBUTION_TYPES.SUPERSTOCKIST_DISTRIBUTOR_RETAILER;
+});
+
+SuperStockistSchema.virtual("customerType").get(function () {
+  return CUSTOMER_CONSTANTS.SUPER_STOCKIST;
 });
 
 // Cascade delete Super Stockist

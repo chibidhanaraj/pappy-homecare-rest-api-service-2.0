@@ -1,7 +1,7 @@
 const { cloneDeep } = require("lodash");
+const { CUSTOMER_CONSTANTS } = require("../constants/constants");
 
 const buildRetailerPayload = (retailerData) => {
-  console.log(retailerData);
   const retailer = cloneDeep(retailerData);
 
   retailer.id = retailer._id;
@@ -15,6 +15,7 @@ const buildRetailerPayload = (retailerData) => {
   retailer.area = retailer.area || {};
   retailer.beatArea = retailer.beatArea || {};
   retailer.distributor = retailer.distributor || {};
+  retailer.customerType = CUSTOMER_CONSTANTS.RETAILER;
 
   delete retailer._id;
   delete retailer.__v;

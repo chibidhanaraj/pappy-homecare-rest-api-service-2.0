@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { CUSTOMER_CONSTANTS } = require("../../constants/constants");
 const Schema = mongoose.Schema;
 
 const contactSchema = new Schema(
@@ -79,6 +80,10 @@ const DistributorSchema = new Schema(
       required: [true, "Please add the Distributor Name"],
     },
 
+    distributionType: {
+      type: String,
+    },
+
     deliveryVehiclesCount: {
       type: String,
     },
@@ -131,10 +136,12 @@ const DistributorSchema = new Schema(
         ref: "Retailer",
       },
     ],
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -146,6 +153,10 @@ const DistributorSchema = new Schema(
     timestamps: { createdAt: true, updatedAt: true },
   }
 );
+
+DistributorSchema.virtual("customerType").get(function () {
+  return CUSTOMER_CONSTANTS.DISTRIBUTOR;
+});
 
 DistributorSchema.virtual("zonesPayload", {
   ref: "Zone",

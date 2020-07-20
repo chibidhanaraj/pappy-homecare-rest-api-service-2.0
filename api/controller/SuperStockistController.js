@@ -115,8 +115,6 @@ exports.createSuperStockist = asyncHandler(async (req, res, next) => {
 
   await Promise.all(updatePromises);
 
-  console.log(savedSuperStockistDocument);
-
   res.status(201).json({
     status: STATUS.OK,
     message: SUPER_STOCKIST_CONTROLLER_CONSTANTS.CREATE_SUCCESS,
@@ -157,6 +155,7 @@ exports.updateSuperStockist = asyncHandler(async (req, res, next) => {
     "currentBrandsDealing",
     "zones",
     "districts",
+    "distributionType",
   ];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>

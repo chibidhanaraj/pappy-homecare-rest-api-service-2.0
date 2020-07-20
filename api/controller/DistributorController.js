@@ -83,6 +83,7 @@ exports.createDistributor = asyncHandler(async (req, res, next) => {
   const districts = req.body.districts || [];
   const areas = req.body.areas;
   const superStockistId = req.body.superStockistId || null;
+  const distributionType = req.body.distributionType;
 
   const distributor = new DistributorModel({
     _id: new mongoose.Types.ObjectId(),
@@ -100,6 +101,7 @@ exports.createDistributor = asyncHandler(async (req, res, next) => {
     superStockistId,
     createdBy: req.user.id || "",
     updatedBy: req.user.id || "",
+    distributionType,
   });
 
   const savedDistributorDocument = await distributor
@@ -158,8 +160,6 @@ exports.createDistributor = asyncHandler(async (req, res, next) => {
 
   await Promise.all(updatePromises);
 
-  console.log(savedDistributorDocument);
-
   res.status(201).json({
     status: STATUS.OK,
     message: DISTRIBUTOR_CONTROLLER_CONSTANTS.CREATE_SUCCESS,
@@ -202,6 +202,7 @@ exports.updateDistributor = asyncHandler(async (req, res, next) => {
     "districts",
     "areas",
     "superStockistId",
+    "distributionType",
   ];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>

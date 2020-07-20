@@ -1,4 +1,5 @@
 const { cloneDeep } = require("lodash");
+const { CUSTOMER_CONSTANTS } = require("../constants/constants");
 
 const buildDistributorPayload = (distributorData) => {
   const distributor = cloneDeep(distributorData);
@@ -6,6 +7,7 @@ const buildDistributorPayload = (distributorData) => {
   distributor.id = distributor._id;
   distributor.superStockistId = distributor.superStockistId || "";
   distributor.superStockist = distributor.superStockist || {};
+  distributor.customerType = CUSTOMER_CONSTANTS.DISTRIBUTOR;
 
   delete distributor._id;
   delete distributor.__v;

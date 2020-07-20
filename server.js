@@ -14,6 +14,8 @@ const PORT = process.env.PORT || 3000;
 //Connect to db
 dbConnection();
 //Routes path
+const userRoutes = require("./api/routes/UserRoutes");
+const authRoutes = require("./api/routes/AuthRoutes");
 const productRoutes = require("./api/routes/ProductRoutes");
 const skuRoutes = require("./api/routes/SkuRoutes");
 const zoneRoutes = require("./api/routes/ZoneRoutes");
@@ -27,8 +29,9 @@ const superStockistRoutes = require("./api/routes/SuperStockistRoutes");
 const wholeSalerRoutes = require("./api/routes/WholeSalerRoutes");
 const directRetailerRoutes = require("./api/routes/DirectRetailerRoutes");
 const retailerRoutes = require("./api/routes/RetailerRoutes");
-const userRoutes = require("./api/routes/UserRoutes");
-const authRoutes = require("./api/routes/AuthRoutes");
+const primaryOrderRoutes = require("./api/routes/Orders/PrimaryOrderRoutes");
+const secondPrimaryOrderRoutes = require("./api/routes/Orders/SecondPrimaryOrderRoutes");
+const secondaryOrderRoutes = require("./api/routes/Orders/SecondaryOrderRoutes");
 
 const app = express();
 
@@ -41,12 +44,11 @@ app.use(express.urlencoded({ extended: true }));
 // Dev logging middleware
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
-  app.use((req, res, next) => {
-    setTimeout(() => next(), 2500);
-  });
 }
 
 // Routes which should handle requests
+app.use("/api/user", userRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/sku", skuRoutes);
 app.use("/api/zone", zoneRoutes);
@@ -60,8 +62,9 @@ app.use("/api/distributor", distributorRoutes);
 app.use("/api/wholesaler", wholeSalerRoutes);
 app.use("/api/directretailer", directRetailerRoutes);
 app.use("/api/retailer", retailerRoutes);
-app.use("/api/user", userRoutes);
-app.use("/api/auth", authRoutes);
+app.use("/api/order/primary-order", primaryOrderRoutes);
+app.use("/api/order/second-primary-order", secondPrimaryOrderRoutes);
+app.use("/api/order/secondary-order", secondaryOrderRoutes);
 
 app.use(errorHandler);
 

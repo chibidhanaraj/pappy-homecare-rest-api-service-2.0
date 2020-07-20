@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { CUSTOMER_CONSTANTS } = require("../../constants/constants");
 const Schema = mongoose.Schema;
 
 const contactSchema = new Schema(
@@ -75,6 +76,10 @@ const RetailerSchema = new Schema(
       ],
     },
 
+    distributionType: {
+      type: String,
+    },
+
     contact: contactSchema,
 
     additionalContacts: [additionalContactSchema],
@@ -126,6 +131,10 @@ const RetailerSchema = new Schema(
     timestamps: { createdAt: true, updatedAt: true },
   }
 );
+
+RetailerSchema.virtual("customerType").get(function () {
+  return CUSTOMER_CONSTANTS.RETAILER;
+});
 
 RetailerSchema.virtual("zone", {
   ref: "Zone",

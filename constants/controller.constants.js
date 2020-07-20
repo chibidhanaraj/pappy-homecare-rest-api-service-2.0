@@ -113,6 +113,39 @@ const SKU_CONTROLLER_CONSTANTS = {
     "{{name}} already exists. Please try again with a different sku name",
 };
 
+const PRIMARY_ORDER_CONTROLLER_CONSTANTS = {
+  FETCH_SUCCESS: "Fetched Successfully",
+  CREATE_SUCCESS: "Primary Order Created Successfully",
+  UPDATE_SUCCESS: "Primary Order Updated Successfully",
+  DELETE_SUCCESS: "Primary Order Deleted Successfully",
+  CUSTOMER_NOT_FOUND:
+    "This Customer does not exist in the server. This customer may be deleted before",
+  PRIMARY_ORDER_NOT_FOUND:
+    "This Primary order does not exist in the server. The order may be deleted before",
+};
+
+const SECOND_PRIMARY_ORDER_CONTROLLER_CONSTANTS = {
+  FETCH_SUCCESS: "Fetched Successfully",
+  CREATE_SUCCESS: "Second-Primary Order Created Successfully",
+  UPDATE_SUCCESS: "Second-Primary Order Updated Successfully",
+  DELETE_SUCCESS: "Second-Primary Order Deleted Successfully",
+  CUSTOMER_NOT_FOUND:
+    "This Customer does not exist in the server. This customer may be deleted before",
+  SECOND_PRIMARY_ORDER_NOT_FOUND:
+    "This Second-Primary order does not exist in the server. The order may be deleted before",
+};
+
+const SECONDARY_ORDER_CONTROLLER_CONSTANTS = {
+  FETCH_SUCCESS: "Fetched Successfully",
+  CREATE_SUCCESS: "Secondary Order Created Successfully",
+  UPDATE_SUCCESS: "Secondary Order Updated Successfully",
+  DELETE_SUCCESS: "Secondary Order Deleted Successfully",
+  CUSTOMER_NOT_FOUND:
+    "This Customer does not exist in the server. This customer may be deleted before",
+  SECONDARY_ORDER_NOT_FOUND:
+    "This Secondary Order does not exist in the server. This Order may be deleted before",
+};
+
 module.exports = {
   STATUS,
   AUTH_CONTROLLER_CONSTANTS,
@@ -126,4 +159,7 @@ module.exports = {
   RETAILER_CONTROLLER_CONSTANTS,
   PRODUCT_CONTROLLER_CONSTANTS,
   SKU_CONTROLLER_CONSTANTS,
+  PRIMARY_ORDER_CONTROLLER_CONSTANTS,
+  SECOND_PRIMARY_ORDER_CONTROLLER_CONSTANTS,
+  SECONDARY_ORDER_CONTROLLER_CONSTANTS,
 };

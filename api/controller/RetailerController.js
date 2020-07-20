@@ -74,6 +74,7 @@ exports.createRetailer = asyncHandler(async (req, res, next) => {
   const areaId = req.body.areaId ? req.body.areaId : null;
   const beatAreaId = req.body.beatAreaId ? req.body.beatAreaId : null;
   const distributorId = req.body.distributorId ? req.body.distributorId : null;
+  const distributionType = req.body.distributionType;
 
   const retailer = new RetailerModel({
     _id: new mongoose.Types.ObjectId(),
@@ -90,6 +91,7 @@ exports.createRetailer = asyncHandler(async (req, res, next) => {
     distributorId,
     createdBy: req.user.id || "",
     updatedBy: req.user.id || "",
+    distributionType,
   });
 
   const savedRetailerDocument = await retailer
@@ -204,6 +206,7 @@ exports.updateRetailer = asyncHandler(async (req, res, next) => {
     "areaId",
     "beatAreaId",
     "distributorId",
+    "distributionType",
   ];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>

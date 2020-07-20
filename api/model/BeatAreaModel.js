@@ -8,35 +8,42 @@ const BeatAreaSchema = new Schema(
       type: String,
       required: true,
     },
+
     beatAreaCode: {
       type: String,
       required: true,
     },
+
     areaId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "Area",
     },
+
     districtId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "District",
     },
+
     zoneId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "Zone",
     },
+
     retailers: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Retailer",
       },
     ],
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
