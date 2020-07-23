@@ -1,29 +1,29 @@
-const mongoose = require("mongoose");
-const ZoneModel = require("../model/ZoneModel");
-const DistrictModel = require("../model/DistrictModel");
-const AreaModel = require("../model/AreaModel");
-const BeatAreaModel = require("../model/BeatAreaModel");
-const ErrorResponse = require("../../utils/errorResponse");
-const asyncHandler = require("../../middleware/asyncHandler");
-const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");
+const mongoose = require('mongoose');
+const BeatAreaModel = require('../model/BeatAreaModel');
+const RetailerModel = require('../model/RetailerModel');
+const ErrorResponse = require('../../utils/errorResponse');
+const asyncHandler = require('../../middleware/asyncHandler');
+const { toUpperCase, toSentenceCase } = require('../../utils/CommonUtils');
 const {
   STATUS,
   BEAT_AREA_CONTROLLER_CONSTANTS,
-} = require("../../constants/controller.constants");
-const { ERROR_TYPES } = require("../../constants/error.constant");
+} = require('../../constants/controller.constants');
+const { ERROR_TYPES } = require('../../constants/error.constant');
+const {
+  normalizeBeatArea,
+  normalizeAllBeatAreas,
+} = require('../../helpers/BeatAreaHelper');
 
 // @desc      Get all beatAreas
 // @route     GET /api/beatArea
 exports.getAllBeatAreas = asyncHandler(async (req, res, next) => {
-  const beatAreas = await BeatAreaModel.find()
-    .populate("zone district area", "name")
-    .exec();
+  const beatAreas = await BeatAreaModel.find().lean().exec();
 
   res.status(200).json({
     status: STATUS.OK,
     message: BEAT_AREA_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
-    error: "",
-    beatAreas,
+    error: '',
+    beatAreas: await normalizeAllBeatAreas(beatAreas),
   });
 });
 
@@ -31,9 +31,7 @@ exports.getAllBeatAreas = asyncHandler(async (req, res, next) => {
 // @route     GET /api/beatArea/:id
 exports.getBeatArea = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
-  const beatArea = await BeatAreaModel.findById(id)
-    .populate("zone district area", "name")
-    .exec();
+  const beatArea = await BeatAreaModel.findById(id).exec();
 
   if (!beatArea) {
     return next(
@@ -48,17 +46,16 @@ exports.getBeatArea = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     status: STATUS.OK,
     message: BEAT_AREA_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
-    error: "",
-    beatArea,
+    error: '',
+    beatArea: await normalizeBeatArea(beatArea.toObject()),
   });
 });
 
 // @desc      Post beatArea
 // @route     POST /api/beatArea/
 exports.createBeatArea = asyncHandler(async (req, res, next) => {
-  const areaCode = req.body.areaCode || ""; // Not saved in db. Used only for Code creation
   const name = toSentenceCase(req.body.name);
-  const beatAreaCode = toUpperCase(areaCode.concat(name));
+  const beatAreaCode = toUpperCase(name);
 
   // Check for created beatArea
   const createdBeatArea = await BeatAreaModel.findOne({
@@ -69,7 +66,7 @@ exports.createBeatArea = asyncHandler(async (req, res, next) => {
     return next(
       new ErrorResponse(
         BEAT_AREA_CONTROLLER_CONSTANTS.BEAT_AREA_DUPLICATE_NAME.replace(
-          "{{name}}",
+          '{{name}}',
           name
         ),
         400,
@@ -82,43 +79,17 @@ exports.createBeatArea = asyncHandler(async (req, res, next) => {
     name,
     beatAreaCode,
     areaId: req.body.areaId,
-    districtId: req.body.districtId,
-    zoneId: req.body.zoneId,
-    createdBy: req.user.id || "",
-    updatedBy: req.user.id || "",
+    createdBy: req.user.id || '',
+    updatedBy: req.user.id || '',
   });
 
-  const savedDocument = await beatArea
-    .save()
-    .then((doc) => doc.populate("zone district area", "name").execPopulate());
-
-  await Promise.all([
-    //update the beatAreaId to Zones Collection
-    await ZoneModel.findOneAndUpdate(
-      { _id: savedDocument.zoneId },
-      { $push: { beatAreas: savedDocument._id } },
-      { new: true, upsert: true }
-    ),
-    //update the beatAreaId to Districts Collection
-    await DistrictModel.findOneAndUpdate(
-      { _id: savedDocument.districtId },
-      { $push: { beatAreas: savedDocument._id } },
-      { new: true, upsert: true }
-    ),
-
-    //update the beatAreaId to Areas Collections
-    await AreaModel.findOneAndUpdate(
-      { _id: savedDocument.areaId },
-      { $push: { beatAreas: savedDocument._id } },
-      { new: true, upsert: true }
-    ),
-  ]);
+  const savedDocument = await beatArea.save();
 
   res.status(201).json({
     status: STATUS.OK,
     message: BEAT_AREA_CONTROLLER_CONSTANTS.CREATE_SUCCESS,
-    error: "",
-    beatArea: savedDocument,
+    error: '',
+    beatArea: await normalizeBeatArea(savedDocument.toObject()),
   });
 });
 
@@ -126,22 +97,9 @@ exports.createBeatArea = asyncHandler(async (req, res, next) => {
 // @route     PATCH /api/beatArea/
 exports.updateBeatArea = asyncHandler(async (req, res, next) => {
   const beatAreaId = req.params.id;
-  const beatArea = await BeatAreaModel.findById(beatAreaId).exec();
-
-  // Check whether the beat Area already exists
-  if (!beatArea) {
-    return next(
-      new ErrorResponse(
-        BEAT_AREA_CONTROLLER_CONSTANTS.BEAT_AREA_NOT_FOUND,
-        404,
-        ERROR_TYPES.NOT_FOUND
-      )
-    );
-  }
-
   // Match for Updates
   const receivedUpdateProperties = Object.keys(req.body);
-  const allowedUpdateProperties = ["name", "areaId", "districtId", "zoneId"];
+  const allowedUpdateProperties = ['name', 'areaId'];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
     allowedUpdateProperties.includes(key)
@@ -154,17 +112,32 @@ exports.updateBeatArea = asyncHandler(async (req, res, next) => {
   const reqBeatAreaName = toSentenceCase(req.body.name);
   const reqBeatAreaCode = toUpperCase(reqBeatAreaName);
 
+  // Check for created beatArea
+  const beatArea = await BeatAreaModel.findById(beatAreaId).exec();
+
+  if (!beatArea) {
+    return next(
+      new ErrorResponse(
+        BEAT_AREA_CONTROLLER_CONSTANTS.BEAT_AREA_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      )
+    );
+  }
+
   // Check for duplicates
   if (reqBeatAreaCode !== beatArea.beatAreaCode) {
-    console.log("Inside the District");
     const checkBeatArea = await BeatAreaModel.findOne({
-      reqBeatAreaCode,
+      beatAreaCode: reqBeatAreaCode,
     });
 
     if (checkBeatArea) {
       return next(
         new ErrorResponse(
-          BEAT_AREA_CONTROLLER_CONSTANTS.BEAT_AREA_DUPLICATE_NAME,
+          BEAT_AREA_CONTROLLER_CONSTANTS.BEAT_AREA_DUPLICATE_NAME.replace(
+            '{{name}}',
+            reqBeatAreaName
+          ),
           400,
           ERROR_TYPES.DUPLICATE_NAME
         )
@@ -176,142 +149,65 @@ exports.updateBeatArea = asyncHandler(async (req, res, next) => {
     ...req.body,
     reqBeatAreaName,
     reqBeatAreaCode,
-    updatedBy: req.user.id || "",
+    updatedBy: req.user.id || '',
   };
 
-  //update the beatArea to changed Area(if new areaId)
-  if (req.body.areaId !== beatArea.areaId) {
-    console.log("Updating the BeatAreaId to Area Collection");
-    const reqAreaId = req.body.areaId;
-    // Check for created area
-    const reqArea = await AreaModel.findById(reqAreaId).exec();
-
-    if (!reqArea) {
-      return next(new ErrorResponse(`Area Not Found for Id:${reqAreaId}`, 400));
-    }
-
-    await Promise.all([
-      //1.Remove the beatAreaId from exisiting area
-      await AreaModel.findOneAndUpdate(
-        { _id: beatArea.areaId },
-        { $pull: { beatAreas: beatAreaId } }
-      ),
-
-      //2. Add the beatAreaId to another area
-      await AreaModel.findOneAndUpdate(
-        { _id: reqAreaId },
-        {
-          $addToSet: {
-            beatAreas: beatAreaId,
-          },
-        }
-      ),
-    ]);
-  }
-
-  //update the beatArea to changed District(if new districtId)
-  if (req.body.districtId !== beatArea.districtId) {
-    console.log("Updating the BeatAreaId to District Collection");
-    const reqDistrictId = req.body.districtId;
-    // Check for created district
-    const reqDistrict = await DistrictModel.findById(reqDistrictId).exec();
-
-    if (!reqDistrict) {
-      return next(
-        new ErrorResponse(`District Not Found for Id:${reqDistrictId}`, 400)
-      );
-    }
-
-    await Promise.all([
-      //1.Remove the beatAreaId from exisiting district
-      await DistrictModel.findOneAndUpdate(
-        { _id: beatArea.districtId },
-        { $pull: { beatAreas: beatAreaId } }
-      ),
-
-      //2. Add the beatAreaId to another district
-      await DistrictModel.findOneAndUpdate(
-        { _id: reqDistrictId },
-        {
-          $addToSet: {
-            beatAreas: beatAreaId,
-          },
-        }
-      ),
-    ]);
-  }
-
-  //update the beatArea to changed Zone(if new zoneId)
-  if (req.body.zoneId !== beatArea.zoneId) {
-    console.log("Updating the BeatAreaId to Zone Collection");
-    const reqZoneId = req.body.zoneId;
-    // Check for created zone
-    const reqZone = await ZoneModel.findById(reqZoneId).exec();
-
-    if (!reqZone) {
-      return next(new ErrorResponse(`Zone Not Found for Id:${reqZone}`, 400));
-    }
-
-    await Promise.all([
-      //1.Remove the beatAreaId from exisiting zone
-      await ZoneModel.findOneAndUpdate(
-        { _id: beatArea.zoneId },
-        { $pull: { beatAreas: beatAreaId } }
-      ),
-
-      //2. Add the beatAreaId to another zone
-      await ZoneModel.findOneAndUpdate(
-        { _id: reqZoneId },
-        {
-          $addToSet: {
-            beatAreas: beatAreaId,
-          },
-        }
-      ),
-    ]);
-  }
-
-  const updatedBeatArea = await BeatAreaModel.findByIdAndUpdate(
-    beatAreaId,
+  await BeatAreaModel.findOneAndUpdate(
+    { _id: beatAreaId },
     dataToUpdate,
     {
       new: true,
       runValidators: true,
-    }
-  )
-    .populate("zone district area", "name")
-    .exec(function (err, doc) {
-      if (err) {
-        new ErrorResponse(`Beat update failure ${reqBeatAreaName}`, 400);
-      } else {
-        res.status(200).json({
-          status: STATUS.OK,
-          message: BEAT_AREA_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
-          error: "",
-          beatArea: doc,
-        });
+      upsert: true,
+    },
+    async (err, beatArea) => {
+      if (err || !beatArea) {
+        return next(
+          new ErrorResponse(
+            BEAT_AREA_CONTROLLER_CONSTANTS.BEAT_AREA_NOT_FOUND,
+            404,
+            ERROR_TYPES.NOT_FOUND
+          )
+        );
       }
-    });
+      res.status(200).json({
+        status: STATUS.OK,
+        message: BEAT_AREA_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
+        error: '',
+        beatArea: await normalizeBeatArea(beatArea.toObject()),
+      });
+    }
+  );
 });
 
+// @desc      Update beatArea
+// @route     DELETE /api/beatArea/
 exports.deleteBeatArea = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
-  const beatArea = await BeatAreaModel.findById(id).exec();
+  const beatAreaId = req.params.id;
 
-  if (!beatArea) {
-    new ErrorResponse(
-      BEAT_AREA_CONTROLLER_CONSTANTS.BEAT_AREA_NOT_FOUND,
-      404,
-      ERROR_TYPES.NOT_FOUND
-    );
-  }
+  await BeatAreaModel.findOne({ _id: beatAreaId }, async (error, beatArea) => {
+    if (error || !beatArea) {
+      new ErrorResponse(
+        BEAT_AREA_CONTROLLER_CONSTANTS.BEAT_AREA_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      );
+    }
 
-  await beatArea.remove();
-
-  res.status(200).json({
-    status: STATUS.OK,
-    message: BEAT_AREA_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
-    error: "",
-    beatArea: {},
+    await Promise.all([
+      await RetailerModel.updateMany(
+        { beatAreaId },
+        { $set: { distributorId: null, beatAreaId: null } },
+        { multi: true }
+      ),
+      await beatArea.remove(),
+    ]).then((el) => {
+      res.status(200).json({
+        status: STATUS.OK,
+        message: BEAT_AREA_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
+        error: '',
+        beatArea: {},
+      });
+    });
   });
 });

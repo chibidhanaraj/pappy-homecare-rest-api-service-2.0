@@ -1,41 +1,32 @@
-const mongoose = require("mongoose");
-const DistributorModel = require("../model/DistributorModel");
-const ZoneModel = require("../model/ZoneModel");
-const DistrictModel = require("../model/DistrictModel");
-const SuperStockistModel = require("../model/SuperStockistModel");
-const AreaModel = require("../model/AreaModel");
-const ErrorResponse = require("../../utils/errorResponse");
-const asyncHandler = require("../../middleware/asyncHandler");
+const mongoose = require('mongoose');
+const DistributorModel = require('../model/DistributorModel');
+const ErrorResponse = require('../../utils/errorResponse');
+const asyncHandler = require('../../middleware/asyncHandler');
 const {
   toSentenceCase,
   areObjectIdEqualArrays,
-} = require("../../utils/CommonUtils");
+} = require('../../utils/CommonUtils');
 const {
   buildDistributorPayload,
   buildAllDistributorsPayload,
-} = require("../../helpers/DistributorHelper");
+} = require('../../helpers/DistributorHelper');
 const {
   STATUS,
   DISTRIBUTOR_CONTROLLER_CONSTANTS,
-} = require("../../constants/controller.constants");
-const { ERROR_TYPES } = require("../../constants/error.constant");
+} = require('../../constants/controller.constants');
+const { ERROR_TYPES } = require('../../constants/error.constant');
+const RetailerModel = require('../model/RetailerModel');
 
 // @desc GET Distributors
 // @route GET /api/distributor
 exports.getAllDistributors = asyncHandler(async (req, res, next) => {
-  const distributors = await DistributorModel.find()
-    .lean()
-    .populate(
-      "zonesPayload districtsPayload areasPayload superStockist",
-      "name"
-    )
-    .exec();
+  const distributors = await DistributorModel.find().lean().exec();
 
   res.status(200).json({
     status: STATUS.OK,
     message: DISTRIBUTOR_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
-    error: "",
-    distributors: buildAllDistributorsPayload(distributors),
+    error: '',
+    distributors: await buildAllDistributorsPayload(distributors),
   });
 });
 
@@ -45,8 +36,8 @@ exports.getDistributor = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
   const distributor = await DistributorModel.findById(id)
     .populate(
-      "zonesPayload districtsPayload areasPayload superStockist",
-      "name"
+      'zonesPayload districtsPayload areasPayload superStockist',
+      'name'
     )
     .exec();
 
@@ -63,8 +54,8 @@ exports.getDistributor = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     status: STATUS.OK,
     message: DISTRIBUTOR_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
-    error: "",
-    distributor: buildDistributorPayload(distributor.toObject()),
+    error: '',
+    distributor: await buildDistributorPayload(distributor.toObject()),
   });
 });
 
@@ -95,76 +86,22 @@ exports.createDistributor = asyncHandler(async (req, res, next) => {
     deliveryVehiclesCount,
     existingRetailersCount,
     currentBrandsDealing,
-    zones,
-    districts,
     areas,
     superStockistId,
-    createdBy: req.user.id || "",
-    updatedBy: req.user.id || "",
+    createdBy: req.user.id || '',
+    updatedBy: req.user.id || '',
     distributionType,
   });
 
-  const savedDistributorDocument = await distributor
-    .save()
-    .then((doc) =>
-      doc
-        .populate(
-          "zonesPayload districtsPayload areasPayload superStockist",
-          "name"
-        )
-        .execPopulate()
-    );
-
-  let updatePromises = [];
-
-  if (zones.length) {
-    const updateZonesPromises = zones.map(async (zoneId) => {
-      await ZoneModel.findOneAndUpdate(
-        { _id: zoneId },
-        { $push: { distributors: savedDistributorDocument._id } },
-        { new: true, upsert: true }
-      );
-    });
-    updatePromises = updatePromises.concat(updateZonesPromises);
-  }
-
-  if (districts.length) {
-    const updateDistrictsPromises = districts.map(async (districtId) => {
-      await DistrictModel.findOneAndUpdate(
-        { _id: districtId },
-        { $push: { distributors: savedDistributorDocument._id } },
-        { new: true, upsert: true }
-      );
-    });
-    updatePromises = updatePromises.concat(updateDistrictsPromises);
-  }
-
-  if (areas.length) {
-    const updateAreasPromises = areas.map(async (areaId) => {
-      await AreaModel.findOneAndUpdate(
-        { _id: areaId },
-        { $push: { distributors: savedDistributorDocument._id } },
-        { new: true, upsert: true }
-      );
-    });
-    updatePromises = updatePromises.concat(updateAreasPromises);
-  }
-
-  if (superStockistId) {
-    await SuperStockistModel.findOneAndUpdate(
-      { _id: savedDistributorDocument.superStockistId },
-      { $push: { distributors: savedDistributorDocument._id } },
-      { new: true, upsert: true }
-    );
-  }
-
-  await Promise.all(updatePromises);
+  const savedDistributorDocument = await distributor.save();
 
   res.status(201).json({
     status: STATUS.OK,
     message: DISTRIBUTOR_CONTROLLER_CONSTANTS.CREATE_SUCCESS,
-    error: "",
-    distributor: buildDistributorPayload(savedDistributorDocument.toObject()),
+    error: '',
+    distributor: await buildDistributorPayload(
+      savedDistributorDocument.toObject()
+    ),
   });
 });
 
@@ -172,9 +109,30 @@ exports.createDistributor = asyncHandler(async (req, res, next) => {
 // @route     PATCH /api/distributor/:distributorId
 exports.updateDistributor = asyncHandler(async (req, res, next) => {
   const distributorId = req.params.id;
-  const reqAreas = req.body.areas;
-  const reqDistricts = req.body.districts;
-  const reqZones = req.body.zones;
+  req.body.name = toSentenceCase(req.body.name);
+
+  const receivedUpdateProperties = Object.keys(req.body);
+  const allowedUpdateProperties = [
+    'name',
+    'contact',
+    'additionalContacts',
+    'address',
+    'gstNumber',
+    'deliveryVehiclesCount',
+    'existingRetailersCount',
+    'currentBrandsDealing',
+    'areas',
+    'superStockistId',
+    'distributionType',
+  ];
+
+  const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
+    allowedUpdateProperties.includes(key)
+  );
+
+  if (!isValidUpdateOperation) {
+    return next(new ErrorResponse(`Invalid Updates for ${distributorId}`));
+  }
 
   const distributor = await DistributorModel.findById(distributorId).exec();
 
@@ -188,245 +146,71 @@ exports.updateDistributor = asyncHandler(async (req, res, next) => {
     );
   }
 
-  const receivedUpdateProperties = Object.keys(req.body);
-  const allowedUpdateProperties = [
-    "name",
-    "contact",
-    "additionalContacts",
-    "address",
-    "gstNumber",
-    "deliveryVehiclesCount",
-    "existingRetailersCount",
-    "currentBrandsDealing",
-    "zones",
-    "districts",
-    "areas",
-    "superStockistId",
-    "distributionType",
-  ];
-
-  const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
-    allowedUpdateProperties.includes(key)
-  );
-
-  if (!isValidUpdateOperation) {
-    return next(new ErrorResponse(`Invalid Updates for ${distributorId}`));
-  }
-
-  if (req.body.name) {
-    req.body.name = toSentenceCase(req.body.name);
-  }
-
-  let removePromises = [];
-  let addPromises = [];
-  const areAreasEqual = areObjectIdEqualArrays(distributor.areas, reqAreas);
-  const areDistrictsEqual = areObjectIdEqualArrays(
-    distributor.districts,
-    reqDistricts
-  );
-  const areZonesEqual = areObjectIdEqualArrays(distributor.zones, reqZones);
-
-  if (!areAreasEqual) {
-    console.log("areas removal");
-    const removeAreasPromises = distributor.areas.map(async (areaId) => {
-      await AreaModel.findOneAndUpdate(
-        { _id: areaId },
-        { $pull: { distributors: distributorId } }
-      );
-    });
-    removePromises = removePromises.concat(removeAreasPromises);
-  }
-
-  if (!areDistrictsEqual) {
-    console.log("districts removal");
-    const removeDistrictsPromises = distributor.districts.map(
-      async (districtId) => {
-        await DistrictModel.findOneAndUpdate(
-          { _id: districtId },
-          { $pull: { distributors: distributorId } }
-        );
-      }
-    );
-    removePromises = removePromises.concat(removeDistrictsPromises);
-  }
-
-  if (!areZonesEqual) {
-    console.log("zones removal");
-    const removeZonesPromises = distributor.zones.map(async (zoneId) => {
-      await ZoneModel.findOneAndUpdate(
-        { _id: zoneId },
-        { $pull: { distributors: distributorId } }
-      );
-    });
-    removePromises = removePromises.concat(removeZonesPromises);
-  }
-
-  await Promise.all(removePromises);
-
-  if (!areAreasEqual && reqAreas.length) {
-    console.log("add areas");
-    const updateAreasPromises = reqAreas.map(async (areaId) => {
-      await AreaModel.findOneAndUpdate(
-        { _id: areaId },
-        { $addToSet: { distributors: distributorId } }
-      );
-    });
-    addPromises = addPromises.concat(updateAreasPromises);
-  }
-
-  if (!areDistrictsEqual && reqDistricts.length) {
-    console.log("add districts");
-    const updateDistrictsPromises = reqDistricts.map(async (districtId) => {
-      await DistrictModel.findOneAndUpdate(
-        { _id: districtId },
-        { $addToSet: { distributors: distributorId } }
-      );
-    });
-    addPromises = addPromises.concat(updateDistrictsPromises);
-  }
-
-  if (!areZonesEqual && reqZones.length) {
-    console.log("add zones");
-    const updateZonesPromises = reqZones.map(async (zoneId) => {
-      await ZoneModel.findOneAndUpdate(
-        { _id: zoneId },
-        { $addToSet: { distributors: distributorId } }
-      );
-    });
-    addPromises = addPromises.concat(updateZonesPromises);
-  }
-
-  await Promise.all(addPromises);
-
-  if (
-    !req.body.superStockistId ||
-    !distributor.superStockistId ||
-    distributor.superStockistId.toString() !==
-      req.body.superStockistId.toString()
-  ) {
-    const reqSuperStockistId = req.body.superStockistId;
-    if (!reqSuperStockistId) {
-      /*
-      1.distributor.superStockistId has already been assigned previously
-      2.Update now  is empty/null distributor.superStockistId
-      3.Pull the DistributorID from SuperStockist
-      */
-      console.log(
-        "UnAssigning the distributorId from SuperStockist Collection"
-      );
-      await SuperStockistModel.findOneAndUpdate(
-        { _id: distributor.superStockistId },
-        { $pull: { distributors: distributorId } }
-      );
-      req.body.superStockistId = null;
-    } else if (!distributor.superStockistId) {
-      /*
-      1.distributor.superStockistId is falsy value previously null/undefined/""
-      2. Update now as empty/null distributor.superStockistId
-      */
-      console.log("Assigning the distributorId to Super Stockist Collection");
-      await SuperStockistModel.findOneAndUpdate(
-        { _id: reqSuperStockistId },
-        {
-          $addToSet: {
-            distributors: distributorId,
-          },
-        }
-      );
-    } else {
-      /*
-      1.distributor.superStockistId has a assigned value previously 
-      2. Update now with new distributor.superStockistId ID
-      */
-      console.log("Updating the retailerId to Super Stockist  Collection");
-
-      // Check for existing SuperStockist
-      const reqSuperStockist = await SuperStockistModel.findById(
-        reqSuperStockistId
-      ).exec();
-
-      if (!reqSuperStockist) {
-        return next(
-          new ErrorResponse(
-            `Super Stockist Not Found for Id:${reqSuperStockistId}`,
-            400
-          )
-        );
-      }
-
-      await Promise.all([
-        //1.Remove the distributorId from exisiting Super Stockist
-        await SuperStockistModel.findOneAndUpdate(
-          { _id: distributor.superStockistId },
-          { $pull: { distributors: distributorId } }
-        ),
-
-        //2. Add the distributorId to another Super Stockist
-        await SuperStockistModel.findOneAndUpdate(
-          { _id: reqSuperStockistId },
-          {
-            $addToSet: {
-              distributors: distributorId,
-            },
-          }
-        ),
-      ]);
-    }
-  }
-
   const dataToUpdate = {
     ...req.body,
-    updatedBy: req.user.id || "",
+    updatedBy: req.user.id || '',
   };
 
-  const updatedDistributor = await DistributorModel.findByIdAndUpdate(
-    distributorId,
+  await DistributorModel.findOneAndUpdate(
+    { _id: distributorId },
     dataToUpdate,
     {
       new: true,
       runValidators: true,
-    }
-  )
-    .populate(
-      "zonesPayload districtsPayload areasPayload superStockist",
-      "name"
-    )
-    .exec(function (err, doc) {
-      if (err) {
-        new ErrorResponse(`Distributor Update failure ${req.body.name}`, 400);
-      } else {
-        res.status(200).json({
-          status: STATUS.OK,
-          message: DISTRIBUTOR_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
-          error: "",
-          distributor: buildDistributorPayload(doc.toObject()),
-        });
+      upsert: true,
+    },
+
+    async (err, distributor) => {
+      if (err || !distributor) {
+        return next(
+          new ErrorResponse(
+            DISTRIBUTOR_CONTROLLER_CONSTANTS.DISTRIBUTOR_NOT_FOUND,
+            404,
+            ERROR_TYPES.NOT_FOUND
+          )
+        );
       }
-    });
+      res.status(200).json({
+        status: STATUS.OK,
+        message: DISTRIBUTOR_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
+        error: '',
+        distributor: await buildDistributorPayload(distributor.toObject()),
+      });
+    }
+  );
 });
 
 // @desc      Delete Distributor
 // @route     delete /api/distributor/
+
 exports.deleteDistributor = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
-  const distributor = await DistributorModel.findById(id).exec();
+  const distributorId = req.params.id;
+  await DistributorModel.findOne(
+    { _id: distributorId },
+    async (error, distributor) => {
+      if (error || !distributor) {
+        new ErrorResponse(
+          DISTRIBUTOR_CONTROLLER_CONSTANTS.DISTRIBUTOR_NOT_FOUND,
+          404,
+          ERROR_TYPES.NOT_FOUND
+        );
+      }
 
-  if (!distributor) {
-    return next(
-      new ErrorResponse(
-        DISTRIBUTOR_CONTROLLER_CONSTANTS.DISTRIBUTOR_NOT_FOUND,
-        404,
-        ERROR_TYPES.NOT_FOUND
-      )
-    );
-  }
-
-  await distributor.remove();
-
-  res.status(200).json({
-    status: STATUS.OK,
-    message: DISTRIBUTOR_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
-    error: "",
-    distributor: {},
-  });
+      await Promise.all([
+        await RetailerModel.updateMany(
+          { distributorId },
+          { $set: { distributorId: null } },
+          { multi: true }
+        ),
+        await distributor.remove(),
+      ]).then((el) => {
+        res.status(200).json({
+          status: STATUS.OK,
+          message: DISTRIBUTOR_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
+          error: '',
+          distributor: {},
+        });
+      });
+    }
+  );
 });

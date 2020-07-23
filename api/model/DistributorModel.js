@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const { CUSTOMER_CONSTANTS } = require("../../constants/constants");
+const mongoose = require('mongoose');
+const { CUSTOMER_CONSTANTS } = require('../../constants/constants');
 const Schema = mongoose.Schema;
 
 const contactSchema = new Schema(
@@ -77,7 +77,7 @@ const DistributorSchema = new Schema(
 
     name: {
       type: String,
-      required: [true, "Please add the Distributor Name"],
+      required: [true, 'Please add the Distributor Name'],
     },
 
     distributionType: {
@@ -106,45 +106,24 @@ const DistributorSchema = new Schema(
 
     superStockistId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "SuperStockist",
+      ref: 'SuperStockist',
     },
-
-    zones: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Zone",
-      },
-    ],
-
-    districts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "District",
-      },
-    ],
 
     areas: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Area",
-      },
-    ],
-
-    retailers: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Retailer",
+        ref: 'Area',
       },
     ],
 
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
 
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
   },
   {
@@ -154,83 +133,7 @@ const DistributorSchema = new Schema(
   }
 );
 
-DistributorSchema.virtual("customerType").get(function () {
-  return CUSTOMER_CONSTANTS.DISTRIBUTOR;
-});
-
-DistributorSchema.virtual("zonesPayload", {
-  ref: "Zone",
-  localField: "zones",
-  foreignField: "_id",
-});
-
-DistributorSchema.virtual("districtsPayload", {
-  ref: "District",
-  localField: "districts",
-  foreignField: "_id",
-});
-
-DistributorSchema.virtual("areasPayload", {
-  ref: "Area",
-  localField: "areas",
-  foreignField: "_id",
-});
-
-DistributorSchema.virtual("superStockist", {
-  ref: "SuperStockist",
-  localField: "superStockistId",
-  foreignField: "_id",
-  justOne: true,
-});
-
-// Cascade delete distributor
-DistributorSchema.pre("remove", async function (next) {
-  await Promise.all([
-    await this.model("Zone").updateMany(
-      { _id: { $in: this.zones } },
-      {
-        $pull: {
-          distributors: this._id,
-        },
-      },
-      { multi: true }
-    ),
-    await this.model("District").updateMany(
-      { _id: { $in: this.districts } },
-      {
-        $pull: {
-          distributors: this._id,
-        },
-      },
-      { multi: true }
-    ),
-    await this.model("Area").updateMany(
-      { _id: { $in: this.areas } },
-      {
-        $pull: {
-          distributors: this._id,
-        },
-      },
-      { multi: true }
-    ),
-    await this.model("SuperStockist").updateMany(
-      { _id: this.superStockistId },
-      {
-        $pull: {
-          distributors: this._id,
-        },
-      }
-    ),
-    await this.model("Retailer").updateMany(
-      { distributorId: this._id },
-      { $set: { distributorId: null } },
-      { multi: true }
-    ),
-  ]);
-  next();
-});
-
-DistributorSchema.set("toJSON", {
+DistributorSchema.set('toJSON', {
   virtuals: true,
   transform: function (doc, ret, options) {
     ret.id = ret._id;
@@ -239,6 +142,6 @@ DistributorSchema.set("toJSON", {
   },
 });
 
-const DistributorModel = mongoose.model("Distributor", DistributorSchema);
+const DistributorModel = mongoose.model('Distributor', DistributorSchema);
 
 module.exports = DistributorModel;
