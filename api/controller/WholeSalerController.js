@@ -1,8 +1,8 @@
-const mongoose = require("mongoose");
-const WholeSalerModel = require("../model/WholeSalerModel");
-const ErrorResponse = require("../../utils/errorResponse");
-const asyncHandler = require("../../middleware/asyncHandler");
-const { toSentenceCase } = require("../../utils/CommonUtils");
+const mongoose = require('mongoose');
+const WholeSalerModel = require('../model/WholeSalerModel');
+const ErrorResponse = require('../../utils/errorResponse');
+const asyncHandler = require('../../middleware/asyncHandler');
+const { toSentenceCase } = require('../../utils/CommonUtils');
 
 // @desc GET WholeSalers
 // @route GET /api/wholesaler
@@ -11,7 +11,7 @@ exports.getAllWholeSalers = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     status: true,
-    wholeSalers,
+    wholeSalers
   });
 });
 
@@ -29,7 +29,7 @@ exports.getWholeSaler = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     status: true,
-    wholeSaler,
+    wholeSaler
   });
 });
 
@@ -49,14 +49,14 @@ exports.createWholeSaler = asyncHandler(async (req, res, next) => {
     additionalContacts,
     address,
     gstNumber,
-    createdBy: req.user.id || "",
-    updatedBy: req.user.id || "",
+    createdBy: req.user.id || '',
+    updatedBy: req.user.id || ''
   });
 
   const savedWholeSalerDocument = await wholeSaler.save();
   res.status(201).json({
     status: true,
-    wholeSaler: savedWholeSalerDocument,
+    wholeSaler: savedWholeSalerDocument
   });
 });
 
@@ -76,7 +76,7 @@ exports.deleteWholeSaler = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     status: true,
-    wholeSaler: {},
+    wholeSaler: {}
   });
 });
 
@@ -98,11 +98,11 @@ exports.updateWholeSaler = asyncHandler(async (req, res, next) => {
 
   const receivedUpdateProperties = Object.keys(req.body);
   const allowedUpdateProperties = [
-    "wholeSalerName",
-    "contact",
-    "additionalContacts",
-    "address",
-    "gstNumber",
+    'wholeSalerName',
+    'contact',
+    'additionalContacts',
+    'address',
+    'gstNumber'
   ];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
@@ -118,8 +118,8 @@ exports.updateWholeSaler = asyncHandler(async (req, res, next) => {
   }
 
   const dataToUpdate = {
-    updatedBy: req.user.id || "",
-    ...req.body,
+    updatedBy: req.user.id || '',
+    ...req.body
   };
 
   const updatedWholeSaler = await WholeSalerModel.findByIdAndUpdate(
@@ -127,7 +127,7 @@ exports.updateWholeSaler = asyncHandler(async (req, res, next) => {
     dataToUpdate,
     {
       new: true,
-      runValidators: true,
+      runValidators: true
     }
   );
 

@@ -1,36 +1,27 @@
-const mongoose = require("mongoose");
-const RetailerModel = require("../model/RetailerModel");
-const DistributorModel = require("../model/DistributorModel");
-const ZoneModel = require("../model/ZoneModel");
-const DistrictModel = require("../model/DistrictModel");
-const AreaModel = require("../model/AreaModel");
-const BeatAreaModel = require("../model/BeatAreaModel");
-const ErrorResponse = require("../../utils/errorResponse");
-const asyncHandler = require("../../middleware/asyncHandler");
-const { toSentenceCase } = require("../../utils/CommonUtils");
+const RetailerModel = require('../model/RetailerModel');
+const ErrorResponse = require('../../utils/errorResponse');
+const asyncHandler = require('../../middleware/asyncHandler');
+const { toSentenceCase } = require('../../utils/CommonUtils');
 const {
   buildAllRetailersPayload,
   buildRetailerPayload,
-} = require("../../helpers/RetailerHelper");
+} = require('../../helpers/RetailerHelper');
 const {
   STATUS,
   RETAILER_CONTROLLER_CONSTANTS,
-} = require("../../constants/controller.constants");
-const { ERROR_TYPES } = require("../../constants/error.constant");
+} = require('../../constants/controller.constants');
+const { ERROR_TYPES } = require('../../constants/error.constant');
 
 // @desc GET Retailer
 // @route GET /api/retailer
 exports.getAllRetailers = asyncHandler(async (req, res, next) => {
-  const retailers = await RetailerModel.find()
-    .lean()
-    .populate("zone district area beatArea distributor", "name")
-    .exec();
+  const retailers = await RetailerModel.find().lean().exec();
 
   res.status(200).json({
     status: STATUS.OK,
     message: RETAILER_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
-    error: "",
-    retailers: buildAllRetailersPayload(retailers),
+    error: '',
+    retailers: await buildAllRetailersPayload(retailers),
   });
 });
 
@@ -38,9 +29,7 @@ exports.getAllRetailers = asyncHandler(async (req, res, next) => {
 // @route    GET /api/retailer/:retailerId
 exports.getRetailer = asyncHandler(async (req, res, next) => {
   const retailerId = req.params.id;
-  const retailer = await RetailerModel.findById(retailerId)
-    .populate("zone district area beatArea distributor", "name")
-    .exec();
+  const retailer = await RetailerModel.findById(retailerId).exec();
 
   if (!retailer) {
     return next(
@@ -55,8 +44,8 @@ exports.getRetailer = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     status: STATUS.OK,
     message: RETAILER_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
-    error: "",
-    retailer: buildRetailerPayload(retailer.toObject()),
+    error: '',
+    retailer: await buildRetailerPayload(retailer.toObject()),
   });
 });
 
@@ -77,102 +66,26 @@ exports.createRetailer = asyncHandler(async (req, res, next) => {
   const distributionType = req.body.distributionType;
 
   const retailer = new RetailerModel({
-    _id: new mongoose.Types.ObjectId(),
     name,
     retailerType,
     contact,
     additionalContacts,
     address,
     gstNumber,
-    zoneId,
-    districtId,
-    areaId,
     beatAreaId,
     distributorId,
-    createdBy: req.user.id || "",
-    updatedBy: req.user.id || "",
+    createdBy: req.user.id || '',
+    updatedBy: req.user.id || '',
     distributionType,
   });
 
-  const savedRetailerDocument = await retailer
-    .save()
-    .then((doc) =>
-      doc
-        .populate("zone district area beatArea distributor", "name")
-        .execPopulate()
-    );
-
-  if (zoneId) {
-    await ZoneModel.findOneAndUpdate(
-      { _id: savedRetailerDocument.zoneId },
-      { $push: { retailers: savedRetailerDocument._id } },
-      { new: true, upsert: true }
-    );
-  }
-
-  if (districtId) {
-    await DistrictModel.findOneAndUpdate(
-      { _id: savedRetailerDocument.districtId },
-      { $push: { retailers: savedRetailerDocument._id } },
-      { new: true, upsert: true }
-    );
-  }
-
-  if (areaId) {
-    await AreaModel.findOneAndUpdate(
-      { _id: savedRetailerDocument.areaId },
-      { $push: { retailers: savedRetailerDocument._id } },
-      { new: true, upsert: true }
-    );
-  }
-
-  if (beatAreaId) {
-    await BeatAreaModel.findOneAndUpdate(
-      { _id: savedRetailerDocument.beatAreaId },
-      { $push: { retailers: savedRetailerDocument._id } },
-      { new: true, upsert: true }
-    );
-  }
-
-  if (distributorId) {
-    await DistributorModel.findOneAndUpdate(
-      { _id: savedRetailerDocument.distributorId },
-      { $push: { beatAreas: savedRetailerDocument._id } },
-      { new: true, upsert: true }
-    );
-  }
+  const savedRetailerDocument = await retailer.save();
 
   res.status(201).json({
     status: STATUS.OK,
     message: RETAILER_CONTROLLER_CONSTANTS.CREATE_SUCCESS,
-    error: "",
-    retailer: buildRetailerPayload(savedRetailerDocument.toObject()),
-  });
-});
-
-// @desc      Delete Retailer
-// @route     delete /api/retailer/:retailerId
-exports.deleteRetailer = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
-  const retailer = await RetailerModel.findById(id).exec();
-
-  if (!retailer) {
-    return next(
-      new ErrorResponse(
-        RETAILER_CONTROLLER_CONSTANTS.RETAILER_NOT_FOUND,
-        404,
-        ERROR_TYPES.NOT_FOUND
-      )
-    );
-  }
-
-  await retailer.remove();
-
-  res.status(200).json({
-    status: STATUS.OK,
-    message: RETAILER_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
-    error: "",
-    retailer: {},
+    error: '',
+    retailer: await buildRetailerPayload(savedRetailerDocument.toObject()),
   });
 });
 
@@ -180,6 +93,30 @@ exports.deleteRetailer = asyncHandler(async (req, res, next) => {
 // @route     PATCH /api/retailer/:retailerId
 exports.updateRetailer = asyncHandler(async (req, res, next) => {
   const retailerId = req.params.id;
+  req.body.name = toSentenceCase(req.body.name);
+  req.body.distributorId = req.body.distributorId || null;
+  req.body.beatAreaId = req.body.beatAreaId || null;
+
+  const receivedUpdateProperties = Object.keys(req.body);
+  const allowedUpdateProperties = [
+    'name',
+    'retailerType',
+    'contact',
+    'additionalContacts',
+    'address',
+    'gstNumber',
+    'beatAreaId',
+    'distributorId',
+    'distributionType',
+  ];
+
+  const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
+    allowedUpdateProperties.includes(key)
+  );
+
+  if (!isValidUpdateOperation) {
+    return next(new ErrorResponse(`Invalid Updates for ${retailerId}`));
+  }
 
   const retailer = await RetailerModel.findById(retailerId).exec();
 
@@ -193,346 +130,59 @@ exports.updateRetailer = asyncHandler(async (req, res, next) => {
     );
   }
 
-  const receivedUpdateProperties = Object.keys(req.body);
-  const allowedUpdateProperties = [
-    "name",
-    "retailerType",
-    "contact",
-    "additionalContacts",
-    "address",
-    "gstNumber",
-    "zoneId",
-    "districtId",
-    "areaId",
-    "beatAreaId",
-    "distributorId",
-    "distributionType",
-  ];
-
-  const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
-    allowedUpdateProperties.includes(key)
-  );
-
-  if (!isValidUpdateOperation) {
-    return next(new ErrorResponse(`Invalid Updates for ${retailerId}`));
-  }
-
-  if (req.body.name) {
-    req.body.name = toSentenceCase(req.body.name);
-  }
-
-  if (
-    !req.body.zoneId ||
-    !retailer.zoneId ||
-    retailer.zoneId.toString() !== req.body.zoneId.toString()
-  ) {
-    const reqZoneId = req.body.zoneId;
-    if (!reqZoneId) {
-      // For Empty String in req.body
-      console.log("UnAssigning the retailerId from Zone Collection");
-      await ZoneModel.findOneAndUpdate(
-        { _id: retailer.zoneId },
-        { $pull: { retailers: retailerId } }
-      );
-      req.body.zoneId = null;
-    } else if (!retailer.zoneId) {
-      await ZoneModel.findOneAndUpdate(
-        { _id: reqZoneId },
-        {
-          $addToSet: {
-            retailers: retailerId,
-          },
-        }
-      );
-    } else {
-      console.log("Updating the retailerId to Zone Collection");
-      // Check for created zone
-      const reqZone = await ZoneModel.findById(reqZoneId).exec();
-
-      if (!reqZone) {
-        return next(
-          new ErrorResponse(`Zone Not Found for Id:${reqZoneId}`, 400)
-        );
-      }
-
-      await Promise.all([
-        //1.Remove the retailerId from exisiting zone
-        await ZoneModel.findOneAndUpdate(
-          { _id: retailer.zoneId },
-          { $pull: { retailers: retailerId } }
-        ),
-
-        //2. Add the retailerId to another zone
-        await ZoneModel.findOneAndUpdate(
-          { _id: reqZoneId },
-          {
-            $addToSet: {
-              retailers: retailerId,
-            },
-          }
-        ),
-      ]);
-    }
-  }
-
-  if (
-    !req.body.districtId ||
-    !retailer.districtId ||
-    retailer.districtId.toString() !== req.body.districtId.toString()
-  ) {
-    const reqDistrictId = req.body.districtId;
-    if (!reqDistrictId) {
-      // Empty String in req.body
-      console.log("UnAssigning the retailerId from District Collection");
-      await DistrictModel.findOneAndUpdate(
-        { _id: retailer.districtId },
-        { $pull: { retailers: retailerId } }
-      ),
-        (req.body.districtId = null);
-    } else if (!retailer.districtId) {
-      // For Falsy values from DB
-      console.log("Assigning the retailerId to District Collection");
-      await DistrictModel.findOneAndUpdate(
-        { _id: reqDistrictId },
-        {
-          $addToSet: {
-            retailers: retailerId,
-          },
-        }
-      );
-    } else {
-      // For Truthy Values
-      console.log("Updating the retailerId to District Collection");
-      // Check for created District
-      const reqDistrict = await DistrictModel.findById(reqDistrictId).exec();
-
-      if (!reqDistrict) {
-        return next(
-          new ErrorResponse(`District Not Found for Id:${reqDistrictId}`, 400)
-        );
-      }
-
-      await Promise.all([
-        //1.Remove the retailerId from exisiting zone
-        await DistrictModel.findOneAndUpdate(
-          { _id: retailer.districtId },
-          { $pull: { retailers: retailerId } }
-        ),
-
-        //2. Add the retailerId to another zone
-        await DistrictModel.findOneAndUpdate(
-          { _id: reqDistrictId },
-          {
-            $addToSet: {
-              retailers: retailerId,
-            },
-          }
-        ),
-      ]);
-    }
-  }
-
-  if (
-    !req.body.areaId ||
-    !retailer.areaId ||
-    retailer.areaId.toString() !== req.body.areaId.toString()
-  ) {
-    const reqAreaId = req.body.areaId;
-    if (!reqAreaId) {
-      // Empty String in req.body
-      console.log("UnAssigning the retailerId from Area Collection");
-      await AreaModel.findOneAndUpdate(
-        { _id: retailer.areaId },
-        { $pull: { retailers: retailerId } }
-      );
-      req.body.areaId = null;
-    } else if (!retailer.areaId) {
-      // For Falsy values from DB
-      console.log("Assigning the retailerId to Area Collection");
-      await AreaModel.findOneAndUpdate(
-        { _id: reqAreaId },
-        {
-          $addToSet: {
-            retailers: retailerId,
-          },
-        }
-      );
-    } else {
-      // For Truthy Values
-      console.log("Updating the retailerId to Area Collection");
-      // Check for created Area
-      const reqArea = await AreaModel.findById(reqAreaId).exec();
-
-      if (!reqArea) {
-        return next(
-          new ErrorResponse(`Area Not Found for Id:${reqAreaId}`, 400)
-        );
-      }
-
-      await Promise.all([
-        //1.Remove the retailerId from exisiting Area
-        await AreaModel.findOneAndUpdate(
-          { _id: retailer.areaId },
-          { $pull: { retailers: retailerId } }
-        ),
-
-        //2. Add the retailerId to another Area
-        await AreaModel.findOneAndUpdate(
-          { _id: reqAreaId },
-          {
-            $addToSet: {
-              retailers: retailerId,
-            },
-          }
-        ),
-      ]);
-    }
-  }
-
-  if (
-    !req.body.beatAreaId ||
-    !retailer.beatAreaId ||
-    retailer.beatAreaId.toString() !== req.body.beatAreaId.toString()
-  ) {
-    const reqBeatAreaId = req.body.beatAreaId;
-    if (!reqBeatAreaId) {
-      // Empty String in req.body
-      console.log("UnAssigning the retailerId from BeatArea Collection");
-      await BeatAreaModel.findOneAndUpdate(
-        { _id: retailer.beatAreaId },
-        { $pull: { retailers: retailerId } }
-      );
-      req.body.beatAreaId = null;
-    } else if (!retailer.beatAreaId) {
-      // For Falsy values from DB
-      console.log("Assigning the retailerId to BeatArea Collection");
-      await BeatAreaModel.findOneAndUpdate(
-        { _id: reqBeatAreaId },
-        {
-          $addToSet: {
-            retailers: retailerId,
-          },
-        }
-      );
-    } else {
-      // For Truthy Values
-      console.log("Updating the retailerId to Beat BeatArea Collection");
-      // Check for created District
-      const reqBeatArea = await BeatAreaModel.findById(reqBeatAreaId).exec();
-
-      if (!reqBeatArea) {
-        return next(
-          new ErrorResponse(`BeatArea Not Found for Id:${reqBeatAreaId}`, 400)
-        );
-      }
-
-      await Promise.all([
-        //1.Remove the retailerId from exisiting Beat BeatArea
-        await BeatAreaModel.findOneAndUpdate(
-          { _id: retailer.beatAreaId },
-          { $pull: { retailers: retailerId } }
-        ),
-
-        //2. Add the retailerId to another Beat BeatArea
-        await BeatAreaModel.findOneAndUpdate(
-          { _id: reqBeatAreaId },
-          {
-            $addToSet: {
-              retailers: retailerId,
-            },
-          }
-        ),
-      ]);
-    }
-  }
-
-  if (
-    !req.body.distributorId ||
-    !retailer.distributorId ||
-    retailer.distributorId.toString() !== req.body.distributorId.toString()
-  ) {
-    const reqDistributorId = req.body.distributorId;
-    if (!reqDistributorId) {
-      // Empty String in req.body
-      console.log("UnAssigning the retailerId from Distributor Collection");
-      await DistributorModel.findOneAndUpdate(
-        { _id: retailer.distributorId },
-        { $pull: { retailers: retailerId } }
-      );
-      req.body.distributorId = null;
-    } else if (!retailer.distributorId) {
-      // For Falsy values from DB
-      console.log("Assigning the retailerId to Distributor Collection");
-      await DistributorModel.findOneAndUpdate(
-        { _id: reqDistributorId },
-        {
-          $addToSet: {
-            retailers: retailerId,
-          },
-        }
-      );
-    } else {
-      console.log("Updating the retailerId to Distributor Collection");
-
-      // Check for created zone
-      const reqDistributor = await DistributorModel.findById(
-        reqDistributorId
-      ).exec();
-
-      if (!reqDistributor) {
-        return next(
-          new ErrorResponse(
-            `Distributor Not Found for Id:${reqDistributorId}`,
-            400
-          )
-        );
-      }
-
-      await Promise.all([
-        //1.Remove the retailerId from exisiting Distributor
-        await DistributorModel.findOneAndUpdate(
-          { _id: retailer.distributorId },
-          { $pull: { retailers: retailerId } }
-        ),
-
-        //2. Add the retailerId to another Distributor
-        await DistributorModel.findOneAndUpdate(
-          { _id: reqDistributorId },
-          {
-            $addToSet: {
-              retailers: retailerId,
-            },
-          }
-        ),
-      ]);
-    }
-  }
-
   const dataToUpdate = {
     ...req.body,
-    skuCode: toSentenceCase(req.body.name),
-    updatedBy: req.user.id || "",
+    updatedBy: req.user.id || '',
   };
 
-  const updatedRetailer = await RetailerModel.findByIdAndUpdate(
-    retailerId,
+  await RetailerModel.findOneAndUpdate(
+    { _id: retailerId },
     dataToUpdate,
     {
       new: true,
       runValidators: true,
-    }
-  )
-    .populate("zone district area beatArea distributor", "name")
-    .exec(function (err, doc) {
-      if (err) {
-        new ErrorResponse(`Retailer Update failure ${req.body.name}`, 400);
-      } else {
-        res.status(200).json({
-          status: STATUS.OK,
-          message: RETAILER_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
-          error: "",
-          retailer: buildRetailerPayload(doc.toObject()),
-        });
+      upsert: true,
+    },
+    async (err, retailer) => {
+      if (err || !retailer) {
+        return next(
+          new ErrorResponse(
+            RETAILER_CONTROLLER_CONSTANTS.RETAILER_NOT_FOUND,
+            404,
+            ERROR_TYPES.NOT_FOUND
+          )
+        );
       }
+      res.status(200).json({
+        status: STATUS.OK,
+        message: RETAILER_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
+        error: '',
+        retailer: await buildRetailerPayload(retailer.toObject()),
+      });
+    }
+  );
+});
+
+// @desc      Delete Retailer
+// @route     delete /api/retailer/:retailerId
+exports.deleteRetailer = asyncHandler(async (req, res, next) => {
+  const retailerId = req.params.id;
+  await RetailerModel.findOne({ _id: retailerId }, async (error, retailer) => {
+    if (error || !retailer) {
+      new ErrorResponse(
+        RETAILER_CONTROLLER_CONSTANTS.RETAILER_NOT_FOUND,
+        404,
+        ERROR_TYPES.NOT_FOUND
+      );
+    }
+
+    await retailer.remove().then((el) => {
+      res.status(200).json({
+        status: STATUS.OK,
+        message: RETAILER_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
+        error: '',
+        retailer: {},
+      });
     });
+  });
 });

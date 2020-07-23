@@ -1,8 +1,4 @@
-const mongoose = require("mongoose");
-const {
-  DISTRIBUTION_TYPES,
-  CUSTOMER_CONSTANTS,
-} = require("../../constants/constants");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const contactSchema = new Schema(
@@ -80,7 +76,7 @@ const SuperStockistSchema = new Schema(
 
     name: {
       type: String,
-      required: [true, "Please add the Super Stockist Name"],
+      required: [true, 'Please add the Super Stockist Name'],
     },
 
     existingDistributorsCount: {
@@ -99,35 +95,21 @@ const SuperStockistSchema = new Schema(
       type: String,
     },
 
-    zones: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Zone",
-      },
-    ],
-
     districts: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "District",
-      },
-    ],
-
-    distributors: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Distributor",
+        ref: 'District',
       },
     ],
 
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
 
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
   },
   {
@@ -137,59 +119,8 @@ const SuperStockistSchema = new Schema(
   }
 );
 
-SuperStockistSchema.virtual("zonesPayload", {
-  ref: "Zone",
-  localField: "zones",
-  foreignField: "_id",
-});
-
-SuperStockistSchema.virtual("districtsPayload", {
-  ref: "District",
-  localField: "districts",
-  foreignField: "_id",
-});
-
-SuperStockistSchema.virtual("distributionType").get(function () {
-  return DISTRIBUTION_TYPES.SUPERSTOCKIST_DISTRIBUTOR_RETAILER;
-});
-
-SuperStockistSchema.virtual("customerType").get(function () {
-  return CUSTOMER_CONSTANTS.SUPER_STOCKIST;
-});
-
-// Cascade delete Super Stockist
-SuperStockistSchema.pre("remove", async function (next) {
-  await Promise.all([
-    await this.model("Zone").updateMany(
-      { _id: { $in: this.zones } },
-      {
-        $pull: {
-          superStockists: this._id,
-        },
-      },
-      { multi: true }
-    ),
-    await this.model("District").updateMany(
-      { _id: { $in: this.districts } },
-      {
-        $pull: {
-          superStockists: this._id,
-        },
-      },
-      { multi: true }
-    ),
-    await this.model("Distributor").updateMany(
-      { superStockistId: this._id },
-      { $set: { superStockistId: null } },
-      { multi: true }
-    ),
-  ]);
-
-  next();
-});
-
 // Ensure virtual fields are serialised.
-SuperStockistSchema.set("toJSON", {
+SuperStockistSchema.set('toJSON', {
   virtuals: true,
   transform: function (doc, ret, options) {
     ret.id = ret._id;
@@ -198,6 +129,6 @@ SuperStockistSchema.set("toJSON", {
   },
 });
 
-const SuperStockistModel = mongoose.model("SuperStockist", SuperStockistSchema);
+const SuperStockistModel = mongoose.model('SuperStockist', SuperStockistSchema);
 
 module.exports = SuperStockistModel;
