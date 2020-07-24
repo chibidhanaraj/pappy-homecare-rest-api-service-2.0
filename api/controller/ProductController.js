@@ -1,13 +1,19 @@
-const mongoose = require("mongoose");
-const ProductModel = require("../model/ProductModel");
-const ErrorResponse = require("../../utils/errorResponse");
-const asyncHandler = require("../../middleware/asyncHandler");
-const { toUpperCase, toSentenceCase } = require("../../utils/CommonUtils");
+const mongoose = require('mongoose');
+const ProductModel = require('../model/ProductModel');
+const ErrorResponse = require('../../utils/errorResponse');
+const asyncHandler = require('../../middleware/asyncHandler');
+const {
+  toUpperCase,
+  toSentenceCase,
+  areObjectIdEqualArrays,
+  findDifferenceIds,
+} = require('../../utils/CommonUtils');
 const {
   STATUS,
   PRODUCT_CONTROLLER_CONSTANTS,
-} = require("../../constants/controller.constants");
-const { ERROR_TYPES } = require("../../constants/error.constant");
+} = require('../../constants/controller.constants');
+const { ERROR_TYPES } = require('../../constants/error.constant');
+const SkuModel = require('../model/SkuModel');
 
 // @desc      Get all products
 // @route     GET /api/product
@@ -17,7 +23,7 @@ exports.getAllProducts = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     status: STATUS.OK,
     message: PRODUCT_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
-    error: "",
+    error: '',
     products,
   });
 });
@@ -41,7 +47,7 @@ exports.getProduct = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     status: STATUS.OK,
     message: PRODUCT_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
-    error: "",
+    error: '',
     product,
   });
 });
@@ -61,8 +67,8 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
     productType,
     fragrances,
     quantities,
-    createdBy: req.user.id || "",
-    updatedBy: req.user.id || "",
+    createdBy: req.user.id || '',
+    updatedBy: req.user.id || '',
   });
 
   const createdProduct = await ProductModel.findOne({
@@ -73,7 +79,7 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
     return next(
       new ErrorResponse(
         PRODUCT_CONTROLLER_CONSTANTS.PRODUCT_DUPLICATE_NAME.replace(
-          "{{name}}",
+          '{{name}}',
           name
         ),
         400,
@@ -87,7 +93,7 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
   res.status(201).json({
     status: STATUS.OK,
     message: PRODUCT_CONTROLLER_CONSTANTS.CREATE_SUCCESS,
-    error: "",
+    error: '',
     product: savedProductDocument,
   });
 });
@@ -97,6 +103,24 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
 exports.updateProduct = asyncHandler(async (req, res, next) => {
   const productId = req.params.id;
   const reqProductCode = toUpperCase(req.body.name);
+
+  const receivedUpdateProperties = Object.keys(req.body);
+  const allowedUpdateProperties = [
+    'brandName',
+    'name',
+    'productType',
+    'fragrances',
+    'quantities',
+  ];
+
+  const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
+    allowedUpdateProperties.includes(key)
+  );
+
+  if (!isValidUpdateOperation) {
+    return next(new ErrorResponse(`Invalid Updates for ${productId}`));
+  }
+
   const product = await ProductModel.findById(productId).exec();
 
   if (!product) {
@@ -117,7 +141,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
     if (createdProduct) {
       new ErrorResponse(
         PRODUCT_CONTROLLER_CONSTANTS.PRODUCT_DUPLICATE_NAME.replace(
-          "{{name}}",
+          '{{name}}',
           name
         ),
         400,
@@ -126,21 +150,34 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
     }
   }
 
-  const receivedUpdateProperties = Object.keys(req.body);
-  const allowedUpdateProperties = [
-    "brandName",
-    "name",
-    "productType",
-    "fragrances",
-    "quantities",
-  ];
+  const prevFragrances = product.fragrances
+    .map((fragrance) => fragrance._id)
+    .filter((id) => !!id);
+  const newFragrances = req.body.fragrances
+    .map((fragrance) => fragrance._id)
+    .filter((id) => !!id);
 
-  const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
-    allowedUpdateProperties.includes(key)
-  );
+  if (!areObjectIdEqualArrays(prevFragrances, newFragrances)) {
+    const skusToBeDeleted = findDifferenceIds(prevFragrances, newFragrances);
 
-  if (!isValidUpdateOperation) {
-    return next(new ErrorResponse(`Invalid Updates for ${productId}`));
+    await SkuModel.deleteMany({
+      fragranceId: { $in: skusToBeDeleted },
+    });
+  }
+
+  const prevQuantities = product.quantities
+    .map((quantity) => quantity._id)
+    .filter((id) => !!id);
+  const newQuantities = req.body.quantities
+    .map((quantity) => quantity._id)
+    .filter((id) => !!id);
+
+  if (!areObjectIdEqualArrays(prevQuantities, newQuantities)) {
+    const skusToBeDeleted = findDifferenceIds(prevQuantities, newQuantities);
+
+    await SkuModel.deleteMany({
+      quantityId: { $in: skusToBeDeleted },
+    });
   }
 
   if (req.body.name) {
@@ -152,7 +189,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
     productCode: toUpperCase(req.body.name),
     fragrances: req.body.fragrances,
     quantites: req.body.quantites,
-    updatedBy: req.user.id || "",
+    updatedBy: req.user.id || '',
   };
 
   const updatedProduct = await ProductModel.findByIdAndUpdate(
@@ -163,10 +200,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
       runValidators: true,
     }
   );
+
   res.status(200).json({
     status: STATUS.OK,
     message: PRODUCT_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
-    error: "",
+    error: '',
     product: updatedProduct,
   });
 });
@@ -192,7 +230,7 @@ exports.deleteProduct = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     status: STATUS.OK,
     message: PRODUCT_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
-    error: "",
+    error: '',
     product: {},
   });
 });

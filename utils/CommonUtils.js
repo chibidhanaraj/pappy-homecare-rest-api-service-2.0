@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const {
   upperCase,
   upperFirst,
@@ -6,10 +6,11 @@ const {
   isEqual,
   startCase,
   camelCase,
-} = require("lodash");
+  find,
+} = require('lodash');
 
 const toUpperCase = (str) => {
-  return upperCase(str).replace(/\s/g, "");
+  return upperCase(str).replace(/\s/g, '');
 };
 
 const toSentenceCase = (str) => {
@@ -21,7 +22,7 @@ const toTitleCase = (str) => {
 };
 
 const toConstantCase = (str) => {
-  return upperCase(str).replace(/\s/g, "_");
+  return upperCase(str).replace(/\s/g, '_');
 };
 
 const areObjectIdEqualArrays = (array1, array2) => {
@@ -30,10 +31,23 @@ const areObjectIdEqualArrays = (array1, array2) => {
   return isEqual(array1, array2);
 };
 
+const findDifferenceIds = (array1, array2) => {
+  return array1.map((id) => id.toString()).filter((el) => !array2.includes(el));
+};
+
+const getRecordFromPayload = (payload, id) => {
+  if (!id) {
+    return null;
+  }
+  return find(payload, (doc) => doc.id.toString() === id.toString());
+};
+
 module.exports = {
   toUpperCase,
   toSentenceCase,
   toConstantCase,
   areObjectIdEqualArrays,
+  findDifferenceIds,
   toTitleCase,
+  getRecordFromPayload,
 };
