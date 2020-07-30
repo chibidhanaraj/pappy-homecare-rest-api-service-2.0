@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // create Product Schema & model
@@ -20,7 +20,7 @@ const SkuSchema = new Schema(
     productId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: "Product",
+      ref: 'Product',
     },
 
     fragranceId: {
@@ -70,12 +70,12 @@ const SkuSchema = new Schema(
 
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
 
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
   },
   {
@@ -85,14 +85,14 @@ const SkuSchema = new Schema(
   }
 );
 
-SkuSchema.virtual("product", {
-  ref: "Product",
-  localField: "productId",
-  foreignField: "_id",
+SkuSchema.virtual('product', {
+  ref: 'Product',
+  localField: 'productId',
+  foreignField: '_id',
   justOne: true,
 });
 
-SkuSchema.set("toJSON", {
+SkuSchema.set('toJSON', {
   virtuals: true,
   transform: function (doc, ret, options) {
     ret.id = ret._id;
@@ -101,6 +101,6 @@ SkuSchema.set("toJSON", {
   },
 });
 
-const SkuModel = mongoose.model("Sku", SkuSchema);
+const SkuModel = mongoose.model('Sku', SkuSchema);
 
 module.exports = SkuModel;

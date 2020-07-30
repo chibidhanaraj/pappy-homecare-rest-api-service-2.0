@@ -1,29 +1,34 @@
 const mongoose = require('mongoose');
-const SkuModel = require('../model/SkuModel');
-const ErrorResponse = require('../../utils/errorResponse');
-const asyncHandler = require('../../middleware/asyncHandler');
-const { toSentenceCase, toTitleCase } = require('../../utils/CommonUtils');
+const SkuModel = require('../../model/Sku/SkuModel');
+const ComboSkuModel = require('../../model/Sku/ComboSkuModel');
+const ErrorResponse = require('../../../utils/errorResponse');
+const asyncHandler = require('../../../middleware/asyncHandler');
+const { toSentenceCase, toTitleCase } = require('../../../utils/CommonUtils');
 const {
   buildSkuPayload,
   buildAllSkusPayload,
-} = require('../../helpers/SkuHelper');
+  updateComboSku,
+} = require('../../../helpers/SkuHelper');
 const {
   STATUS,
   SKU_CONTROLLER_CONSTANTS,
-  PRODUCT_CONTROLLER_CONSTANTS,
-} = require('../../constants/controller.constants');
-const { ERROR_TYPES } = require('../../constants/error.constant');
+} = require('../../../constants/controller.constants');
+const { ERROR_TYPES } = require('../../../constants/error.constant');
 
 // @desc      Get all sku
 // @route     GET /api/sku
 exports.getAllSkus = asyncHandler(async (req, res, next) => {
   const fetchedSkus = await SkuModel.find().lean().exec();
+  const fetchesComboSkus = await ComboSkuModel.find().lean().exec();
 
   res.status(200).json({
     status: STATUS.OK,
     message: SKU_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
     error: '',
-    skus: await buildAllSkusPayload(fetchedSkus),
+    skus: await buildAllSkusPayload({
+      skus: fetchedSkus,
+      comboSkus: fetchesComboSkus,
+    }),
   });
 });
 
@@ -220,25 +225,28 @@ exports.updateSku = asyncHandler(async (req, res, next) => {
 // @desc      Update sku
 // @route     DELETE /api/sku/:id
 exports.deleteSku = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
-  const sku = await SkuModel.findById(id).exec();
+  const skuId = req.params.id;
 
-  if (!sku) {
-    return next(
-      new ErrorResponse(
-        SKU_CONTROLLER_CONSTANTS.SKU_NOT_FOUND,
-        404,
-        ERROR_TYPES.NOT_FOUND
-      )
+  await SkuModel.findOne({ _id: skuId }, async (error, sku) => {
+    if (error || !sku) {
+      return next(
+        new ErrorResponse(
+          SKU_CONTROLLER_CONSTANTS.SKU_NOT_FOUND,
+          404,
+          ERROR_TYPES.NOT_FOUND
+        )
+      );
+    }
+
+    await Promise.all([await updateComboSku(skuId), await sku.remove()]).then(
+      (el) => {
+        res.status(200).json({
+          status: STATUS.OK,
+          message: SKU_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
+          error: '',
+          sku: {},
+        });
+      }
     );
-  }
-
-  await sku.remove();
-
-  res.status(200).json({
-    status: STATUS.OK,
-    message: SKU_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
-    error: '',
-    sku: {},
   });
 });

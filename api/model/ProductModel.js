@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const FragranceSchema = new Schema({
@@ -13,8 +13,8 @@ const QuantitySchema = new Schema({
   },
   unit: {
     type: String,
-    enum: ["mL", "L", "Kg", "g"],
-    default: "mL",
+    enum: ['mL', 'L', 'Kg', 'g'],
+    default: 'mL',
   },
 });
 
@@ -37,8 +37,8 @@ const ProductSchema = new Schema(
     },
     productType: {
       type: String,
-      enum: ["LIQUID", "POWDER", "SOAP", "SCRUBBER", "OTHERS"],
-      default: "LIQUID",
+      enum: ['LIQUID', 'POWDER', 'SOAP', 'SCRUBBER', 'OTHERS'],
+      default: 'LIQUID',
     },
     fragrances: {
       type: [FragranceSchema],
@@ -48,11 +48,11 @@ const ProductSchema = new Schema(
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
   },
   {
@@ -62,15 +62,7 @@ const ProductSchema = new Schema(
   }
 );
 
-// Cascade delete SKUs when a product is deleted
-ProductSchema.pre("remove", async function (next) {
-  console.log(`Delete Product and its Skus `);
-
-  await this.model("Sku").deleteMany({ productId: this._id });
-  next();
-});
-
-ProductSchema.set("toJSON", {
+ProductSchema.set('toJSON', {
   virtuals: true,
   transform: function (doc, ret, options) {
     ret.id = ret._id;
@@ -79,6 +71,6 @@ ProductSchema.set("toJSON", {
   },
 });
 
-const ProductModel = mongoose.model("Product", ProductSchema);
+const ProductModel = mongoose.model('Product', ProductSchema);
 
 module.exports = ProductModel;

@@ -1,7 +1,10 @@
-const { calculateSkuPrice } = require('../utils/SkuPriceCalculation');
-const { cloneDeep, find } = require('lodash');
-const { getRecordFromPayload } = require('../utils/CommonUtils');
 const ProductModel = require('../api/model/ProductModel');
+const ComboSkuModel = require('../api/model/Sku/ComboSkuModel');
+const { calculateSkuPrice } = require('../utils/SkuPriceCalculation');
+const { cloneDeep } = require('lodash');
+const { getRecordFromPayload } = require('../utils/CommonUtils');
+const { SKU_TYPES } = require('../constants/constants');
+const { buildComboSkuPayload } = require('./ComboSkuHelper');
 
 const normalizeFragranceData = (fragrances, fragranceId) => {
   const fragrance = getRecordFromPayload(fragrances, fragranceId);
@@ -67,20 +70,47 @@ const buildSkuPayload = async (skuData) => {
     skuFragrance,
     skuQuantity,
     skuPrices,
+    skuType: SKU_TYPES.SKU,
   };
 };
 
-const buildAllSkusPayload = async (skus) => {
+const buildAllSkusPayload = async ({ skus, comboSkus }) => {
   let responses = [];
   await skus.reduce(async (allSkus, sku) => {
     await allSkus;
     const newSku = await buildSkuPayload(sku);
     responses.push(newSku);
   }, Promise.resolve());
+
+  await comboSkus.reduce(async (allComboSkus, comboSku) => {
+    await allComboSkus;
+    const newComboSku = await buildComboSkuPayload(comboSku);
+    responses.push(newComboSku);
+  }, Promise.resolve());
+
   return Promise.all(responses);
+};
+
+const updateComboSku = async (skuId) => {
+  let comboSkuIds = [];
+
+  await ComboSkuModel.find({ 'skus.id': { $in: skuId } })
+    .then((docs) => {
+      docs.forEach((doc) => {
+        comboSkuIds.push(doc._id);
+      });
+      return docs;
+    })
+    .then((el) => {
+      return ComboSkuModel.deleteMany(
+        { _id: { $in: comboSkuIds } },
+        { multi: true }
+      );
+    });
 };
 
 module.exports = {
   buildSkuPayload,
   buildAllSkusPayload,
+  updateComboSku,
 };

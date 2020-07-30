@@ -13,7 +13,11 @@ const {
   PRODUCT_CONTROLLER_CONSTANTS,
 } = require('../../constants/controller.constants');
 const { ERROR_TYPES } = require('../../constants/error.constant');
-const SkuModel = require('../model/SkuModel');
+const SkuModel = require('../model/Sku/SkuModel');
+const {
+  deleteSkusAndCombosOnPropertyUpdate,
+  deleteSkusAndCombos,
+} = require('../../helpers/ProductHelper');
 
 // @desc      Get all products
 // @route     GET /api/product
@@ -158,11 +162,15 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
     .filter((id) => !!id);
 
   if (!areObjectIdEqualArrays(prevFragrances, newFragrances)) {
-    const skusToBeDeleted = findDifferenceIds(prevFragrances, newFragrances);
+    const fragranceSkusToBeDeleted = findDifferenceIds(
+      prevFragrances,
+      newFragrances
+    );
 
-    await SkuModel.deleteMany({
-      fragranceId: { $in: skusToBeDeleted },
-    });
+    await deleteSkusAndCombosOnPropertyUpdate(
+      'fragranceId',
+      fragranceSkusToBeDeleted
+    );
   }
 
   const prevQuantities = product.quantities
@@ -173,11 +181,15 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
     .filter((id) => !!id);
 
   if (!areObjectIdEqualArrays(prevQuantities, newQuantities)) {
-    const skusToBeDeleted = findDifferenceIds(prevQuantities, newQuantities);
+    const quantitySkusToBeDeleted = findDifferenceIds(
+      prevQuantities,
+      newQuantities
+    );
 
-    await SkuModel.deleteMany({
-      quantityId: { $in: skusToBeDeleted },
-    });
+    await deleteSkusAndCombosOnPropertyUpdate(
+      'quantityId',
+      quantitySkusToBeDeleted
+    );
   }
 
   if (req.body.name) {
@@ -212,25 +224,29 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
 // @desc      Delete product
 // @route     DELETE /api/product/
 exports.deleteProduct = asyncHandler(async (req, res, next) => {
-  const id = req.params.id;
-  const product = await ProductModel.findById(id).exec();
+  const productId = req.params.id;
 
-  if (!product) {
-    return next(
-      new ErrorResponse(
-        PRODUCT_CONTROLLER_CONSTANTS.PRODUCT_NOT_FOUND,
-        404,
-        ERROR_TYPES.NOT_FOUND
-      )
-    );
-  }
+  await ProductModel.findOne({ _id: productId }, async (error, product) => {
+    if (error || !product) {
+      return next(
+        new ErrorResponse(
+          PRODUCT_CONTROLLER_CONSTANTS.PRODUCT_NOT_FOUND,
+          404,
+          ERROR_TYPES.NOT_FOUND
+        )
+      );
+    }
 
-  await product.remove();
-
-  res.status(200).json({
-    status: STATUS.OK,
-    message: PRODUCT_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
-    error: '',
-    product: {},
+    await Promise.all([
+      await deleteSkusAndCombos(productId),
+      await product.remove(),
+    ]).then((el) => {
+      res.status(200).json({
+        status: STATUS.OK,
+        message: PRODUCT_CONTROLLER_CONSTANTS.DELETE_SUCCESS,
+        error: '',
+        product: {},
+      });
+    });
   });
 });

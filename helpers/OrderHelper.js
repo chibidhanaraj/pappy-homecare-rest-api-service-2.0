@@ -1,10 +1,10 @@
-const { cloneDeep } = require("lodash");
-const { CUSTOMER_CONSTANTS } = require("../constants/constants");
-const SuperStockistModel = require("../api/model/SuperStockistModel");
-const DistributorModel = require("../api/model/DistributorModel");
-const RetailerModel = require("../api/model/RetailerModel");
-const UserModel = require("../api/model/UserModel");
-const SkuModel = require("../api/model/SkuModel");
+const { cloneDeep } = require('lodash');
+const { CUSTOMER_CONSTANTS } = require('../constants/constants');
+const SuperStockistModel = require('../api/model/SuperStockistModel');
+const DistributorModel = require('../api/model/DistributorModel');
+const RetailerModel = require('../api/model/RetailerModel');
+const UserModel = require('../api/model/UserModel');
+const SkuModel = require('../api/model/Sku/SkuModel');
 
 const getUserModel = (customerType) => {
   switch (customerType) {
@@ -61,7 +61,7 @@ const normalizeOrderDetails = async (orderPayload) => {
     orderedItems,
     customer: {
       id: customer.id,
-      place: (customer && customer.address && customer.address.place) || "",
+      place: (customer && customer.address && customer.address.place) || '',
       name: customer.name,
       customerType: customer.customerType,
       distributionType: customer.distributionType,

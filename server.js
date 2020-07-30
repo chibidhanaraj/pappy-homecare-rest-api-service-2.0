@@ -17,7 +17,7 @@ dbConnection();
 const userRoutes = require('./api/routes/UserRoutes');
 const authRoutes = require('./api/routes/AuthRoutes');
 const productRoutes = require('./api/routes/ProductRoutes');
-const skuRoutes = require('./api/routes/SkuRoutes');
+const skuRoutes = require('./api/routes/Sku/SkuRoutes');
 const zoneRoutes = require('./api/routes/ZoneRoutes');
 const districtRoutes = require('./api/routes/DistrictRoutes');
 const areaRoutes = require('./api/routes/AreaRoutes');
