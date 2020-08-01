@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const cookieParser = require('cookie-parser');
 const { dbConnection } = require('./config/dbConnection');
 const colors = require('colors');
 const morgan = require('morgan');
@@ -36,10 +35,9 @@ const app = express();
 //Middlewares
 app.use(cors());
 app.use(express.json());
-app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-// Dev logging middleware
+// Morgan HTTP logging middleware
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
