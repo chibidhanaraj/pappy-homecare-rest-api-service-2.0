@@ -7,6 +7,7 @@ const {
   startCase,
   camelCase,
   find,
+  toLower,
 } = require('lodash');
 
 const toUpperCase = (str) => {
@@ -15,6 +16,10 @@ const toUpperCase = (str) => {
 
 const toSentenceCase = (str) => {
   return upperFirst(lowerCase(str));
+};
+
+const toWordUpperFirstCase = (str) => {
+  return startCase(toLower(str));
 };
 
 const toTitleCase = (str) => {
@@ -45,6 +50,7 @@ const getRecordFromPayload = (payload, id) => {
 module.exports = {
   toUpperCase,
   toSentenceCase,
+  toWordUpperFirstCase,
   toConstantCase,
   areObjectIdEqualArrays,
   findDifferenceIds,

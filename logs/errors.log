@@ -1,0 +1,189 @@
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"South zone already exists. Please try again with a different zone name","url":"/api/zone/","userId":"5f0db90ac36b4569ccd538e3"}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Area validation failed: districtId: Cast to ObjectID failed for value \"\" at path \"districtId\", name: Path `name` is required., areaCode: Path `areaCode` is required.","url":"/api/area/","userId":"5f0db90ac36b4569ccd538e3"}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Sku validation failed: name: Path `name` is required., skuCode: Path `skuCode` is required., productId: Path `productId` is required.","url":"/api/sku","userId":"5f0db90ac36b4569ccd538e3"}
+{"level":"error","method":"POST","type":"SERVER_ERROR","message":"ProductModel is not defined","url":"/api/parent-product","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"productId is not defined","url":"/api/parent-product/6003e9ba8aece91920432cab","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"Toiler Cleaner already exists. Please try again with a different parent product name","url":"/api/parent-product","userId":""}
+{"level":"error","method":"POST","type":"Auth Error","message":"Not authorized to access this route","url":"/api/sku","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"Bathroom Cleaner already exists. Please try again with a different parent product name","url":"/api/parent-product","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"57001 already exists. Please try again with a different sku name","url":"/api/sku","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"57002 already exists. Please try again with a different sku name","url":"/api/sku/60041e9b5357c130746d2bd8","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"57001 already exists. Please try again with a different sku name","url":"/api/sku/60041e9b5357c130746d2bd8","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"57001 already exists. Please try again with a different sku name","url":"/api/sku/60041e9b5357c130746d2bd8","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"57002 already exists. Please try again with a different sku name","url":"/api/sku/60041e9b5357c130746d2bd8","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"57002 already exists. Please try again with a different sku name","url":"/api/sku/60041e9b5357c130746d2bd8","userId":""}
+{"level":"error","method":"POST","type":"SERVER_ERROR","message":"sku_number is not defined","url":"/api/sku/combo","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"57003 already exists. Please choose a different sku number","url":"/api/sku/combo","userId":""}
+{"level":"error","method":"POST","type":"SERVER_ERROR","message":"SKU_CONTROLLER_CONSTANTS is not defined","url":"/api/sku/combo","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"57004 already exists. Please choose a different sku number","url":"/api/sku/combo","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"57003 already exists. Please choose a different sku number","url":"/api/sku/combo","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"57003 already exists. Please choose a different sku number","url":"/api/sku/combo","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"57002 already exists. Please choose a different sku number","url":"/api/sku/combo","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"57001 already exists. Please try again with a different sku name","url":"/api/sku/60041eb45357c130746d2bda","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"57004 already exists. Please try again with a different sku name","url":"/api/sku/60041eb45357c130746d2bda","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"57003 already exists. Please try again with a different sku name","url":"/api/sku","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"57001 already exists. Please try again with a different sku name","url":"/api/sku","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"57004 already exists. Please try again with a different sku name","url":"/api/sku","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"SKU_CONTROLLER_CONSTANTS is not defined","url":"/api/sku/combo/60042505222dff22ec078346","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"Arguments must be aggregate pipeline operators","url":"/api/sku/combo-sku","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"Unrecognized expression '$first'","url":"/api/sku/combo-sku","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"ParentProduct validation failed: product_quantity: `200` is not a valid enum value for path `product_quantity`.","url":"/api/parent-product","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"57001 already exists. Please choose a different sku number","url":"/api/sku/combo-sku","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"57002 already exists. Please try again with a different sku name","url":"/api/sku","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"ComboSkuModel is not defined","url":"/api/zone/","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"Mongoose 5.x disallows passing a spread of operators to `Model.aggregate()`. Instead of `Model.aggregate({ $match }, { $skip })`, do `Model.aggregate([{ $match }, { $skip }])`","url":"/api/zone/","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"Aggregate has empty pipeline","url":"/api/zone/","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"North Chennai Zone already exists. Please try again with a different zone name","url":"/api/zone/","userId":""}
+{"level":"error","method":"POST","type":"SERVER_ERROR","message":"props is not defined","url":"/api/district/","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"This District does not exist in the server. This District or the district's Zone may be deleted before","url":"/api/district/60045cf7fc1b3f0f8083b80e","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"Arguments must be aggregate pipeline operators","url":"/api/district/","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"This Area does not exist in the server. This Area or the area's District or the area's Zone may be deleted before","url":"/api/area/60047025e16f03283c07be8d","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Beat validation failed: beat: Path `beat` is required.","url":"/api/beat","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Beat validation failed: beat: Path `beat` is required.","url":"/api/beat","userId":""}
+{"level":"error","method":"POST","type":"NOT_FOUND","message":"This Area does not exist in the server. This Area or the area's District or the area's Zone may be deleted before","url":"/api/beat","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"SS 1 already exists in the Karur. Please recheck the data and update","url":"/api/super-stockist/","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"SUPER_STOCKIST_AGGREGATE_QUERY is not defined","url":"/api/super-stockist/","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"undefined is not iterable (cannot read property Symbol(Symbol.iterator))","url":"/api/super-stockist/","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"undefined is not iterable (cannot read property Symbol(Symbol.iterator))","url":"/api/super-stockist/","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"undefined is not iterable (cannot read property Symbol(Symbol.iterator))","url":"/api/super-stockist/","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"undefined is not iterable (cannot read property Symbol(Symbol.iterator))","url":"/api/super-stockist/","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"undefined is not iterable (cannot read property Symbol(Symbol.iterator))","url":"/api/super-stockist/","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"undefined is not iterable (cannot read property Symbol(Symbol.iterator))","url":"/api/super-stockist/","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"Unrecognized expression '$first'","url":"/api/super-stockist/","userId":""}
+{"level":"error","method":"POST","type":"SERVER_ERROR","message":"mongoose is not defined","url":"/api/super-stockist/","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"Unexpected token / in JSON at position 72","url":"/api/super-stockist/6005bbcb045e5f14e8027f39","userId":""}
+{"level":"error","method":"POST","type":"SERVER_ERROR","message":"RETAILER_AGGREGATE_QUERY is not iterable","url":"/api/retailer/","userId":""}
+{"level":"error","method":"POST","type":"SERVER_ERROR","message":"Cannot read property 'replace' of undefined","url":"/api/retailer/","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"Retailer 1 already exists in Karur. Please recheck the data and update","url":"/api/retailer/","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"Retailer 1 already exists in the beat. Please recheck the data and update","url":"/api/retailer/","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"Retailer 1 already exists in the beat. Please recheck the data and update","url":"/api/retailer/","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"Cannot read property 'id' of undefined","url":"/api/auth/currentUser","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"Cannot read property 'id' of undefined","url":"/api/auth/currentUser","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"ParentProduct validation failed: product_quantity_unit: `ML` is not a valid enum value for path `product_quantity_unit`.","url":"/api/parent-product/","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"ParentProduct validation failed: product_quantity_unit: `ML` is not a valid enum value for path `product_quantity_unit`.","url":"/api/parent-product/","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"ParentProduct validation failed: product_quantity_unit: `mL` is not a valid enum value for path `product_quantity_unit`.","url":"/api/parent-product/","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"ParentProduct validation failed: product_quantity_unit: `mL` is not a valid enum value for path `product_quantity_unit`.","url":"/api/parent-product/","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"District validation failed: zone: Path `zone` is required.","url":"/api/district/","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"Cannot read property 'split' of undefined","url":"/api/territory/","userId":""}
+{"level":"error","method":"GET","type":"INVALID_OPERATION","message":"Select Params are required","url":"/api/territory/?select=","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Beat validation failed: name: Path `name` is required., area: Path `area` is required.","url":"/api/beat/","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"Cannot read property 'split' of undefined","url":"/api/territory/","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Area validation failed: district: Path `district` is required.","url":"/api/area/","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"reqAreaName is not defined","url":"/api/area/601a7bc2fd1c943640a157e0","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"reqAreaName is not defined","url":"/api/area/601a7bc2fd1c943640a157e0","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"Karur Town already exists. Please try again with a different area name","url":"/api/area/","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Beat validation failed: area: Path `area` is required.","url":"/api/beat/","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"Invalid Updates for 601ab2187700d14a4860c31b","url":"/api/super-stockist/601ab2187700d14a4860c31b","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"obj.toObject is not a function","url":"/api/super-stockist/601ab2187700d14a4860c31b","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"obj.toObject is not a function","url":"/api/super-stockist/601ab2187700d14a4860c31b","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"obj.toObject is not a function","url":"/api/super-stockist/601ab2187700d14a4860c31b","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"obj.toObject is not a function","url":"/api/super-stockist/601ab2187700d14a4860c31b","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"obj.toObject is not a function","url":"/api/super-stockist/601ab5767ddbc70a4cbed310","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"obj.toObject is not a function","url":"/api/super-stockist/601ab5767ddbc70a4cbed310","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"obj.toObject is not a function","url":"/api/super-stockist/601ab5767ddbc70a4cbed310","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"obj.toObject is not a function","url":"/api/super-stockist/601ab5767ddbc70a4cbed310","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"obj.toObject is not a function","url":"/api/super-stockist/601ab5767ddbc70a4cbed310","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"obj.toObject is not a function","url":"/api/super-stockist/601ab5767ddbc70a4cbed310","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"obj.toObject is not a function","url":"/api/super-stockist/601ab2187700d14a4860c31b","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"Invalid Updates for 601b8ee619baa920b4c288ac","url":"/api/distributor/601b8ee619baa920b4c288ac","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"cloneDeep is not defined","url":"/api/distributor/601b8ee619baa920b4c288ac","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"This Distributor does not exist in the server. This Distributor may be deleted before","url":"/api/distributor/601b9cdb9dc35c40045a15f4","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"This Distributor does not exist in the server. This Distributor may be deleted before","url":"/api/distributor/601b8ee619baa920b4c288ac","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"This Distributor does not exist in the server. This Distributor may be deleted before","url":"/api/distributor/601b9cdb9dc35c40045a15f4","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"Invalid $project :: caused by :: specification contains two conflicting paths. Cannot specify both 'distributor.id' and 'distributor': { id: \"$_id\", _id: 0, name: 1, contact: 1, address: 1, gstin: 1, retail_type: 1, distributor: 1, distributor.id: \"$distributor._id\", distributor.name: \"$distributor.name\", beat.id: \"$beat._id\", beat.name: \"$beat.name\", area.id: \"$area._id\", area.name: \"$area.name\", district.id: \"$district._id\", district.name: \"$district.name\", zone.id: \"$zone._id\", zone.name: \"$zone.name\" }","url":"/api/retailer/","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"cloneDeep is not defined","url":"/api/retailer/601bdc0a4b735e0d180b6e79","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"Zone Deletion Failed. Zone is mapped to one/many districts","url":"/api/zone/601a5d730641d229d0b4e79f","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"Zone Deletion Failed. Zone is mapped to one/many districts","url":"/api/zone/601a5d730641d229d0b4e79f","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"District Deletion Failed. District is mapped to one/many areas or super stockists","url":"/api/district/601a7cdd5bb7ec3960b98793","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"District Deletion Failed. District is mapped to one/many areas or super stockists","url":"/api/district/601a7cdd5bb7ec3960b98793","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"District Deletion Failed. District is mapped to one/many areas or super stockists","url":"/api/district/601a5f9f8d4b473ae8fe62c3","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"District Deletion Failed. District is mapped to one/many areas or super stockists","url":"/api/district/601a5f9f8d4b473ae8fe62c3","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"Area Deletion Failed. Area is mapped to one/many beats or distributors","url":"/api/area/601a7d0fdc938e3f8c092b0e","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"Area Deletion Failed. Area is mapped to one/many beats or distributors","url":"/api/area/601a7d22dc938e3f8c092b0f","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"Beat Deletion Failed. Beat is mapped to one/many Retailers","url":"/api/beat/601a833f71c1904048eeae90","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"This Super Stockist has been linked to one/many distributor. Try mapping the linked distributor to another Super stockist or remove the Super stockist map","url":"/api/super-stockist/601ab5767ddbc70a4cbed310","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"This Distributor has been linked to one/many retailers. Try mapping the linked retailer to another Local Distributor or unlink the current Distributor map","url":"/api/distributor/601ba1e59dc35c40045a15f5","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"Zone Deletion Failed. Zone is mapped to one/many districts","url":"/api/zone/601a7567fd1c943640a157db","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"Zone Deletion Failed. Zone is mapped to one/many districts","url":"/api/zone/601a7567fd1c943640a157db","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"Zone Deletion Failed. Zone is mapped to one/many districts","url":"/api/zone/601a7567fd1c943640a157db","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"District Deletion Failed. District is mapped to one/many areas or super stockists","url":"/api/district/601bf3fca36f732cec95585f","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"Area Deletion Failed. Area is mapped to one/many beats or distributors","url":"/api/area/601bf4aaa36f732cec955860","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Sku validation failed: fragrance_name: Path `fragrance_name` is required.","url":"/api/sku","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"Invalid Updates for 601c3d55e74005423801816e","url":"/api/sku/601c3d55e74005423801816e","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"Invalid Updates for 601c3d55e74005423801816e","url":"/api/sku/601c3d55e74005423801816e","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"Invalid Updates for 601c3d55e74005423801816e","url":"/api/sku/601c3d55e74005423801816e","userId":""}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"Invalid Updates for 601c3d55e74005423801816e","url":"/api/sku/601c3d55e74005423801816e","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"Cannot read property 'id' of null","url":"/api/auth/currentUser","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"User validation failed: createdBy: Cast to ObjectID failed for value \"ADMIN\" at path \"createdBy\", updatedBy: Cast to ObjectID failed for value \"ADMIN\" at path \"updatedBy\", mobile_number: Path `mobile_number` is required.","url":"/api/user","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"User validation failed: mobile_number: Path `mobile_number` is required.","url":"/api/user","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Username and Password do not match","url":"/api/auth/login","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"Cannot read property 'id' of null","url":"/api/auth/currentUser","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"Cannot read property 'id' of null","url":"/api/auth/currentUser","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Validation Error","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Validation Error","url":"/api/auth/login","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"Validation Error","url":"/api/auth/login","userId":""}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"This Super Stockist has been linked to one/many distributors. Try mapping the linked distributor to another Super stockist or unlink the current Super stockist map","url":"/api/super-stockist/601c0082c2d95f3018c6d5b5","userId":""}
+{"level":"error","method":"POST","type":"SERVER_ERROR","message":"toSentenceCase is not defined","url":"/api/zone/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"SERVER_ERROR","message":"toTitleCase is not defined","url":"/api/zone/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"North zone already exists. Please try again with a different zone name","url":"/api/zone/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"north zone already exists. Please try again with a different zone name","url":"/api/zone/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"This Zone does not exist in the server. This Zone may be deleted before","url":"/api/zone/601d091798df601cfc2eec21","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"SOutH ZonE already exists. Please try again with a different zone name","url":"/api/zone/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"South Zone already exists. Please try again with a different zone name","url":"/api/zone/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"This Zone does not exist in the server. This Zone may be deleted before","url":"/api/zone/601d0ace2557820e80409134","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"This Zone does not exist in the server. This Zone may be deleted before","url":"/api/zone/601d0ab22557820e80409131","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"This Zone does not exist in the server. This Zone may be deleted before","url":"/api/zone/601d0a5ef9275f2f143ed91e","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"This Zone does not exist in the server. This Zone may be deleted before","url":"/api/zone/601d0c0613ca284d48fba5e8","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"This Zone does not exist in the server. This Zone may be deleted before","url":"/api/zone/601d0c0613ca284d48fba5e8","userId":""}
+{"level":"error","method":"PATCH","type":"NOT_FOUND","message":"This Zone does not exist in the server. This Zone may be deleted before","url":"/api/zone/601d0c0613ca284d48fba5e8","userId":""}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"north zone already exists. Please try again with a different zone name","url":"/api/zone/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"PATCH","type":"DUPLICATE_NAME","message":"North Zone already exists. Please try again with a different zone name","url":"/api/zone/601d0c0613ca284d48fba5e8","userId":""}
+{"level":"error","method":"PATCH","type":"DUPLICATE_NAME","message":"North Zone already exists. Please try again with a different zone name","url":"/api/zone/601d0c0613ca284d48fba5e8","userId":""}
+{"level":"error","method":"PATCH","type":"DUPLICATE_NAME","message":"North Zone already exists. Please try again with a different zone name","url":"/api/zone/601d0c0613ca284d48fba5e8","userId":""}
+{"level":"error","method":"POST","type":"SERVER_ERROR","message":"get is not defined","url":"/api/district/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"chennai already exists. Please try again with a different district name","url":"/api/district/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"tHE NILGRIS already exists. Please try again with a different district name","url":"/api/district/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"North Chennai already exists. Please try again with a different area name","url":"/api/area/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"North Chennai  already exists. Please try again with a different area name","url":"/api/area/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"Vadapalani already exists. Please try again with a different beat name","url":"/api/beat/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"vadapalani already exists. Please try again with a different beat name","url":"/api/beat/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"Test 1 already exists in Karur district. Please recheck the data and update","url":"/api/super-stockist/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"Test 1 already exists in Karur district. Please recheck the data and update","url":"/api/super-stockist/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"contact is not defined","url":"/api/super-stockist/601d1b1777155044ecae024e","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"name is not defined","url":"/api/super-stockist/601d1b1777155044ecae024e","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"PATCH","type":"DUPLICATE_NAME","message":"Cannot change Mobile Number","url":"/api/super-stockist/601d1b1777155044ecae024e","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"PATCH","type":"DUPLICATE_NAME","message":"Cannot change Mobile Number","url":"/api/super-stockist/601d1d708d310b3fe40365b4","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"PATCH","type":"DUPLICATE_NAME","message":"Cannot change Mobile Number","url":"/api/super-stockist/601d3840cccc270a04f820e4","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"SERVER_ERROR","message":"Cannot read property 'replace' of undefined","url":"/api/distributor/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"Test 2 already exists in Karur district. Please recheck the data and update","url":"/api/distributor/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"{{name}} already exists in {{place}} district. Please recheck the data and update","url":"/api/distributor/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"Distributor already exists. Please recheck the data and update","url":"/api/distributor/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"POST","type":"DUPLICATE_NAME","message":"Super Stockist already exists. Please recheck the data and update","url":"/api/super-stockist/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"PATCH","type":"DUPLICATE_NAME","message":"North Zone already exists. Please try again with a different zone name","url":"/api/zone/601d6dd87fdbe32d608c0cb9","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"PATCH","type":"DUPLICATE_NAME","message":"North Zone already exists. Please try again with a different zone name","url":"/api/zone/601d6dd87fdbe32d608c0cb9","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"PATCH","type":"DUPLICATE_NAME","message":"North Zone already exists. Please try again with a different zone name","url":"/api/zone/601d6dd87fdbe32d608c0cb9","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"PATCH","type":"DUPLICATE_NAME","message":"Nilgris already exists. Please try again with a different district name","url":"/api/district/601d1615bf066f368ce5f441","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"Beat Deletion Failed. Beat is mapped to one/many Retailers","url":"/api/beat/601d18f3bf066f368ce5f443","userId":""}
+{"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"District validation failed: zone: Cast to ObjectID failed for value \"\" at path \"zone\"","url":"/api/district/","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"Invalid Updates for 601d15dcbf066f368ce5f43f","url":"/api/area/601d15dcbf066f368ce5f43f","userId":"601d01cccf90f850386a70cf"}

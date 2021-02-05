@@ -39,13 +39,4 @@ const logger = createLogger({
   ],
 });
 
-logger.stream = {
-  write: (message, encoding) => {
-    logger.info({
-      message,
-      timeStamp: moment().format('MMMM Do YYYY, h:mm:ss a'),
-    });
-  },
-};
-
 module.exports = logger;
