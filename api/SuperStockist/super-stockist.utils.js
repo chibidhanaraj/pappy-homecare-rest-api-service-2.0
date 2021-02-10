@@ -1,5 +1,8 @@
 const { cloneDeep } = require('lodash');
 const { toWordUpperFirstCase } = require('../../utils/CommonUtils');
+const SuperStockistSkuInventory = require('../SuperStockistSkuInventory/super-stockist-sku-inventory.model');
+const SuperStockistSkuInventoryActivity = require('../SuperStockistSkuInventoryActivity/super-stockist-sku-inventory-activity.model');
+const { ACTIVITY_CONSTANTS } = require('../../constants/constants');
 
 const SUPER_STOCKIST_AGGREGATE_QUERY = [
   {
@@ -87,6 +90,78 @@ const SUPER_STOCKIST_AGGREGATE_QUERY = [
   },
 ];
 
+const SUPER_STOCKIST_INVENTORY_AGGREGATE_QUERY = [
+  {
+    $lookup: {
+      from: 'superstockistskuinventories',
+      localField: '_id',
+      foreignField: 'super_stockist',
+      as: 'sku_items',
+    },
+  },
+  {
+    $unwind: { path: '$sku_items', preserveNullAndEmptyArrays: true },
+  },
+  {
+    $lookup: {
+      from: 'skus',
+      localField: 'sku_items.sku',
+      foreignField: '_id',
+      as: 'sku_items.sku',
+    },
+  },
+  {
+    $unwind: {
+      path: '$sku_items.sku',
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+  {
+    $lookup: {
+      from: 'parentproducts',
+      localField: 'sku_items.sku.parent_product',
+      foreignField: '_id',
+      as: 'sku_items.parent_product',
+    },
+  },
+  {
+    $unwind: {
+      path: '$sku_items.parent_product',
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+  {
+    $group: {
+      _id: '$_id',
+      id: {
+        $first: '$_id',
+      },
+      sku_items: {
+        $push: {
+          $cond: [
+            { $gt: ['$sku_items._id', null] },
+            {
+              sku_id: '$sku_items.sku._id',
+              name: '$sku_items.sku.name',
+              parent_product_name: '$sku_items.parent_product.name',
+              current_inventory_level: '$sku_items.current_inventory_level',
+            },
+            '$$REMOVE',
+          ],
+        },
+      },
+      name: {
+        $first: '$name',
+      },
+    },
+  },
+  {
+    $project: {
+      _id: 0,
+    },
+  },
+];
+
 const getUpdatedData = (req, superStockist) => {
   const dataToUpdate = {};
 
@@ -140,7 +215,58 @@ const getUpdatedData = (req, superStockist) => {
   return dataToUpdate;
 };
 
+const incrementSuperStockistInventoryLevel = async ({
+  superStockistId,
+  skuId,
+  quantity,
+  orderId,
+}) => {
+  const newActivity = new SuperStockistSkuInventoryActivity({
+    super_stockist: superStockistId,
+    sku: skuId,
+    quantity: quantity,
+    comment: ACTIVITY_CONSTANTS.ADD_NEW_STOCK,
+    primary_order: orderId,
+  });
+
+  await newActivity.save();
+
+  return await SuperStockistSkuInventory.findOneAndUpdate(
+    {
+      super_stockist: superStockistId,
+      sku: skuId,
+    },
+    { $inc: { current_inventory_level: Number(quantity) } },
+    {
+      new: true,
+      runValidators: true,
+      upsert: true,
+    }
+  );
+};
+
+const incrementSuperStockistInventoryLevels = async (
+  superStockistId,
+  skus,
+  orderId
+) => {
+  const responses = [];
+  await skus.reduce(async (allSkus, sku) => {
+    await allSkus;
+    const updatedSsInventory = await incrementSuperStockistInventoryLevel({
+      superStockistId,
+      skuId: sku.id,
+      quantity: sku.ordered_quantity,
+      orderId: orderId,
+    });
+    responses.push(updatedSsInventory);
+  }, Promise.resolve());
+  return Promise.all(responses);
+};
+
 module.exports = {
   SUPER_STOCKIST_AGGREGATE_QUERY,
+  SUPER_STOCKIST_INVENTORY_AGGREGATE_QUERY,
   getUpdatedData,
+  incrementSuperStockistInventoryLevels,
 };

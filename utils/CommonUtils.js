@@ -36,6 +36,12 @@ const areObjectIdEqualArrays = (array1, array2) => {
   return isEqual(array1, array2);
 };
 
+const convertIdsToObjectIds = (ids) => {
+  return ids.map((el) => {
+    return mongoose.Types.ObjectId(el);
+  });
+};
+
 const findDifferenceIds = (array1, array2) => {
   return array1.map((id) => id.toString()).filter((el) => !array2.includes(el));
 };
@@ -56,4 +62,5 @@ module.exports = {
   findDifferenceIds,
   toTitleCase,
   getRecordFromPayload,
+  convertIdsToObjectIds,
 };

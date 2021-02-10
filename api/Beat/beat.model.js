@@ -6,12 +6,10 @@ const BeatSchema = new Schema(
   {
     name: {
       type: String,
-      required: true,
     },
 
     area: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
       ref: 'Area',
     },
 

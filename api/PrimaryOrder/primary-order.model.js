@@ -1,36 +1,7 @@
 const mongoose = require('mongoose');
+const { ORDER_STATUS } = require('../../constants/constants');
 const Schema = mongoose.Schema;
 const CounterModel = require('../Counter/counter.model');
-
-const OrderItemsSchema = new Schema(
-  {
-    skuId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Sku',
-    },
-
-    count: {
-      type: Number,
-      default: 0,
-    },
-
-    piecesPerCarton: {
-      type: Number,
-      default: 1,
-    },
-
-    skuPrice: {
-      type: Number,
-      default: 0,
-    },
-
-    productId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product',
-    },
-  },
-  { _id: false }
-);
 
 // Create Primary Order Schema & model
 const PrimaryOrderSchema = new Schema(
@@ -63,7 +34,12 @@ const PrimaryOrderSchema = new Schema(
       ref: 'User',
     },
 
-    orderedItems: [OrderItemsSchema],
+    sku_items: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'PrimaryOrderSkuItem',
+      },
+    ],
 
     note: {
       type: String,
@@ -71,7 +47,15 @@ const PrimaryOrderSchema = new Schema(
 
     status: {
       type: String,
-      enum: ['ORDER_TAKEN', 'APPROVED_BY_COMPANY', 'CANCELLED'],
+      enum: [
+        ORDER_STATUS.ORDERED,
+        ORDER_STATUS.ORDER_APPROVED,
+        ORDER_STATUS.ORDER_CANCELLED_BY_FACTORY,
+        ORDER_STATUS.ORDER_CANCELLED_BY_SUPER_STOCKIST,
+        ORDER_STATUS.ORDER_CANCELLED_BY_DISTRIBUTOR,
+        ORDER_STATUS.REACHED_DESTINATION,
+      ],
+      default: ORDER_STATUS.ORDERED,
     },
   },
   {

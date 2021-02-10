@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const DistributorModel = require('./distributor.model');
-const RetailerModel = require('../Retailer/retailer.model');
 const ErrorResponse = require('../../utils/ErrorResponse');
 const asyncHandler = require('../../middleware/asyncHandler');
 const {
@@ -10,6 +9,7 @@ const {
 const { ERROR_TYPES } = require('../../constants/error.constant');
 const {
   DISTRIBUTOR_AGGREGATE_QUERY,
+  DISTRIBUTOR_INVENTORY_AGGREGATE_QUERY,
   getUpdatedData,
 } = require('./distributor.utils');
 const { toWordUpperFirstCase } = require('../../utils/CommonUtils');
@@ -20,6 +20,14 @@ const { get } = require('lodash');
 exports.getAllDistributors = asyncHandler(async (req, res, next) => {
   const query = [...DISTRIBUTOR_AGGREGATE_QUERY];
 
+  if (req.query.area) {
+    query.unshift({
+      $match: {
+        appointed_areas: { $in: [mongoose.Types.ObjectId(req.query.area)] },
+      },
+    });
+  }
+
   const results = await DistributorModel.aggregate(query);
 
   res.status(200).json({
@@ -28,6 +36,30 @@ exports.getAllDistributors = asyncHandler(async (req, res, next) => {
     error: '',
     count: results.length,
     distributors: results,
+  });
+});
+
+// @desc      Get Distributor Inventory
+// @route     GET /api/distributor/:id/inventory
+exports.getDistributorInventory = asyncHandler(async (req, res, next) => {
+  const distributorId = req.params.id;
+
+  const query = [
+    {
+      $match: {
+        _id: mongoose.Types.ObjectId(distributorId),
+      },
+    },
+    ...DISTRIBUTOR_INVENTORY_AGGREGATE_QUERY,
+  ];
+
+  const results = await DistributorModel.aggregate(query);
+
+  res.status(200).json({
+    status: STATUS.OK,
+    message: DISTRIBUTOR_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: '',
+    distributor: results[0],
   });
 });
 
@@ -45,7 +77,6 @@ exports.createDistributor = asyncHandler(async (req, res, next) => {
     distribution_type,
     delivery_vehicles_count,
     existing_retailers_count,
-    super_stockist,
   } = req.body;
 
   const exisitingDistributor = await DistributorModel.findOne({
@@ -74,7 +105,6 @@ exports.createDistributor = asyncHandler(async (req, res, next) => {
     distribution_type,
     delivery_vehicles_count,
     existing_retailers_count,
-    super_stockist,
   });
 
   const savedDistributorDocument = await newDistributor.save();
@@ -99,7 +129,7 @@ exports.createDistributor = asyncHandler(async (req, res, next) => {
 });
 
 // @desc      Update Distributor
-// @route     PATCH /api/distributor/:superstockistId
+// @route     PATCH /api/distributor/:distributorId
 exports.updateDistributor = asyncHandler(async (req, res, next) => {
   const distributorId = req.params.id;
 
@@ -113,7 +143,6 @@ exports.updateDistributor = asyncHandler(async (req, res, next) => {
     'gstin',
     'appointed_areas',
     'is_appointment_confirmed_by_company',
-    'super_stockist',
     'distribution_type',
     'delivery_vehicles_count',
     'existing_retailers_count',
@@ -206,7 +235,7 @@ exports.updateDistributor = asyncHandler(async (req, res, next) => {
 });
 
 // @desc      Delete Distributor
-// @route     delete /api/distributor/:superstockistId
+// @route     delete /api/distributor/:distributorId
 exports.deleteDistributor = asyncHandler(async (req, res, next) => {
   const distributorId = req.params.id;
   await DistributorModel.findOne(
@@ -219,20 +248,6 @@ exports.deleteDistributor = asyncHandler(async (req, res, next) => {
           ERROR_TYPES.NOT_FOUND
         );
         errorResponse();
-      }
-
-      const isDbrMappedToRetailer = await RetailerModel.exists({
-        distributor: distributorId,
-      });
-
-      if (isDbrMappedToRetailer) {
-        return next(
-          new ErrorResponse(
-            DISTRIBUTOR_CONTROLLER_CONSTANTS.DELETE_FAILED,
-            405,
-            ERROR_TYPES.INVALID_OPERATION
-          )
-        );
       }
 
       await distributor.remove().then(() => {

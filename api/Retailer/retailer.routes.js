@@ -6,10 +6,13 @@ const {
   createRetailer,
   updateRetailer,
   deleteRetailer,
+  getRetailerInventory,
 } = require('./retailer.controller');
 
 router.route('/').get(getAllRetailers).post(protect, createRetailer);
 
 router.route('/:id').patch(protect, updateRetailer).delete(deleteRetailer);
+
+router.route('/:id/inventory').get(getRetailerInventory);
 
 module.exports = router;

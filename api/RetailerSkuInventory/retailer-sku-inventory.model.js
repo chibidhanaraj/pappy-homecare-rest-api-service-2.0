@@ -1,25 +1,21 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// create Parent Product Schema & model
-const ParentProductSchema = new Schema(
+// Create Retailer Sku Inventory Schema & model
+const RetailerSkuInventorySchema = new Schema(
   {
-    brand: {
-      type: String,
-    },
-
-    name: {
-      type: String,
-    },
-
-    created_by: {
+    retailer: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Retailer',
     },
 
-    updated_by: {
+    sku: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Sku',
+    },
+
+    current_inventory_level: {
+      type: Number,
     },
   },
   {
@@ -42,6 +38,9 @@ const ParentProductSchema = new Schema(
   }
 );
 
-const ParentProduct = mongoose.model('ParentProduct', ParentProductSchema);
+const RetailerSkuInventory = mongoose.model(
+  'RetailerSkuInventory',
+  RetailerSkuInventorySchema
+);
 
-module.exports = ParentProduct;
+module.exports = RetailerSkuInventory;

@@ -165,6 +165,7 @@ const PRIMARY_ORDER_CONTROLLER_CONSTANTS = {
     'This Customer does not exist in the server. This customer may be deleted before',
   PRIMARY_ORDER_NOT_FOUND:
     'This Primary order does not exist in the server. The order may be deleted before',
+  PRIMARY_ORDER_UPDATE_FAILED: 'This Primary Order Update has failed.',
 };
 
 const SECOND_PRIMARY_ORDER_CONTROLLER_CONSTANTS = {
@@ -176,6 +177,8 @@ const SECOND_PRIMARY_ORDER_CONTROLLER_CONSTANTS = {
     'This Customer does not exist in the server. This customer may be deleted before',
   SECOND_PRIMARY_ORDER_NOT_FOUND:
     'This Second-Primary order does not exist in the server. The order may be deleted before',
+  SECOND_PRIMARY_ORDER_UPDATE_FAILED:
+    'This Second-Primary Order Update has failed.',
 };
 
 const SECONDARY_ORDER_CONTROLLER_CONSTANTS = {
@@ -187,6 +190,7 @@ const SECONDARY_ORDER_CONTROLLER_CONSTANTS = {
     'This Customer does not exist in the server. This customer may be deleted before',
   SECONDARY_ORDER_NOT_FOUND:
     'This Secondary Order does not exist in the server. This Order may be deleted before',
+  SECONDARY_ORDER_UPDATE_FAILED: 'This Secondary Order Update has failed.',
 };
 
 module.exports = {

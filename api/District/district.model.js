@@ -6,12 +6,10 @@ const DistrictSchema = new Schema(
   {
     name: {
       type: String,
-      required: true,
     },
 
     zone: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
       ref: 'Zone',
     },
 

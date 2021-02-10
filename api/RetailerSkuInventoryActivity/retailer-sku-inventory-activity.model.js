@@ -1,26 +1,35 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// create Area Schema & model
-const AreaSchema = new Schema(
+// Create Retailer Sku Inventory Activity Schema & model
+const RetailerSkuInventoryActivitySchema = new Schema(
   {
-    name: {
+    retailer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Retailer',
+    },
+
+    super_stockist: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'SuperStockist',
+    },
+
+    distributor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Distributor',
+    },
+
+    sku: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Sku',
+    },
+
+    quantity: {
+      type: Number,
+    },
+
+    comment: {
       type: String,
-    },
-
-    district: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'District',
-    },
-
-    created_by: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-
-    updated_by: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
     },
   },
   {
@@ -43,6 +52,9 @@ const AreaSchema = new Schema(
   }
 );
 
-const AreaModel = mongoose.model('Area', AreaSchema);
+const RetailerSkuInventoryActivity = mongoose.model(
+  'RetailerSkuInventoryActivity',
+  RetailerSkuInventoryActivitySchema
+);
 
-module.exports = AreaModel;
+module.exports = RetailerSkuInventoryActivity;

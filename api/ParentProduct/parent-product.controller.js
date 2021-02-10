@@ -25,20 +25,7 @@ exports.getAllParentProducts = asyncHandler(async (req, res, next) => {
 // @desc      Post parent-product
 // @route     POST /api/parent-product/
 exports.createParentProduct = asyncHandler(async (req, res, next) => {
-  const {
-    brand,
-    name,
-    type,
-    product_quantity,
-    product_quantity_unit,
-    pieces_per_carton,
-    sgst,
-    igst,
-    cgst,
-    super_stockist_margin,
-    distributor_margin,
-    retailer_margin,
-  } = req.body;
+  const { brand, name } = req.body;
 
   const existingParentProduct = await ParentProductModel.findOne({
     name: toWordUpperFirstCase(name),
@@ -60,16 +47,6 @@ exports.createParentProduct = asyncHandler(async (req, res, next) => {
   const newParentProduct = new ParentProductModel({
     brand,
     name: toWordUpperFirstCase(name),
-    type,
-    product_quantity,
-    product_quantity_unit,
-    pieces_per_carton,
-    sgst,
-    igst,
-    cgst,
-    super_stockist_margin,
-    distributor_margin,
-    retailer_margin,
     created_by: get(req, 'user.id', null),
   });
 
@@ -89,19 +66,7 @@ exports.updateParentProduct = asyncHandler(async (req, res, next) => {
   const parentProductId = req.params.id;
 
   const receivedUpdateProperties = Object.keys(req.body);
-  const allowedUpdateProperties = [
-    'name',
-    'type',
-    'product_quantity',
-    'product_quantity_unit',
-    'pieces_per_carton',
-    'sgst',
-    'cgst',
-    'igst',
-    'super_stockist_margin',
-    'distributor_margin',
-    'retailer_margin',
-  ];
+  const allowedUpdateProperties = ['name'];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
     allowedUpdateProperties.includes(key)

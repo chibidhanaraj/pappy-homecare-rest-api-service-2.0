@@ -102,7 +102,6 @@ const SuperStockistSchema = new Schema(
 
     existing_distributors_count: {
       type: String,
-      default: '0',
     },
 
     appointed_districts: [

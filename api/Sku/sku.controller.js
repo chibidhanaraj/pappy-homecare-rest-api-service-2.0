@@ -27,7 +27,7 @@ exports.getAllSkus = asyncHandler(async (req, res, next) => {
       $match: matchQuery,
     },
     ...SKU_AGGREGATE_QUERY,
-    { $sort: { sku_number: 1 } },
+    { $sort: { sku: 1 } },
   ];
 
   const results = await SkuModel.aggregate(query);
@@ -44,19 +44,29 @@ exports.getAllSkus = asyncHandler(async (req, res, next) => {
 // @desc      Post sku
 // @route     POST /api/sku
 exports.createSku = asyncHandler(async (req, res, next) => {
-  const { sku_number, fragrance_name, mrp, parent_product, child } = req.body;
+  const {
+    sku,
+    name,
+    mrp,
+    sku_type,
+    pieces_per_carton,
+    sgst,
+    igst,
+    cgst,
+    super_stockist_margin,
+    distributor_margin,
+    retailer_margin,
+    child,
+  } = req.body;
 
   const existingSku = await SkuModel.findOne({
-    sku_number,
+    sku,
   });
 
   if (existingSku) {
     return next(
       new ErrorResponse(
-        SKU_CONTROLLER_CONSTANTS.SKU_DUPLICATE_NUMBER.replace(
-          '{{name}}',
-          sku_number
-        ),
+        SKU_CONTROLLER_CONSTANTS.SKU_DUPLICATE_NUMBER.replace('{{name}}', sku),
         400,
         ERROR_TYPES.DUPLICATE_NAME
       )
@@ -64,14 +74,21 @@ exports.createSku = asyncHandler(async (req, res, next) => {
   }
 
   const newSku = new SkuModel({
-    type: req.body.type || 'single',
-    sku_number,
-    fragrance_name: toWordUpperFirstCase(fragrance_name),
-    created_by: get(req, 'user.id', null),
+    sku,
+    name: toWordUpperFirstCase(name),
     mrp,
-    parent_product,
+    sku_type,
+    pieces_per_carton,
+    sgst,
+    igst,
+    cgst,
+    parent_product: get(req, 'body.parent_product', null),
     special_selling_price: req.body.special_selling_price || '',
+    super_stockist_margin,
+    distributor_margin,
+    retailer_margin,
     child,
+    created_by: get(req, 'user.id', null),
   });
 
   const savedSkuDocument = await newSku.save();
@@ -102,13 +119,20 @@ exports.updateSku = asyncHandler(async (req, res, next) => {
 
   const receivedUpdateProperties = Object.keys(req.body);
   const allowedUpdateProperties = [
-    'sku_number',
-    'fragrance_name',
+    'sku',
+    'name',
     'mrp',
+    'sku_type',
+    'pieces_per_carton',
+    'sgst',
+    'igst',
+    'cgst',
     'parent_product',
     'special_selling_price',
+    'super_stockist_margin',
+    'distributor_margin',
+    'retailer_margin',
     'child',
-    'type',
   ];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
@@ -131,17 +155,17 @@ exports.updateSku = asyncHandler(async (req, res, next) => {
     );
   }
 
-  if (req.body.sku_number) {
-    const existingSkuWithSameSkuNumber = await SkuModel.findOne({
-      sku_number: req.body.sku_number,
+  if (req.body.sku) {
+    const existingSkuWithSameSku = await SkuModel.findOne({
+      sku: req.body.sku,
     }).exec();
 
-    if (existingSkuWithSameSkuNumber) {
+    if (existingSkuWithSameSku) {
       return next(
         new ErrorResponse(
           SKU_CONTROLLER_CONSTANTS.SKU_DUPLICATE_NUMBER.replace(
             '{{name}}',
-            req.body.sku_number
+            req.body.sku
           ),
           404,
           ERROR_TYPES.NOT_FOUND

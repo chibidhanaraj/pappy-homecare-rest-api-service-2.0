@@ -1,26 +1,30 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// create Area Schema & model
-const AreaSchema = new Schema(
+// Create SuperStockist Sku Inventory Activity Schema & model
+const SuperStockistSkuInventoryActivitySchema = new Schema(
   {
-    name: {
+    super_stockist: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'SuperStockist',
+    },
+
+    primary_order: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'PrimaryOrder',
+    },
+
+    sku: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Sku',
+    },
+
+    quantity: {
+      type: Number,
+    },
+
+    comment: {
       type: String,
-    },
-
-    district: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'District',
-    },
-
-    created_by: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-
-    updated_by: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
     },
   },
   {
@@ -43,6 +47,9 @@ const AreaSchema = new Schema(
   }
 );
 
-const AreaModel = mongoose.model('Area', AreaSchema);
+const SuperStockistSkuInventoryActivity = mongoose.model(
+  'SuperStockistSkuInventoryActivity',
+  SuperStockistSkuInventoryActivitySchema
+);
 
-module.exports = AreaModel;
+module.exports = SuperStockistSkuInventoryActivity;

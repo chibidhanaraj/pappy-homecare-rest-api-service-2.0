@@ -109,28 +109,21 @@ const DistributorSchema = new Schema(
 
     distribution_type: {
       type: String,
-      enum: ['PRIMARY', 'SECONDARY'],
-      default: 'SECONDARY',
+      enum: ['PRIMARY_DISTRIBUTOR', 'SECOND_PRIMARY_DISTRIBUTOR'],
+      default: 'PRIMARY_DISTRIBUTOR',
     },
 
     delivery_vehicles_count: {
       type: String,
-      default: '1',
     },
 
     existing_retailers_count: {
       type: String,
-      default: '0',
     },
 
     is_appointment_confirmed_by_company: {
       type: Boolean,
       default: false,
-    },
-
-    super_stockist: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'SuperStockist',
     },
 
     created_by: {

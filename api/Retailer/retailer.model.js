@@ -97,11 +97,6 @@ const RetailerSchema = new Schema(
       ref: 'Beat',
     },
 
-    distributor: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Distributor',
-    },
-
     created_by: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

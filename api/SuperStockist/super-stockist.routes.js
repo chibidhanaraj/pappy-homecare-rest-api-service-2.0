@@ -3,6 +3,7 @@ const { protect } = require('../../middleware/authHandler');
 const router = express.Router({ mergeParams: true });
 const {
   getAllSuperStockists,
+  getSuperStockistInventory,
   createSuperStockist,
   updateSuperStockist,
   deleteSuperStockist,
@@ -14,5 +15,7 @@ router
   .route('/:id')
   .patch(protect, updateSuperStockist)
   .delete(deleteSuperStockist);
+
+router.route('/:id/inventory').get(getSuperStockistInventory);
 
 module.exports = router;

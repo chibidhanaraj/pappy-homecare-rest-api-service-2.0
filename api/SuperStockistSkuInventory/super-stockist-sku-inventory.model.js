@@ -1,25 +1,21 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// create Parent Product Schema & model
-const ParentProductSchema = new Schema(
+// Create SuperStockist Sku Inventory Schema & model
+const SuperStockistSkuInventorySchema = new Schema(
   {
-    brand: {
-      type: String,
-    },
-
-    name: {
-      type: String,
-    },
-
-    created_by: {
+    super_stockist: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'SuperStockist',
     },
 
-    updated_by: {
+    sku: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Sku',
+    },
+
+    current_inventory_level: {
+      type: Number,
     },
   },
   {
@@ -42,6 +38,9 @@ const ParentProductSchema = new Schema(
   }
 );
 
-const ParentProduct = mongoose.model('ParentProduct', ParentProductSchema);
+const SuperStockistSkuInventory = mongoose.model(
+  'SuperStockistSkuInventory',
+  SuperStockistSkuInventorySchema
+);
 
-module.exports = ParentProduct;
+module.exports = SuperStockistSkuInventory;

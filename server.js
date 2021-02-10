@@ -23,6 +23,9 @@ const BeatRoutes = require('./api/Beat/beat.routes');
 const SuperStockistRoutes = require('./api/SuperStockist/super-stockist.routes');
 const DistributorRoutes = require('./api/Distributor/distributor.routes');
 const RetailerRoutes = require('./api/Retailer/retailer.routes');
+const PrimaryOrderRoutes = require('./api/PrimaryOrder/primary-order.routes');
+const SecondaryOrderRoutes = require('./api/SecondaryOrder/secondary-order.routes');
+const SecondPrimaryOrderRoutes = require('./api/SecondPrimaryOrder/second-primary-order.routes');
 const UserRoutes = require('./api/User/user.routes');
 const AuthRoutes = require('./api/Auth/auth.routes');
 
@@ -49,6 +52,9 @@ app.use('/api/beat', BeatRoutes);
 app.use('/api/super-stockist', SuperStockistRoutes);
 app.use('/api/distributor', DistributorRoutes);
 app.use('/api/retailer', RetailerRoutes);
+app.use('/api/order/primary-order', PrimaryOrderRoutes);
+app.use('/api/order/second-primary-order', SecondPrimaryOrderRoutes);
+app.use('/api/order/secondary-order', SecondaryOrderRoutes);
 app.use('/api/user', UserRoutes);
 app.use('/api/auth', AuthRoutes);
 

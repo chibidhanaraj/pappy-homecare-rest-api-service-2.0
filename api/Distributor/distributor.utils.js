@@ -1,5 +1,8 @@
-const { cloneDeep, isEqual } = require('lodash');
+const { cloneDeep, get } = require('lodash');
 const { toWordUpperFirstCase } = require('../../utils/CommonUtils');
+const DistributorSkuInventory = require('../DistributorSkuInventory/distributor-sku-inventory.model');
+const DistributorSkuInventoryActivity = require('../DistributorSkuInventoryActivity/distributor-sku-inventory-activity.model');
+const { ACTIVITY_CONSTANTS } = require('../../constants/constants');
 
 const DISTRIBUTOR_AGGREGATE_QUERY = [
   {
@@ -42,17 +45,6 @@ const DISTRIBUTOR_AGGREGATE_QUERY = [
     },
   },
   {
-    $lookup: {
-      from: 'superstockists',
-      localField: 'super_stockist',
-      foreignField: '_id',
-      as: 'super_stockist',
-    },
-  },
-  {
-    $unwind: { path: '$super_stockist', preserveNullAndEmptyArrays: true },
-  },
-  {
     $group: {
       _id: '$_id',
       id: {
@@ -87,9 +79,6 @@ const DISTRIBUTOR_AGGREGATE_QUERY = [
       },
       existing_retailers_count: {
         $first: '$existing_retailers_count',
-      },
-      super_stockist: {
-        $first: '$super_stockist',
       },
       appointed_areas: {
         $push: {
@@ -127,14 +116,84 @@ const DISTRIBUTOR_AGGREGATE_QUERY = [
       distribution_type: 1,
       delivery_vehicles_count: 1,
       existing_retailers_count: 1,
-      'super_stockist.id': '$super_stockist._id',
-      'super_stockist.name': '$super_stockist.name',
       appointed_areas: 1,
     },
   },
   {
     $sort: {
       name: 1,
+    },
+  },
+];
+
+const DISTRIBUTOR_INVENTORY_AGGREGATE_QUERY = [
+  {
+    $lookup: {
+      from: 'distributorskuinventories',
+      localField: '_id',
+      foreignField: 'distributor',
+      as: 'sku_items',
+    },
+  },
+  {
+    $unwind: { path: '$sku_items', preserveNullAndEmptyArrays: true },
+  },
+  {
+    $lookup: {
+      from: 'skus',
+      localField: 'sku_items.sku',
+      foreignField: '_id',
+      as: 'sku_items.sku',
+    },
+  },
+  {
+    $unwind: {
+      path: '$sku_items.sku',
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+  {
+    $lookup: {
+      from: 'parentproducts',
+      localField: 'sku_items.sku.parent_product',
+      foreignField: '_id',
+      as: 'sku_items.parent_product',
+    },
+  },
+  {
+    $unwind: {
+      path: '$sku_items.parent_product',
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+  {
+    $group: {
+      _id: '$_id',
+      id: {
+        $first: '$_id',
+      },
+      sku_items: {
+        $push: {
+          $cond: [
+            { $gt: ['$sku_items._id', null] },
+            {
+              sku_id: '$sku_items.sku._id',
+              name: '$sku_items.sku.name',
+              parent_product_name: '$sku_items.parent_product.name',
+              current_inventory_level: '$sku_items.current_inventory_level',
+            },
+            '$$REMOVE',
+          ],
+        },
+      },
+      name: {
+        $first: '$name',
+      },
+    },
+  },
+  {
+    $project: {
+      _id: 0,
     },
   },
 ];
@@ -183,17 +242,6 @@ const getUpdatedData = (req, distributor) => {
     dataToUpdate.appointed_areas = req.body.appointed_areas;
   }
 
-  if (
-    req.body.super_stockist !== undefined &&
-    req.body.super_stockist !== null
-  ) {
-    if (!req.body.super_stockist) {
-      dataToUpdate.super_stockist = undefined;
-    } else {
-      dataToUpdate.super_stockist = req.body.super_stockist;
-    }
-  }
-
   if (req.body.existing_retailers_count) {
     dataToUpdate.existing_retailers_count = req.body.existing_retailers_count;
   }
@@ -207,12 +255,65 @@ const getUpdatedData = (req, distributor) => {
       req.body.is_appointment_confirmed_by_company;
   }
 
-  console.log(dataToUpdate);
-
   return dataToUpdate;
+};
+
+const incrementDistributorInventoryLevel = async ({
+  distributorId,
+  skuId,
+  quantity,
+  primaryOrderId,
+  secondPrimaryOrderId,
+}) => {
+  const newActivity = new DistributorSkuInventoryActivity({
+    distributor: distributorId,
+    sku: skuId,
+    quantity: quantity,
+    comment: ACTIVITY_CONSTANTS.ADD_NEW_STOCK,
+    primary_order: primaryOrderId ? primaryOrderId : null,
+    second_primary_order: secondPrimaryOrderId ? secondPrimaryOrderId : null,
+  });
+
+  await newActivity.save();
+
+  return await DistributorSkuInventory.findOneAndUpdate(
+    {
+      distributor: distributorId,
+      sku: skuId,
+    },
+    { $inc: { current_inventory_level: Number(quantity) } },
+    {
+      new: true,
+      runValidators: true,
+      upsert: true,
+    }
+  );
+};
+
+const incrementDistributorInventoryLevels = async ({
+  distributorId,
+  skus,
+  primaryOrderId,
+  secondPrimaryOrderId,
+}) => {
+  const responses = [];
+  await skus.reduce(async (allSkus, sku) => {
+    await allSkus;
+    const updatedDbrInventory = await incrementDistributorInventoryLevel({
+      distributorId,
+      skuId: sku.id,
+      quantity: sku.ordered_quantity,
+      primaryOrderId,
+      secondPrimaryOrderId,
+    });
+    responses.push(updatedDbrInventory);
+  }, Promise.resolve());
+  return Promise.all(responses);
 };
 
 module.exports = {
   DISTRIBUTOR_AGGREGATE_QUERY,
+  DISTRIBUTOR_INVENTORY_AGGREGATE_QUERY,
   getUpdatedData,
+  incrementDistributorInventoryLevels,
 };

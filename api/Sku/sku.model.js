@@ -19,12 +19,11 @@ const variationsSchema = new Schema(
 // create Sku Schema & model
 const SkuSchema = new Schema(
   {
-    sku_number: {
+    sku: {
       type: String,
-      required: true,
     },
 
-    fragrance_name: {
+    name: {
       type: String,
     },
 
@@ -42,9 +41,44 @@ const SkuSchema = new Schema(
       ref: 'ParentProduct',
     },
 
-    type: {
+    sku_type: {
       type: 'String',
       default: 'single',
+    },
+
+    pieces_per_carton: {
+      type: String,
+      default: 1,
+    },
+
+    sgst: {
+      type: String,
+      default: '0',
+    },
+
+    cgst: {
+      type: String,
+      default: '0',
+    },
+
+    igst: {
+      type: String,
+      default: '0',
+    },
+
+    super_stockist_margin: {
+      type: String,
+      default: '0',
+    },
+
+    distributor_margin: {
+      type: String,
+      default: '0',
+    },
+
+    retailer_margin: {
+      type: String,
+      default: '0',
     },
 
     child: [variationsSchema],

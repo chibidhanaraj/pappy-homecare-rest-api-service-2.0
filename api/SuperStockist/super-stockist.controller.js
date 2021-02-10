@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const SuperStockistModel = require('./super-stockist.model');
-const DistributorModel = require('../Distributor/distributor.model');
 const ErrorResponse = require('../../utils/ErrorResponse');
 const asyncHandler = require('../../middleware/asyncHandler');
 const {
@@ -10,15 +9,29 @@ const {
 const { ERROR_TYPES } = require('../../constants/error.constant');
 const {
   SUPER_STOCKIST_AGGREGATE_QUERY,
+  SUPER_STOCKIST_INVENTORY_AGGREGATE_QUERY,
   getUpdatedData,
 } = require('./super-stockist.utils');
-const { toWordUpperFirstCase } = require('../../utils/CommonUtils');
+const {
+  toWordUpperFirstCase,
+  convertIdsToObjectIds,
+} = require('../../utils/CommonUtils');
 const { get, isEqual } = require('lodash');
 
 // @desc      Get all Super Stockists
 // @route     GET /api/super-stockist/
 exports.getAllSuperStockists = asyncHandler(async (req, res, next) => {
   const query = [...SUPER_STOCKIST_AGGREGATE_QUERY];
+
+  if (req.query.districts) {
+    const districts = convertIdsToObjectIds(req.query.districts);
+
+    query.unshift({
+      $match: {
+        appointed_districts: { $in: districts },
+      },
+    });
+  }
 
   const results = await SuperStockistModel.aggregate(query);
 
@@ -28,6 +41,30 @@ exports.getAllSuperStockists = asyncHandler(async (req, res, next) => {
     error: '',
     count: results.length,
     superStockists: results,
+  });
+});
+
+// @desc      Get Super Stockist Inventory
+// @route     GET /api/super-stockist/:id/inventory
+exports.getSuperStockistInventory = asyncHandler(async (req, res, next) => {
+  const superStockistId = req.params.id;
+
+  const query = [
+    {
+      $match: {
+        _id: mongoose.Types.ObjectId(superStockistId),
+      },
+    },
+    ...SUPER_STOCKIST_INVENTORY_AGGREGATE_QUERY,
+  ];
+
+  const results = await SuperStockistModel.aggregate(query);
+
+  res.status(200).json({
+    status: STATUS.OK,
+    message: SUPER_STOCKIST_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: '',
+    superStockist: results[0],
   });
 });
 
@@ -211,20 +248,6 @@ exports.deleteSuperStockist = asyncHandler(async (req, res, next) => {
           ERROR_TYPES.NOT_FOUND
         );
         errorResponse();
-      }
-
-      const isSsMappedToDbr = await DistributorModel.exists({
-        super_stockist: superStockistId,
-      });
-
-      if (isSsMappedToDbr) {
-        return next(
-          new ErrorResponse(
-            SUPER_STOCKIST_CONTROLLER_CONSTANTS.DELETE_FAILED,
-            405,
-            ERROR_TYPES.INVALID_OPERATION
-          )
-        );
       }
 
       await superStockist.remove().then(() => {
