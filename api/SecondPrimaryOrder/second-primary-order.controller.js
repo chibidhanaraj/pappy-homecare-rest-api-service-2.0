@@ -28,8 +28,37 @@ exports.getAllSecondPrimaryOrders = asyncHandler(async (req, res, next) => {
 
   const matchQuery = {};
 
-  if (req.query.search) {
-    matchQuery.invoice_number = { $regex: req.query.search };
+  if (req.query.invoice_number) {
+    matchQuery.invoice_number = {
+      $regex: req.query.invoice_number,
+    };
+  }
+
+  if (req.query.super_stockist) {
+    matchQuery.super_stockist = mongoose.Types.ObjectId(
+      req.query.super_stockist
+    );
+  }
+
+  if (req.query.distributor) {
+    matchQuery.distributor = mongoose.Types.ObjectId(req.query.distributor);
+  }
+
+  if (req.query.status) {
+    matchQuery.status = req.query.status;
+  }
+
+  const filterByCustomerName = [];
+
+  if (req.query.customerName) {
+    filterByCustomerName.push({
+      $match: {
+        $or: [
+          { 'super_stockist.name': req.query.customerName },
+          { 'distributor.name': req.query.customerName },
+        ],
+      },
+    });
   }
 
   const query = [

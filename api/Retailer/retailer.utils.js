@@ -128,7 +128,9 @@ const RETAILER_INVENTORY_AGGREGATE_QUERY = [
             { $gt: ['$sku_items._id', null] },
             {
               sku_id: '$sku_items.sku._id',
+              sku: '$sku_items.sku.sku',
               name: '$sku_items.sku.name',
+              sku_type: '$sku_items.sku.sku_type',
               parent_product_name: '$sku_items.parent_product.name',
               current_inventory_level: '$sku_items.current_inventory_level',
             },

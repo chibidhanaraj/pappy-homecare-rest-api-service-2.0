@@ -192,6 +192,11 @@ const SECONDARY_ORDERS_AGGREGATE_QUERY = [
       createdAt: 1,
     },
   },
+  {
+    $sort: {
+      createdAt: -1,
+    },
+  },
 ];
 
 const SECONDARY_ORDER_AGGREGATE_QUERY = [

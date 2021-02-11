@@ -173,6 +173,11 @@ const PRIMARY_ORDERS_AGGREGATE_QUERY = [
       createdAt: 1,
     },
   },
+  {
+    $sort: {
+      createdAt: -1,
+    },
+  },
 ];
 
 const PRIMARY_ORDER_AGGREGATE_QUERY = [

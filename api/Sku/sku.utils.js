@@ -21,6 +21,8 @@ const SKU_AGGREGATE_QUERY = [
       child: 1,
       special_selling_price: 1,
       parent_product_name: '$parent_product.name',
+      'parent_product.id': '$parent_product._id',
+      'parent_product.name': '$parent_product.name',
       pieces_per_carton: 1,
       'tax.sgst': '$sgst',
       'tax.cgst': '$cgst',
