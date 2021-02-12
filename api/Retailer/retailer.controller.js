@@ -9,7 +9,6 @@ const {
 const { ERROR_TYPES } = require('../../constants/error.constant');
 const {
   RETAILER_AGGREGATE_QUERY,
-  RETAILER_INVENTORY_AGGREGATE_QUERY,
   getUpdatedData,
 } = require('./retailer.utils');
 const { toWordUpperFirstCase } = require('../../utils/CommonUtils');
@@ -28,30 +27,6 @@ exports.getAllRetailers = asyncHandler(async (req, res, next) => {
     error: '',
     count: results.length,
     retailers: results,
-  });
-});
-
-// @desc      Get Retailer Inventory
-// @route     GET /api/retailer/:id/inventory
-exports.getRetailerInventory = asyncHandler(async (req, res, next) => {
-  const retailerId = req.params.id;
-
-  const query = [
-    {
-      $match: {
-        _id: mongoose.Types.ObjectId(retailerId),
-      },
-    },
-    ...RETAILER_INVENTORY_AGGREGATE_QUERY,
-  ];
-
-  const results = await RetailerModel.aggregate(query);
-
-  res.status(200).json({
-    status: STATUS.OK,
-    message: RETAILER_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
-    error: '',
-    retailer: results[0],
   });
 });
 

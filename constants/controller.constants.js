@@ -130,6 +130,9 @@ const SUPER_STOCKIST_CONTROLLER_CONSTANTS = {
     'This SuperStockist does not exist in the server. This SuperStockist may be deleted before',
   SUPER_STOCKIST_DUPLICATE_NAME:
     'Super Stockist already exists. Please recheck the data and update',
+  SUPER_STOCKIST_DUPLICATE_SKU:
+    'Sku Already exists. Please recheck the data and update',
+  SUPER_STOCKIST_SKU_FOUND: 'Sku Not Found. Please recheck the data and update',
 };
 
 const DISTRIBUTOR_CONTROLLER_CONSTANTS = {
@@ -143,6 +146,9 @@ const DISTRIBUTOR_CONTROLLER_CONSTANTS = {
     'This Distributor does not exist in the server. This Distributor may be deleted before',
   DISTRIBUTOR_DUPLICATE_NAME:
     'Distributor already exists. Please recheck the data and update',
+  DISTRIBUTOR_DUPLICATE_SKU:
+    'Sku Already exists. Please recheck the data and update',
+  DISTRIBUTOR_SKU_FOUND: 'Sku Not Found. Please recheck the data and update',
 };
 
 const RETAILER_CONTROLLER_CONSTANTS = {
@@ -154,6 +160,9 @@ const RETAILER_CONTROLLER_CONSTANTS = {
     'This Retailer does not exist in the server. This Retailer may be deleted before',
   RETAILER_DUPLICATE_NAME:
     '{{name}} already exists in the beat. Please recheck the data and update',
+  RETAILER_DUPLICATE_SKU:
+    'Sku Already exists. Please recheck the data and update',
+  RETAILER_SKU_FOUND: 'Sku Not Found. Please recheck the data and update',
 };
 
 const PRIMARY_ORDER_CONTROLLER_CONSTANTS = {

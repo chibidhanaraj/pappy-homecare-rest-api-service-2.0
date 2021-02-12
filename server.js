@@ -41,6 +41,11 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+// simulate delay response
+// app.use((req, res, next) => {
+//   setTimeout(() => next(), 2000);
+// });
+
 // Routes which should handle requests
 app.use('/api/parent-product', ParentProductRoutes);
 app.use('/api/sku', SkuRoutes);

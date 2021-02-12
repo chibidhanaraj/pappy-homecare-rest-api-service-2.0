@@ -19,6 +19,11 @@ const SuperStockistSkuInventoryActivitySchema = new Schema(
       ref: 'Sku',
     },
 
+    created_by: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+
     quantity: {
       type: Number,
     },

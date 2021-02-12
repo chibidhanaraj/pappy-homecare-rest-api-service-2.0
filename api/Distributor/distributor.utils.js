@@ -126,80 +126,6 @@ const DISTRIBUTOR_AGGREGATE_QUERY = [
   },
 ];
 
-const DISTRIBUTOR_INVENTORY_AGGREGATE_QUERY = [
-  {
-    $lookup: {
-      from: 'distributorskuinventories',
-      localField: '_id',
-      foreignField: 'distributor',
-      as: 'sku_items',
-    },
-  },
-  {
-    $unwind: { path: '$sku_items', preserveNullAndEmptyArrays: true },
-  },
-  {
-    $lookup: {
-      from: 'skus',
-      localField: 'sku_items.sku',
-      foreignField: '_id',
-      as: 'sku_items.sku',
-    },
-  },
-  {
-    $unwind: {
-      path: '$sku_items.sku',
-      preserveNullAndEmptyArrays: true,
-    },
-  },
-  {
-    $lookup: {
-      from: 'parentproducts',
-      localField: 'sku_items.sku.parent_product',
-      foreignField: '_id',
-      as: 'sku_items.parent_product',
-    },
-  },
-  {
-    $unwind: {
-      path: '$sku_items.parent_product',
-      preserveNullAndEmptyArrays: true,
-    },
-  },
-  {
-    $group: {
-      _id: '$_id',
-      id: {
-        $first: '$_id',
-      },
-      sku_items: {
-        $push: {
-          $cond: [
-            { $gt: ['$sku_items._id', null] },
-            {
-              sku_id: '$sku_items.sku._id',
-              sku: '$sku_items.sku.sku',
-              name: '$sku_items.sku.name',
-              sku_type: '$sku_items.sku.sku_type',
-              parent_product_name: '$sku_items.parent_product.name',
-              current_inventory_level: '$sku_items.current_inventory_level',
-            },
-            '$$REMOVE',
-          ],
-        },
-      },
-      name: {
-        $first: '$name',
-      },
-    },
-  },
-  {
-    $project: {
-      _id: 0,
-    },
-  },
-];
-
 const getUpdatedData = (req, distributor) => {
   const dataToUpdate = {};
 
@@ -315,7 +241,6 @@ const incrementDistributorInventoryLevels = async ({
 
 module.exports = {
   DISTRIBUTOR_AGGREGATE_QUERY,
-  DISTRIBUTOR_INVENTORY_AGGREGATE_QUERY,
   getUpdatedData,
   incrementDistributorInventoryLevels,
 };

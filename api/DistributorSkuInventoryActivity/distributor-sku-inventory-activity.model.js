@@ -31,6 +31,11 @@ const DistributorSkuInventoryActivitySchema = new Schema(
     comment: {
       type: String,
     },
+
+    created_by: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
   },
   {
     toJSON: {

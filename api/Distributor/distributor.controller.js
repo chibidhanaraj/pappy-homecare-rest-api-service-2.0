@@ -39,30 +39,6 @@ exports.getAllDistributors = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc      Get Distributor Inventory
-// @route     GET /api/distributor/:id/inventory
-exports.getDistributorInventory = asyncHandler(async (req, res, next) => {
-  const distributorId = req.params.id;
-
-  const query = [
-    {
-      $match: {
-        _id: mongoose.Types.ObjectId(distributorId),
-      },
-    },
-    ...DISTRIBUTOR_INVENTORY_AGGREGATE_QUERY,
-  ];
-
-  const results = await DistributorModel.aggregate(query);
-
-  res.status(200).json({
-    status: STATUS.OK,
-    message: DISTRIBUTOR_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
-    error: '',
-    distributor: results[0],
-  });
-});
-
 // @desc      Post Distributor
 // @route     POST /api/distributor/
 exports.createDistributor = asyncHandler(async (req, res, next) => {

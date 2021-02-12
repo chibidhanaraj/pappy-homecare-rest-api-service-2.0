@@ -187,3 +187,7 @@
 {"level":"error","method":"DELETE","type":"INVALID_OPERATION","message":"Beat Deletion Failed. Beat is mapped to one/many Retailers","url":"/api/beat/601d18f3bf066f368ce5f443","userId":""}
 {"level":"error","method":"POST","type":"VALIDATION_ERROR","message":"District validation failed: zone: Cast to ObjectID failed for value \"\" at path \"zone\"","url":"/api/district/","userId":"601d01cccf90f850386a70cf"}
 {"level":"error","method":"PATCH","type":"SERVER_ERROR","message":"Invalid Updates for 601d15dcbf066f368ce5f43f","url":"/api/area/601d15dcbf066f368ce5f43f","userId":"601d01cccf90f850386a70cf"}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"DistributorModel is not defined","url":"/api/distributor/6024243e76bb1d29e48df9a7/inventory","userId":""}
+{"level":"error","method":"GET","type":"SERVER_ERROR","message":"DistributorModel is not defined","url":"/api/distributor/6024243e76bb1d29e48df9a7/inventory","userId":""}
+{"level":"error","method":"POST","type":"SERVER_ERROR","message":"get is not defined","url":"/api/distributor/602421de76bb1d29e48df99f/inventory","userId":"60241f2776bb1d29e48df98f"}
+{"level":"error","method":"POST","type":"SERVER_ERROR","message":"get is not defined","url":"/api/retailer/6024255376bb1d29e48df9ad/inventory","userId":"60241f2776bb1d29e48df98f"}

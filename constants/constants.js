@@ -44,6 +44,7 @@ const SKU_TYPES = {
 };
 
 const ACTIVITY_CONSTANTS = {
+  ADD_OPENING_STOCK: 'Added Opening Stock',
   ADD_NEW_STOCK: 'Added to Inventory',
 };
 

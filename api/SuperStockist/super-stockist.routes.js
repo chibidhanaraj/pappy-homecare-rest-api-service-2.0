@@ -9,13 +9,15 @@ const {
   deleteSuperStockist,
 } = require('./super-stockist.controller');
 
+const SuperStockistSkuInventoryRoutes = require('../SuperStockistSkuInventory/super-stockist-sku-inventory.routes');
+
+router.use('/:superStockistId/inventory', SuperStockistSkuInventoryRoutes);
+
 router.route('/').get(getAllSuperStockists).post(protect, createSuperStockist);
 
 router
   .route('/:id')
   .patch(protect, updateSuperStockist)
   .delete(deleteSuperStockist);
-
-router.route('/:id/inventory').get(getSuperStockistInventory);
 
 module.exports = router;
