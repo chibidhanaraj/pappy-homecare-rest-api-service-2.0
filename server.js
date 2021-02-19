@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 //Connect to db
 dbConnection();
 //Routes path
+const AttendanceRoutes = require('./api/Attendance/attendance.routes');
 const ParentProductRoutes = require('./api/ParentProduct/parent-product.routes');
 const SkuRoutes = require('./api/Sku/sku.routes');
 const TerritoryRoutes = require('./api/Territory/territory.routes');
@@ -47,21 +48,22 @@ if (process.env.NODE_ENV === 'development') {
 // });
 
 // Routes which should handle requests
-app.use('/api/parent-product', ParentProductRoutes);
-app.use('/api/sku', SkuRoutes);
-app.use('/api/territory', TerritoryRoutes);
-app.use('/api/zone', ZoneRoutes);
-app.use('/api/district', DistrictRoutes);
-app.use('/api/area', AreaRoutes);
-app.use('/api/beat', BeatRoutes);
-app.use('/api/super-stockist', SuperStockistRoutes);
-app.use('/api/distributor', DistributorRoutes);
-app.use('/api/retailer', RetailerRoutes);
-app.use('/api/order/primary-order', PrimaryOrderRoutes);
-app.use('/api/order/second-primary-order', SecondPrimaryOrderRoutes);
-app.use('/api/order/secondary-order', SecondaryOrderRoutes);
-app.use('/api/user', UserRoutes);
-app.use('/api/auth', AuthRoutes);
+app.use('/api/v1/user-attendance', AttendanceRoutes);
+app.use('/api/v1/parent-product', ParentProductRoutes);
+app.use('/api/v1/sku', SkuRoutes);
+app.use('/api/v1/territory', TerritoryRoutes);
+app.use('/api/v1/zone', ZoneRoutes);
+app.use('/api/v1/district', DistrictRoutes);
+app.use('/api/v1/area', AreaRoutes);
+app.use('/api/v1/beat', BeatRoutes);
+app.use('/api/v1/super-stockist', SuperStockistRoutes);
+app.use('/api/v1/distributor', DistributorRoutes);
+app.use('/api/v1/retailer', RetailerRoutes);
+app.use('/api/v1/order/primary-order', PrimaryOrderRoutes);
+app.use('/api/v1/order/second-primary-order', SecondPrimaryOrderRoutes);
+app.use('/api/v1/order/secondary-order', SecondaryOrderRoutes);
+app.use('/api/v1/user', UserRoutes);
+app.use('/api/v1/auth', AuthRoutes);
 
 app.use(errorHandler);
 

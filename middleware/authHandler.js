@@ -30,7 +30,9 @@ exports.protect = asyncHandler(async (req, res, next) => {
       if (error) {
         return res.status(401).json({ msg: 'Token is not valid' });
       } else {
+        console.log(decoded.id);
         req.user = await UserModel.findById(decoded.id);
+        req.userId = decoded.id;
         next();
       }
     });

@@ -20,6 +20,17 @@ const USER_CONTROLLER_CONSTANTS = {
     'Username {{name}} already exists. Please try again with a new Username',
 };
 
+const ATTENDANCE_CONTROLLER_CONSTANTS = {
+  FETCH_SUCCESS: 'Fetched Successfully',
+  CREATE_SUCCESS: 'User Created Successfully',
+  UPDATE_SUCCESS: 'User Updated Successfully',
+  DELETE_SUCCESS: 'User Deleted Successfully',
+  ATTENDANCE_NOT_FOUND:
+    'This User Attendance does not exist in the server. This User Attendance may be deleted before',
+  USER_DUPLICATE_USERNAME:
+    'Username {{name}} already exists. Please try again with a new Username',
+};
+
 const PARENT_PRODUCT_CONTROLLER_CONSTANTS = {
   FETCH_SUCCESS: 'Fetched Successfully',
   CREATE_SUCCESS: 'Parent Product Created Successfully',
@@ -206,6 +217,7 @@ module.exports = {
   STATUS,
   AUTH_CONTROLLER_CONSTANTS,
   USER_CONTROLLER_CONSTANTS,
+  ATTENDANCE_CONTROLLER_CONSTANTS,
   STATE_CONTROLLER_CONSTANTS,
   TERRITORY_CONTROLLER_CONSTANTS,
   ZONE_CONTROLLER_CONSTANTS,

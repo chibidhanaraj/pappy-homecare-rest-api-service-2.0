@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "SET NODE_ENV=production & node server",
-    "dev": "nodemon server"
+    "dev": "nodemon server",
+    "tunnel": "ngrok http 8080"
   },
   "dependencies": {
     "app-root-path": "^3.0.0",
@@ -21,6 +22,7 @@
     "moment": "^2.27.0",
     "mongoose": "^5.9.9",
     "morgan": "^1.10.0",
+    "ngrok": "^3.4.0",
     "winston": "^3.3.3"
   },
   "devDependencies": {

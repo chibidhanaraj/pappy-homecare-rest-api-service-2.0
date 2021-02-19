@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const AreaModel = require('./area.model');
 const BeatModel = require('../Beat/beat.model');
+const DistrictModel = require('../District/district.model');
 const DistributorModel = require('../Distributor/distributor.model');
 const ErrorResponse = require('../../utils/errorResponse');
 const asyncHandler = require('../../middleware/asyncHandler');
@@ -13,7 +14,6 @@ const { ERROR_TYPES } = require('../../constants/error.constant');
 const { AREA_AGGREGATE_QUERY } = require('./area.utils');
 const { toWordUpperFirstCase } = require('../../utils/CommonUtils');
 const { get } = require('lodash');
-const DistrictModel = require('../District/district.model');
 
 // @desc      Get all areas
 // @route     GET /api/area/
