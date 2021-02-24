@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Retailer = require('../Retailer/retailer.model');
 const RetailerSkuInventory = require('./retailer-sku-inventory.model');
 const RetailerSkuInventoryActivity = require('../RetailerSkuInventoryActivity/retailer-sku-inventory-activity.model');
-const ErrorResponse = require('../../utils/ErrorResponse');
+const ErrorResponse = require('../../utils/errorResponse');
 const asyncHandler = require('../../middleware/asyncHandler');
 const {
   STATUS,

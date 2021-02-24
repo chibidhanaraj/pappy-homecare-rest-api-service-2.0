@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const SuperStockist = require('../SuperStockist/super-stockist.model');
 const SuperStockistSkuInventory = require('./super-stockist-sku-inventory.model');
-const ErrorResponse = require('../../utils/ErrorResponse');
+const ErrorResponse = require('../../utils/errorResponse');
 const asyncHandler = require('../../middleware/asyncHandler');
 const {
   STATUS,

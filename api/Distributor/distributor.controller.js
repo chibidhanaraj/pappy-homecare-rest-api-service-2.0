@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const DistributorModel = require('./distributor.model');
-const ErrorResponse = require('../../utils/ErrorResponse');
+const ErrorResponse = require('../../utils/errorResponse');
 const asyncHandler = require('../../middleware/asyncHandler');
 const {
   STATUS,

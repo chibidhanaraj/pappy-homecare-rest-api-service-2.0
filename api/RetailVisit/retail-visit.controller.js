@@ -7,7 +7,7 @@ const {
   STATUS,
 } = require('../../constants/controller.constants');
 const asyncHandler = require('../../middleware/asyncHandler');
-const ErrorResponse = require('../../utils/ErrorResponse');
+const ErrorResponse = require('../../utils/errorResponse');
 const {
   RETAIL_VISIT_AGGREGATE_QUERY,
   RETAIL_VISITS_AGGREGATE_QUERY,

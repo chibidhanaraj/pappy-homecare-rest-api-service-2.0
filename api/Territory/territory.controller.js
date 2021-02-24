@@ -2,7 +2,7 @@ const ZoneModel = require('../Zone/zone.model');
 const DistrictModel = require('../District/district.model');
 const AreaModel = require('../Area/area.model');
 const BeatModel = require('../Beat/beat.model');
-const ErrorResponse = require('../../utils/ErrorResponse');
+const ErrorResponse = require('../../utils/errorResponse');
 const asyncHandler = require('../../middleware/asyncHandler');
 const {
   STATUS,

@@ -1,6 +1,6 @@
 const ZoneModel = require('./zone.model');
 const DistrictModel = require('../District/district.model');
-const ErrorResponse = require('../../utils/ErrorResponse');
+const ErrorResponse = require('../../utils/errorResponse');
 const asyncHandler = require('../../middleware/asyncHandler');
 const {
   STATUS,
