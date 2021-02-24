@@ -9,9 +9,13 @@ const {
 } = require('./retailer.controller');
 
 const RetailerInventoryRoutes = require('../RetailerSkuInventory/retailer-sku-inventory.routes');
+const RetailVisitRoutes = require('../RetailVisit/retail-visit.routes');
 
 /* Redirect to Retailer Sku Inventory Router */
 router.use('/:retailerId/inventory', RetailerInventoryRoutes);
+
+/* Redirect to Retail Visit Router */
+router.use('/:retailerId/retail-visit', RetailVisitRoutes);
 
 router.route('/').get(getAllRetailers).post(protect, createRetailer);
 

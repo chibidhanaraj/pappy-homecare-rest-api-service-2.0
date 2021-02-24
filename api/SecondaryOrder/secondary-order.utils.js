@@ -66,8 +66,8 @@ const SECONDARY_ORDERS_AGGREGATE_QUERY = [
       total_order_value: {
         $sum: { $toDouble: '$sku_item.total_cost' },
       },
-      sku_items: {
-        $push: '$sku_item',
+      total_ordered_quantities: {
+        $sum: { $toInt: '$sku_item.ordered_quantity' },
       },
       invoice_number: {
         $first: '$invoice_number',
@@ -173,6 +173,7 @@ const SECONDARY_ORDERS_AGGREGATE_QUERY = [
       id: '$_id',
       _id: 0,
       total_order_value: { $trunc: ['$total_order_value', 2] },
+      total_ordered_quantities: 1,
       sku_items: 1,
       invoice_number: 1,
       'retailer.id': '$retailer._id',
@@ -272,6 +273,9 @@ const SECONDARY_ORDER_AGGREGATE_QUERY = [
       total_order_value: {
         $sum: { $toDouble: '$sku_item.total_cost' },
       },
+      total_ordered_quantities: {
+        $sum: { $toInt: '$sku_item.ordered_quantity' },
+      },
       sku_items: {
         $push: '$sku_item',
       },
@@ -351,6 +355,7 @@ const SECONDARY_ORDER_AGGREGATE_QUERY = [
       id: '$_id',
       _id: 0,
       total_order_value: { $trunc: ['$total_order_value', 2] },
+      total_ordered_quantities: 1,
       sku_items: 1,
       invoice_number: 1,
       'retailer.id': '$retailer._id',

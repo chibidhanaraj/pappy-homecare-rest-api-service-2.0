@@ -39,12 +39,24 @@ const additionalContactSchema = new Schema(
   { _id: false }
 );
 
+const locationSchema = new Schema(
+  {
+    // GeoJSON Point
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point',
+    },
+    coordinates: {
+      type: [Number],
+      index: '2dsphere',
+    },
+  },
+  { _id: false }
+);
+
 const AddressSchema = new Schema(
   {
-    door_number: {
-      type: String,
-    },
-
     street_address: {
       type: String,
     },
@@ -55,6 +67,11 @@ const AddressSchema = new Schema(
 
     place: {
       type: String,
+    },
+
+    state: {
+      type: String,
+      default: 'TN',
     },
 
     zip_code: {
@@ -76,6 +93,8 @@ const RetailerSchema = new Schema(
     additional_contacts: [additionalContactSchema],
 
     address: AddressSchema,
+
+    location: locationSchema,
 
     gstin: {
       type: String,

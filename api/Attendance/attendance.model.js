@@ -13,11 +13,6 @@ const locationSchema = new Schema(
       type: [Number],
       index: '2dsphere',
     },
-    formattedAddress: String,
-    street: String,
-    city: String,
-    state: String,
-    zipcode: String,
   },
   { _id: false }
 );

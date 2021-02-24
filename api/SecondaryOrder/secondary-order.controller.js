@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const SecondaryOrderModel = require('./secondary-order.model');
 const SecondaryOrderSkuItemModel = require('../SecondaryOrderSkuItem/secondary-order-sku-item.model');
+const RetailVisit = require('../RetailVisit/retail-visit.model');
+const EmployeeActivity = require('../EmployeeSecondaryOrderActivity/employee-secondary-order-activity.model');
 const ErrorResponse = require('../../utils/errorResponse');
 const asyncHandler = require('../../middleware/asyncHandler');
 const {
@@ -8,9 +10,15 @@ const {
   SECONDARY_ORDER_CONTROLLER_CONSTANTS,
 } = require('../../constants/controller.constants');
 const { ERROR_TYPES } = require('../../constants/error.constant');
-const { ORDER_STATUS } = require('../../constants/constants');
+const {
+  ORDER_STATUS,
+  ACTIVITY_CONSTANTS,
+} = require('../../constants/constants');
 const { get } = require('lodash');
-const { SECONDARY_ORDERS_AGGREGATE_QUERY } = require('./secondary-order.utils');
+const {
+  SECONDARY_ORDERS_AGGREGATE_QUERY,
+  SECONDARY_ORDER_AGGREGATE_QUERY,
+} = require('./secondary-order.utils');
 const {
   incrementRetailerInventoryLevels,
 } = require('../Retailer/retailer.utils');
@@ -137,11 +145,22 @@ exports.getSecondaryOrder = asyncHandler(async (req, res, next) => {
     );
   }
 
+  const query = [
+    {
+      $match: {
+        _id: mongoose.Types.ObjectId(order.id),
+      },
+    },
+    ...SECONDARY_ORDER_AGGREGATE_QUERY,
+  ];
+
+  const results = await SecondaryOrderModel.aggregate(query);
+
   res.status(200).json({
     status: STATUS.OK,
     message: SECONDARY_ORDER_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
     error: '',
-    secondaryOrder: order,
+    secondaryOrder: results[0],
   });
 });
 
@@ -198,6 +217,24 @@ exports.createSecondaryOrder = asyncHandler(async (req, res, next) => {
         new ErrorResponse('Error on Creation', 404, ERROR_TYPES.NOT_FOUND)
       );
     } else {
+      const savedRetailVisit = await RetailVisit.create({
+        retailer: savedSecondaryOrderDocument.retailer,
+        visit_result: ACTIVITY_CONSTANTS.NEW_ORDER,
+        secondary_order: savedSecondaryOrderDocument.id,
+        created_by: orderTakenBy || get(req, 'user.id', null),
+      });
+
+      await EmployeeActivity.create({
+        employee: orderTakenBy || get(req, 'user.id', null),
+        activity: ACTIVITY_CONSTANTS.NEW_SECONDARY_ORDER,
+        retailer: savedSecondaryOrderDocument.retailer,
+        secondary_order: savedSecondaryOrderDocument.id,
+        location: {
+          coordinates: get(req, 'body.current_user_location', {}),
+        },
+        retail_visit: savedRetailVisit._id,
+      });
+
       const query = [
         {
           $match: {

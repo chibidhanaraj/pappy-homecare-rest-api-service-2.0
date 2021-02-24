@@ -19,6 +19,14 @@ const { get } = require('lodash');
 exports.getAllRetailers = asyncHandler(async (req, res, next) => {
   const query = [...RETAILER_AGGREGATE_QUERY];
 
+  if (req.query.beat) {
+    query.unshift({
+      $match: {
+        beat: { $in: [mongoose.Types.ObjectId(req.query.beat)] },
+      },
+    });
+  }
+
   const results = await RetailerModel.aggregate(query);
 
   res.status(200).json({
@@ -46,7 +54,6 @@ exports.createRetailer = asyncHandler(async (req, res, next) => {
   const exisitingRetailer = await RetailerModel.findOne({
     name: toWordUpperFirstCase(name),
     beat,
-    'contact.contact_number': contact.contact_number,
   });
 
   if (exisitingRetailer) {
@@ -71,6 +78,9 @@ exports.createRetailer = asyncHandler(async (req, res, next) => {
     gstin,
     retail_type,
     beat,
+    location: {
+      coordinates: get(req, 'body.retailer_location', {}),
+    },
   });
 
   const savedRetailerDocument = await newRetailer.save();

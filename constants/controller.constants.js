@@ -174,6 +174,7 @@ const RETAILER_CONTROLLER_CONSTANTS = {
   RETAILER_DUPLICATE_SKU:
     'Sku Already exists. Please recheck the data and update',
   RETAILER_SKU_FOUND: 'Sku Not Found. Please recheck the data and update',
+  RETAILER_VISIT_SUCCESSFUL: 'Retailer Visit Created Successfully',
 };
 
 const PRIMARY_ORDER_CONTROLLER_CONSTANTS = {

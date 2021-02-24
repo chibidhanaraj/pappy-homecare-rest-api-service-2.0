@@ -59,6 +59,7 @@ app.use('/api/v1/beat', BeatRoutes);
 app.use('/api/v1/super-stockist', SuperStockistRoutes);
 app.use('/api/v1/distributor', DistributorRoutes);
 app.use('/api/v1/retailer', RetailerRoutes);
+app.use('/api/v1/retail-visits', RetailerRoutes);
 app.use('/api/v1/order/primary-order', PrimaryOrderRoutes);
 app.use('/api/v1/order/second-primary-order', SecondPrimaryOrderRoutes);
 app.use('/api/v1/order/secondary-order', SecondaryOrderRoutes);

@@ -58,10 +58,6 @@ const currentBrandsDealingSchema = new Schema(
 
 const AddressSchema = new Schema(
   {
-    door_number: {
-      type: String,
-    },
-
     street_address: {
       type: String,
     },

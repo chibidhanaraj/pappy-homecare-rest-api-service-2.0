@@ -9,7 +9,6 @@ const {
 const { ERROR_TYPES } = require('../../constants/error.constant');
 const {
   DISTRIBUTOR_AGGREGATE_QUERY,
-  DISTRIBUTOR_INVENTORY_AGGREGATE_QUERY,
   getUpdatedData,
 } = require('./distributor.utils');
 const { toWordUpperFirstCase } = require('../../utils/CommonUtils');

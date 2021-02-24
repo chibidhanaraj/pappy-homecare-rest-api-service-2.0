@@ -38,7 +38,6 @@ exports.login = asyncHandler(async (req, res, next) => {
   const { user_name, password } = req.body;
 
   const user = await UserModel.findOne({ user_name }).select('+password');
-  console.log(user);
 
   if (!user) {
     return next(
