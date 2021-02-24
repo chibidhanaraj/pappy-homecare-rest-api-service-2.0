@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "SET NODE_ENV=production & node server",
+    "start": "SET NODE_ENV=production & node server.js",
     "dev": "nodemon server",
     "tunnel": "ngrok http 8080"
   },
