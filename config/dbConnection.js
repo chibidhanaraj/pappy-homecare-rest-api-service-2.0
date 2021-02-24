@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const dbConnection = async () => {
   const db = mongoose.connection;
-  const url = `mongodb://${process.env.MONGO_URI}/${process.env.DB_DATABASE_NAME}`;
+  const url = process.env.PROD_MONGO_URI;
 
   const connect = await mongoose.connect(url, {
     useNewUrlParser: true,
