@@ -66,9 +66,6 @@ const SECOND_PRIMARY_ORDERS_AGGREGATE_QUERY = [
       total_order_value: {
         $sum: { $toDouble: '$sku_item.total_cost' },
       },
-      sku_items: {
-        $push: '$sku_item',
-      },
       invoice_number: {
         $first: '$invoice_number',
       },

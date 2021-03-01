@@ -12,6 +12,7 @@ const { ORDER_STATUS } = require('../../constants/constants');
 const { get } = require('lodash');
 const {
   PRIMARY_ORDERS_AGGREGATE_QUERY,
+  PRIMARY_ORDER_AGGREGATE_QUERY,
   updateCustomerInventory,
 } = require('./primary-order.utils');
 
@@ -139,11 +140,22 @@ exports.getPrimaryOrder = asyncHandler(async (req, res, next) => {
     );
   }
 
+  const query = [
+    {
+      $match: {
+        _id: mongoose.Types.ObjectId(order.id),
+      },
+    },
+    ...PRIMARY_ORDER_AGGREGATE_QUERY,
+  ];
+
+  const results = await PrimaryOrderModel.aggregate(query);
+
   res.status(200).json({
     status: STATUS.OK,
     message: PRIMARY_ORDER_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
     error: '',
-    primaryOrder: order,
+    primaryOrder: results[0],
   });
 });
 

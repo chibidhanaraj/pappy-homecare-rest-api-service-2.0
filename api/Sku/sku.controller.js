@@ -75,7 +75,7 @@ exports.createSku = asyncHandler(async (req, res, next) => {
 
   const newSku = new SkuModel({
     sku,
-    name: toWordUpperFirstCase(name),
+    name,
     mrp,
     sku_type,
     pieces_per_carton,

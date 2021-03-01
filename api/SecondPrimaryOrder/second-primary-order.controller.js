@@ -146,11 +146,22 @@ exports.getSecondPrimaryOrder = asyncHandler(async (req, res, next) => {
     );
   }
 
+  const query = [
+    {
+      $match: {
+        _id: mongoose.Types.ObjectId(order.id),
+      },
+    },
+    ...SECOND_PRIMARY_ORDER_AGGREGATE_QUERY,
+  ];
+
+  const results = await SecondPrimaryOrderModel.aggregate(query);
+
   res.status(200).json({
     status: STATUS.OK,
     message: SECOND_PRIMARY_ORDER_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
     error: '',
-    secondPrimaryOrder: order,
+    secondPrimaryOrder: results[0],
   });
 });
 

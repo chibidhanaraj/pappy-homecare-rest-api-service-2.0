@@ -34,11 +34,6 @@ const EmployeeSecondaryOrderActivitySchema = new Schema(
       ref: 'Retailer',
     },
 
-    super_stockist: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'SuperStockist',
-    },
-
     distributor: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Distributor',
