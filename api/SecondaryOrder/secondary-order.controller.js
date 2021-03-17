@@ -230,7 +230,7 @@ exports.createSecondaryOrder = asyncHandler(async (req, res, next) => {
         retailer: savedSecondaryOrderDocument.retailer,
         secondary_order: savedSecondaryOrderDocument.id,
         location: {
-          coordinates: get(req, 'body.current_user_location', {}),
+          coordinates: get(req, 'body.current_user_location', []),
         },
         retail_visit: savedRetailVisit._id,
       });
