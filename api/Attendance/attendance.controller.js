@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const moment = require('moment');
 const AttendanceModel = require('./attendance.model');
 const ErrorResponse = require('../../utils/errorResponse');
 const asyncHandler = require('../../middleware/asyncHandler');
@@ -17,8 +18,6 @@ exports.getAttendance = asyncHandler(async (req, res, next) => {
     attendance_date: req.query.attendance_date,
     user: req.userId,
   }).exec();
-
-  console.log(attendance);
 
   if (!attendance) {
     return res.status(200).json({
@@ -124,6 +123,9 @@ exports.updateAttendance = asyncHandler(async (req, res, next) => {
 
   if (req.body.end_time) {
     dataToUpdate.end_time = req.body.end_time;
+    dataToUpdate.work_duration = moment(req.body.end_time).diff(
+      moment(attendance.start_time)
+    );
   }
 
   if (req.body.end_location) {

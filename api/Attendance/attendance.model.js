@@ -48,6 +48,10 @@ const AttendanceSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+
+    work_duration: {
+      type: String,
+    },
   },
   {
     toJSON: {

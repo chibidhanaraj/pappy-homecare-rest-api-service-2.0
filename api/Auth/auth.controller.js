@@ -11,7 +11,28 @@ const { ERROR_TYPES } = require('../../constants/error.constant');
 // @route     POST /api/auth/currentUser
 // @access    Private
 exports.getCurrentUser = asyncHandler(async (req, res, next) => {
+  const { loggedInFrom } = req.query;
   const user = await UserModel.findById(req.user.id);
+
+  if (!user) {
+    return next(
+      new ErrorResponse(
+        AUTH_CONTROLLER_CONSTANTS.USER_NOT_FOUND,
+        401,
+        ERROR_TYPES.VALIDATION_ERROR
+      )
+    );
+  }
+
+  if (!user.allowed_apps.includes(loggedInFrom)) {
+    return next(
+      new ErrorResponse(
+        AUTH_CONTROLLER_CONSTANTS.INVALID_APP_ACCESS,
+        401,
+        ERROR_TYPES.INVALID_OPERATION
+      )
+    );
+  }
 
   res.status(200).json({
     status: true,
@@ -35,24 +56,19 @@ const sendAuthToken = (model, statusCode, res) => {
 // @access    Public
 
 exports.login = asyncHandler(async (req, res, next) => {
-  const { user_name, password } = req.body;
+  const { user_name, password, loggedInFrom } = req.body;
+  console.log(user_name.trim());
 
-  const user = await UserModel.findOne({ user_name }).select('+password');
+  const user = await UserModel.findOne({ user_name: user_name.trim() }).select(
+    '+password'
+  );
 
   if (!user) {
     return next(
       new ErrorResponse(
-        AUTH_CONTROLLER_CONSTANTS.INVALID_CREDENTAILS,
+        AUTH_CONTROLLER_CONSTANTS.USER_NOT_FOUND,
         401,
-        ERROR_TYPES.VALIDATION_ERROR,
-        [
-          {
-            location: 'body',
-            msg: AUTH_CONTROLLER_CONSTANTS.INVALID_CREDENTAILS,
-            param: 'user_name, password',
-            value: '',
-          },
-        ]
+        ERROR_TYPES.VALIDATION_ERROR
       )
     );
   }
@@ -65,15 +81,17 @@ exports.login = asyncHandler(async (req, res, next) => {
       new ErrorResponse(
         AUTH_CONTROLLER_CONSTANTS.INVALID_CREDENTAILS,
         401,
-        ERROR_TYPES.VALIDATION_ERROR,
-        [
-          {
-            location: 'body',
-            msg: AUTH_CONTROLLER_CONSTANTS.INVALID_CREDENTAILS,
-            param: 'user_name, password',
-            value: '',
-          },
-        ]
+        ERROR_TYPES.VALIDATION_ERROR
+      )
+    );
+  }
+
+  if (!user.allowed_apps.includes(loggedInFrom)) {
+    return next(
+      new ErrorResponse(
+        AUTH_CONTROLLER_CONSTANTS.INVALID_APP_ACCESS,
+        401,
+        ERROR_TYPES.INVALID_OPERATION
       )
     );
   }

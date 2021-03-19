@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const asyncHandler = require('./asyncHandler');
 const ErrorResponse = require('../utils/errorResponse');
 const UserModel = require('../api/User/user.model');
+const { ERROR_TYPES } = require('../constants/error.constant');
 
 // Protect routes
 exports.protect = asyncHandler(async (req, res, next) => {
@@ -30,8 +31,18 @@ exports.protect = asyncHandler(async (req, res, next) => {
       if (error) {
         return res.status(401).json({ msg: 'Token is not valid' });
       } else {
-        console.log(decoded.id);
         req.user = await UserModel.findById(decoded.id);
+
+        if (!req.user) {
+          return next(
+            new ErrorResponse(
+              'User does not exist',
+              401,
+              ERROR_TYPES.UNAUTHORIZED
+            )
+          );
+        }
+
         req.userId = decoded.id;
         next();
       }

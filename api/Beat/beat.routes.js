@@ -8,7 +8,7 @@ const {
   deleteBeat,
 } = require('./beat.controller');
 
-router.route('/').get(getAllBeats).post(protect, createBeat);
+router.route('/').get(protect, getAllBeats).post(protect, createBeat);
 
 router.route('/:id').patch(protect, updateBeat).delete(deleteBeat);
 

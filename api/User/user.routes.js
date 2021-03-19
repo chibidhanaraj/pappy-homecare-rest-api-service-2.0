@@ -3,6 +3,7 @@ const router = express.Router();
 
 const {
   getAllUsers,
+  getAllUsersAttendance,
   getUser,
   createUser,
   updateUser,
@@ -15,6 +16,8 @@ const EmployeeDailySalesReportRoutes = require('../EmployeeDailySalesReport/empl
 router.use('/:userId/daily-sales-report', EmployeeDailySalesReportRoutes);
 
 router.route('/').get(getAllUsers).post(createUser);
+
+router.route('/attendance/').get(getAllUsersAttendance);
 
 router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
 

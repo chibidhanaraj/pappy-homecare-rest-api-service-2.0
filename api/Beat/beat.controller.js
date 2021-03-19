@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const BeatModel = require('./beat.model');
 const RetailerModel = require('../Retailer/retailer.model');
+const UserModel = require('../User/user.model');
 const ErrorResponse = require('../../utils/errorResponse');
 const asyncHandler = require('../../middleware/asyncHandler');
 const {
@@ -18,6 +19,15 @@ const { get } = require('lodash');
 // @route     GET /api/beat/
 exports.getAllBeats = asyncHandler(async (req, res, next) => {
   const query = [...BEAT_AGGREGATE_QUERY];
+  const exisitingUser = req.user;
+
+  if (exisitingUser.restrict_by_territory) {
+    query.unshift({
+      $match: {
+        _id: { $in: exisitingUser.assigned_beats },
+      },
+    });
+  }
 
   const results = await BeatModel.aggregate(query);
 

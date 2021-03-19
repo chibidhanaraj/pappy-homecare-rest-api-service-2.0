@@ -324,6 +324,34 @@ const SECONDARY_ORDER_AGGREGATE_QUERY = [
   },
   {
     $lookup: {
+      from: 'beats',
+      localField: 'retailer.beat',
+      foreignField: '_id',
+      as: 'beat',
+    },
+  },
+  {
+    $unwind: {
+      path: '$beat',
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+  {
+    $lookup: {
+      from: 'areas',
+      localField: 'beat.area',
+      foreignField: '_id',
+      as: 'area',
+    },
+  },
+  {
+    $unwind: {
+      path: '$area',
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+  {
+    $lookup: {
       from: 'distributors',
       localField: 'distributor',
       foreignField: '_id',
@@ -362,6 +390,10 @@ const SECONDARY_ORDER_AGGREGATE_QUERY = [
       'retailer.name': '$retailer.name',
       'distributor.id': '$distributor._id',
       'distributor.name': '$distributor.name',
+      'beat.id': '$beat._id',
+      'beat.name': '$beat.name',
+      'area.id': '$area._id',
+      'area.name': '$area.name',
       orderTakenBy: '$user.name',
       created_by: 1,
       updated_by: 1,

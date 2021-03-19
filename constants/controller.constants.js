@@ -7,6 +7,9 @@ const AUTH_CONTROLLER_CONSTANTS = {
   AUTH_SUCCESS: 'User Authentication Successful',
   AUTH_FAIL: 'User Authentication Failed',
   INVALID_CREDENTAILS: 'Username and Password do not match',
+  INVALID_APP_ACCESS: 'No Permission to access. Contact Admin',
+  USER_NOT_FOUND:
+    'This User does not exist in the server. This User may be deleted before',
 };
 
 const USER_CONTROLLER_CONSTANTS = {

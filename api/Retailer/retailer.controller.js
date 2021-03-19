@@ -79,7 +79,7 @@ exports.createRetailer = asyncHandler(async (req, res, next) => {
     retail_type,
     beat,
     location: {
-      coordinates: get(req, 'body.retailer_location', {}),
+      coordinates: get(req, 'body.retailer_location', []),
     },
   });
 

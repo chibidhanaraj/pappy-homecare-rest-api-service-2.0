@@ -1,8 +1,4 @@
-const {
-  CUSTOMER_CONSTANTS,
-  ACTIVITY_CONSTANTS,
-  ORDER_TYPES,
-} = require('../../constants/constants');
+const { CUSTOMER_CONSTANTS } = require('../../constants/constants');
 const {
   incrementDistributorInventoryLevels,
 } = require('../Distributor/distributor.utils');
@@ -77,6 +73,9 @@ const PRIMARY_ORDERS_AGGREGATE_QUERY = [
       },
       total_order_value: {
         $sum: { $toDouble: '$sku_item.total_cost' },
+      },
+      total_ordered_quantities: {
+        $sum: { $toInt: '$sku_item.ordered_quantity' },
       },
       invoice_number: {
         $first: '$invoice_number',
@@ -154,6 +153,7 @@ const PRIMARY_ORDERS_AGGREGATE_QUERY = [
       id: '$_id',
       _id: 0,
       total_order_value: { $trunc: ['$total_order_value', 2] },
+      total_ordered_quantities: 1,
       sku_items: 1,
       invoice_number: 1,
       customer_type: 1,
@@ -252,6 +252,9 @@ const PRIMARY_ORDER_AGGREGATE_QUERY = [
       total_order_value: {
         $sum: { $toDouble: '$sku_item.total_cost' },
       },
+      total_ordered_quantities: {
+        $sum: { $toInt: '$sku_item.ordered_quantity' },
+      },
       sku_items: {
         $push: '$sku_item',
       },
@@ -331,6 +334,7 @@ const PRIMARY_ORDER_AGGREGATE_QUERY = [
       id: '$_id',
       _id: 0,
       total_order_value: { $trunc: ['$total_order_value', 2] },
+      total_ordered_quantities: 1,
       sku_items: 1,
       invoice_number: 1,
       customer_type: 1,

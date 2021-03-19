@@ -66,6 +66,9 @@ const SECOND_PRIMARY_ORDERS_AGGREGATE_QUERY = [
       total_order_value: {
         $sum: { $toDouble: '$sku_item.total_cost' },
       },
+      total_ordered_quantities: {
+        $sum: { $toInt: '$sku_item.ordered_quantity' },
+      },
       invoice_number: {
         $first: '$invoice_number',
       },
@@ -144,6 +147,7 @@ const SECOND_PRIMARY_ORDERS_AGGREGATE_QUERY = [
       total_order_value: { $trunc: ['$total_order_value', 2] },
       sku_items: 1,
       invoice_number: 1,
+      total_ordered_quantities: 1,
       'super_stockist.id': '$super_stockist._id',
       'super_stockist.name': '$super_stockist.name',
       'distributor.id': '$distributor._id',
@@ -233,6 +237,9 @@ const SECOND_PRIMARY_ORDER_AGGREGATE_QUERY = [
       total_order_value: {
         $sum: { $toDouble: '$sku_item.total_cost' },
       },
+      total_ordered_quantities: {
+        $sum: { $toInt: '$sku_item.ordered_quantity' },
+      },
       sku_items: {
         $push: '$sku_item',
       },
@@ -314,6 +321,7 @@ const SECOND_PRIMARY_ORDER_AGGREGATE_QUERY = [
       total_order_value: { $trunc: ['$total_order_value', 2] },
       sku_items: 1,
       invoice_number: 1,
+      total_ordered_quantities: 1,
       'super_stockist.id': '$super_stockist._id',
       'super_stockist.name': '$super_stockist.name',
       'distributor.id': '$distributor._id',

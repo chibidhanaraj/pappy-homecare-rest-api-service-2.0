@@ -27,6 +27,24 @@ const UserSchema = new Schema(
       select: false,
     },
 
+    allowed_apps: [
+      {
+        type: String,
+      },
+    ],
+
+    restrict_by_territory: {
+      type: Boolean,
+      default: true,
+    },
+
+    assigned_beats: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Beat',
+      },
+    ],
+
     role: {
       type: String,
       enum: [

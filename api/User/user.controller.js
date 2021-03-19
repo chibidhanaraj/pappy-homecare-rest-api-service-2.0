@@ -8,6 +8,7 @@ const {
   USER_CONTROLLER_CONSTANTS,
 } = require('../../constants/controller.constants');
 const { get } = require('lodash');
+const { USERS_ATTENDANCE_BY_DATE_AGGREGATE_QUERY } = require('./user.utils');
 
 // @desc      Get all users
 // @route     GET /api/user
@@ -20,6 +21,26 @@ exports.getAllUsers = asyncHandler(async (req, res, next) => {
     message: USER_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
     error: '',
     users,
+  });
+});
+
+// @desc      Get all users attendances
+// @route     GET /api/user/attendance
+// @access    Private/Admin
+exports.getAllUsersAttendance = asyncHandler(async (req, res, next) => {
+  const query = USERS_ATTENDANCE_BY_DATE_AGGREGATE_QUERY(
+    req.query.attendance_date,
+    req.query.user
+  );
+
+  const results = await UserModel.aggregate(query);
+
+  res.status(200).json({
+    status: STATUS.OK,
+    message: USER_CONTROLLER_CONSTANTS.FETCH_SUCCESS,
+    error: '',
+    count: results.length,
+    attendances: results,
   });
 });
 
@@ -52,7 +73,16 @@ exports.getUser = asyncHandler(async (req, res, next) => {
 // @route     POST /api/user
 // @access    Private/Admin
 exports.createUser = asyncHandler(async (req, res, next) => {
-  const { name, user_name, mobile_number, password, role } = req.body;
+  const {
+    name,
+    user_name,
+    mobile_number,
+    password,
+    role,
+    allowed_apps,
+    assigned_beats,
+    restrict_by_territory,
+  } = req.body;
   const userReq = req.user;
 
   const user = new UserModel({
@@ -63,6 +93,9 @@ exports.createUser = asyncHandler(async (req, res, next) => {
     role,
     createdBy: get(userReq, 'id', null),
     updatedBy: get(userReq, 'id', null),
+    allowed_apps,
+    assigned_beats,
+    restrict_by_territory,
   });
 
   const createdUser = await UserModel.findOne({

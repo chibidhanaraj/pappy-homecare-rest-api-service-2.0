@@ -294,7 +294,7 @@ exports.updatePrimaryOrder = asyncHandler(async (req, res, next) => {
             _id: mongoose.Types.ObjectId(primaryOrder.id),
           },
         },
-        ...PRIMARY_ORDERS_AGGREGATE_QUERY,
+        ...PRIMARY_ORDER_AGGREGATE_QUERY,
       ];
 
       const [order] = await PrimaryOrderModel.aggregate(query);

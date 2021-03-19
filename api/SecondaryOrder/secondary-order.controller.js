@@ -317,7 +317,7 @@ exports.updateSecondaryOrder = asyncHandler(async (req, res, next) => {
             _id: mongoose.Types.ObjectId(secondaryOrder.id),
           },
         },
-        ...SECONDARY_ORDERS_AGGREGATE_QUERY,
+        ...SECONDARY_ORDER_AGGREGATE_QUERY,
       ];
 
       const [order] = await SecondaryOrderModel.aggregate(query);
