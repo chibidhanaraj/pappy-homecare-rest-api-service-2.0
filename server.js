@@ -49,7 +49,7 @@ if (process.env.NODE_ENV === 'development') {
 // });
 
 app.get('/', function (req, res) {
-  return res.status(201).json({
+  return res.status(200).json({
     status: STATUS.OK,
     message: 'Server is connected',
   });
