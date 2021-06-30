@@ -29,6 +29,7 @@ const SecondaryOrderRoutes = require('./api/SecondaryOrder/secondary-order.route
 const SecondPrimaryOrderRoutes = require('./api/SecondPrimaryOrder/second-primary-order.routes');
 const UserRoutes = require('./api/User/user.routes');
 const AuthRoutes = require('./api/Auth/auth.routes');
+const { STATUS } = require('./constants/controller.constants');
 
 const app = express();
 
@@ -46,6 +47,13 @@ if (process.env.NODE_ENV === 'development') {
 // app.use((req, res, next) => {
 //   setTimeout(() => next(), 2000);
 // });
+
+app.get('/', function (req, res) {
+  return res.status(201).json({
+    status: STATUS.OK,
+    message: 'Server is connected',
+  });
+});
 
 // Routes which should handle requests
 app.use('/api/v1/user-attendance', AttendanceRoutes);
