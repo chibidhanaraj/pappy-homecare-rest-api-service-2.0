@@ -57,6 +57,8 @@ exports.createSku = asyncHandler(async (req, res, next) => {
     distributor_margin,
     retailer_margin,
     child,
+    factory_inventory_in_units,
+    factory_inventory_in_loose_units,
   } = req.body;
 
   const existingSku = await SkuModel.findOne({
@@ -89,6 +91,8 @@ exports.createSku = asyncHandler(async (req, res, next) => {
     retailer_margin,
     child,
     created_by: get(req, 'user.id', null),
+    factory_inventory_in_units,
+    factory_inventory_in_loose_units,
   });
 
   const savedSkuDocument = await newSku.save();
@@ -133,6 +137,8 @@ exports.updateSku = asyncHandler(async (req, res, next) => {
     'distributor_margin',
     'retailer_margin',
     'child',
+    'factory_inventory_in_units',
+    'factory_inventory_in_loose_units',
   ];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>

@@ -48,7 +48,7 @@ const SkuSchema = new Schema(
 
     pieces_per_carton: {
       type: String,
-      default: 1,
+      default: '1',
     },
 
     sgst: {
@@ -82,6 +82,16 @@ const SkuSchema = new Schema(
     },
 
     child: [variationsSchema],
+
+    factory_inventory_in_units: {
+      type: String,
+      default: '0',
+    },
+
+    factory_inventory_in_loose_units: {
+      type: String,
+      default: '0',
+    },
 
     created_by: {
       type: mongoose.Schema.Types.ObjectId,

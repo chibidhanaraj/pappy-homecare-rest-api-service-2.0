@@ -30,6 +30,12 @@ const SKU_AGGREGATE_QUERY = [
       'margin.super_stockist': '$super_stockist_margin',
       'margin.distributor': '$distributor_margin',
       'margin.retailer': '$retailer_margin',
+      factory_inventory_in_units: {
+        $ifNull: ['$factory_inventory_in_units', '0'],
+      },
+      factory_inventory_in_loose_units: {
+        $ifNull: ['$factory_inventory_in_loose_units', '0'],
+      },
     },
   },
 ];
