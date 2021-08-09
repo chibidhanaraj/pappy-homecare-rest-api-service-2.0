@@ -131,8 +131,11 @@ exports.createUser = asyncHandler(async (req, res, next) => {
 exports.updateUser = asyncHandler(async (req, res, next) => {
   const userId = req.params.id;
 
+  console.log(userId);
+
   const user = await UserModel.findById(userId).exec();
 
+  console.log(user);
   if (!user) {
     return next(
       new ErrorResponse(
@@ -149,6 +152,7 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     'employeeId',
     'mobileNumber',
     'role',
+    'assigned_beats',
   ];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
@@ -160,7 +164,6 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
   }
 
   const dataToUpdate = {
-    updatedBy: req.user.id || '',
     ...req.body,
   };
 
