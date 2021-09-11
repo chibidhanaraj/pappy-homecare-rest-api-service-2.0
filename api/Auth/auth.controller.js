@@ -57,7 +57,6 @@ const sendAuthToken = (model, statusCode, res) => {
 
 exports.login = asyncHandler(async (req, res, next) => {
   const { user_name, password, loggedInFrom } = req.body;
-  console.log(user_name.trim());
 
   const user = await UserModel.findOne({ user_name: user_name.trim() }).select(
     '+password'

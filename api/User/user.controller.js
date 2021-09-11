@@ -131,11 +131,8 @@ exports.createUser = asyncHandler(async (req, res, next) => {
 exports.updateUser = asyncHandler(async (req, res, next) => {
   const userId = req.params.id;
 
-  console.log(userId);
-
   const user = await UserModel.findById(userId).exec();
 
-  console.log(user);
   if (!user) {
     return next(
       new ErrorResponse(
@@ -153,6 +150,7 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     'mobileNumber',
     'role',
     'assigned_beats',
+    'restrict_by_territory',
   ];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
@@ -173,7 +171,9 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
   });
 
   res.status(200).json({
-    status: true,
+    status: STATUS.OK,
+    message: USER_CONTROLLER_CONSTANTS.UPDATE_SUCCESS,
+    error: '',
     user: updatedUser,
   });
 });
