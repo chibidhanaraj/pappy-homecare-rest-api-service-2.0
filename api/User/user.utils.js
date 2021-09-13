@@ -39,6 +39,7 @@ const USERS_ATTENDANCE_BY_DATE_AGGREGATE_QUERY = (date, user) => {
         user_id: '$_id',
         _id: 0,
         role: 1,
+        is_inactive: 1,
         employee_name: '$name',
         'attendance.is_present': '$attendance.is_present',
         'attendance.attendance_date': '$attendance.attendance_date',

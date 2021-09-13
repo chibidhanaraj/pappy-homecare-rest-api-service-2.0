@@ -33,7 +33,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
       } else {
         req.user = await UserModel.findById(decoded.id);
 
-        if (!req.user) {
+        if (!req.user || req.user.is_inactive) {
           return next(
             new ErrorResponse(
               'User does not exist',

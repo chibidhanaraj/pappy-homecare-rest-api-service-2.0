@@ -14,7 +14,7 @@ const { USERS_ATTENDANCE_BY_DATE_AGGREGATE_QUERY } = require('./user.utils');
 // @route     GET /api/user
 // @access    Private/Admin
 exports.getAllUsers = asyncHandler(async (req, res, next) => {
-  const users = await UserModel.find().exec();
+  const users = await UserModel.find().sort({ user_name: -1 }).exec();
 
   res.status(200).json({
     status: STATUS.OK,
@@ -151,6 +151,7 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     'role',
     'assigned_beats',
     'restrict_by_territory',
+    'is_inactive',
   ];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>

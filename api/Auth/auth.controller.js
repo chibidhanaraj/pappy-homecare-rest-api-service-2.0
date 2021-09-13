@@ -14,7 +14,7 @@ exports.getCurrentUser = asyncHandler(async (req, res, next) => {
   const { loggedInFrom } = req.query;
   const user = await UserModel.findById(req.user.id);
 
-  if (!user) {
+  if (!user || user.is_inactive) {
     return next(
       new ErrorResponse(
         AUTH_CONTROLLER_CONSTANTS.USER_NOT_FOUND,
@@ -62,7 +62,7 @@ exports.login = asyncHandler(async (req, res, next) => {
     '+password'
   );
 
-  if (!user) {
+  if (!user || user.is_inactive) {
     return next(
       new ErrorResponse(
         AUTH_CONTROLLER_CONSTANTS.USER_NOT_FOUND,
