@@ -12,6 +12,16 @@ const ParentProductSchema = new Schema(
       type: String,
     },
 
+    carton_box_stock: {
+      type: String,
+      default: '0',
+    },
+
+    product_container_stock: {
+      type: String,
+      default: '0',
+    } /* Bottles, Wrappers, Sheets */,
+
     created_by: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

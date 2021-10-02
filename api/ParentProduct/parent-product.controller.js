@@ -25,7 +25,7 @@ exports.getAllParentProducts = asyncHandler(async (req, res, next) => {
 // @desc      Post parent-product
 // @route     POST /api/parent-product/
 exports.createParentProduct = asyncHandler(async (req, res, next) => {
-  const { brand, name } = req.body;
+  const { brand, name, carton_box_stock } = req.body;
 
   const existingParentProduct = await ParentProductModel.findOne({
     name: toWordUpperFirstCase(name),
@@ -47,6 +47,8 @@ exports.createParentProduct = asyncHandler(async (req, res, next) => {
   const newParentProduct = new ParentProductModel({
     brand,
     name: toWordUpperFirstCase(name),
+    carton_box_stock,
+    product_container_stock,
     created_by: get(req, 'user.id', null),
   });
 
@@ -66,7 +68,11 @@ exports.updateParentProduct = asyncHandler(async (req, res, next) => {
   const parentProductId = req.params.id;
 
   const receivedUpdateProperties = Object.keys(req.body);
-  const allowedUpdateProperties = ['name'];
+  const allowedUpdateProperties = [
+    'name',
+    'carton_box_stock',
+    'product_container_stock',
+  ];
 
   const isValidUpdateOperation = receivedUpdateProperties.every((key) =>
     allowedUpdateProperties.includes(key)
